@@ -6,7 +6,7 @@
 - Document Status: `active`
 - Requirements Root: `docs/project/`
 - Last Reconciled: `2026-08-10`
-- Active Feature Slice: `none`
+- Active Feature Slice: `FS-003`
 
 ## Purpose
 
@@ -40,7 +40,7 @@
 |---|---|---|---|---|---|---|---|---|
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-002 | `published-instructions` | feature | none | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
-| FS-003 | `application-entry` | feature | none | none | none | proposed | 已補充公開頁共用架構責任，尚未開始 Spec。 | 2026-08-10 |
+| FS-003 | `application-entry` | feature | none | none | none | awaiting-approval | Spec 與 Plan 草稿已建立；等待確認目前人數契約、卡片文案及整體核准。 | 2026-08-10 |
 | FS-004 | `competition-application` | feature | FS-003 | none | none | proposed | 已補充共用申請表架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
 | FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立；證照正規化契約待確認。 | 2026-08-10 |
@@ -64,7 +64,7 @@
 |---|---|---|---|---|
 | FS-001 | `docs/blueprint/slices/FS-001-staff-authentication.md` | pending | pending | pending |
 | FS-002 | `docs/blueprint/slices/FS-002-published-instructions.md` | pending | pending | pending |
-| FS-003 | `docs/blueprint/slices/FS-003-application-entry.md` | pending | pending | pending |
+| FS-003 | `docs/blueprint/slices/FS-003-application-entry.md` | `docs/specs/FS-003/FS-003-application-entry-spec.md` | `docs/plans/FS-003/FS-003-application-entry-plan.md` | pending |
 | FS-004 | `docs/blueprint/slices/FS-004-competition-application.md` | pending | pending | pending |
 | FS-005 | `docs/blueprint/slices/FS-005-project-participation-application.md` | pending | pending | pending |
 | FS-006 | `docs/blueprint/slices/FS-006-certificate-application.md` | pending | pending | pending |
