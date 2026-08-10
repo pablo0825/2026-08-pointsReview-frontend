@@ -146,14 +146,17 @@
 
 ## Commit Plan
 
+Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(<ID>): draft <feature> specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
+
 - Commit Plan Approval: `pending`
 - Approved By: `pending`
 - Approved At: `pending`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
 |---|---|---|---|---|
-| C1 | 保存已核准的需求與 Slice 文件 | 已核准的 `docs/project/` 變更（如有）、Slice Brief、Spec、Plan、blueprint | 文件一致性 | `docs(<ID>): approve <feature> specification` |
-| C2 | <第一個可獨立檢視的實作目的> | `<paths>` | <checks> | `<type>(<ID>): <English summary>` |
+| Approval | 保存已核准的需求與 Slice 文件 | 已核准的 `docs/project/` 變更（如有）、Slice Brief、Spec、Plan、blueprint | 文件一致性 | `docs(<ID>): approve <feature> specification` |
+| I1 | <第一個可獨立檢視的實作目的> | `<paths>` | <checks> | `<type>(<ID>): <English summary>` |
+| Verification | 保存完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據 | `docs(<ID>): record <feature> verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint、必要 lineage 文件 | 文件一致性 | `docs(<ID>): record <feature> acceptance` |
 
 Commit Plan Approval 使用 `pending`、`approved`。每個 batch 只涵蓋一個清楚目的，並保持可獨立檢視。將相關測試與實作放在同一 batch，或確保每個中間 commit 仍具合理可驗證性。
@@ -177,7 +180,12 @@ Commit Plan Approval 使用 `pending`、`approved`。每個 batch 只涵蓋一�
 - 只有使用者已明確核准的 `docs/project/` 變更才能列入 Files、Documentation Updates 與 Commit Plan。
 - 不得將實作分析或現有程式碼推論出的行為回寫成產品需求。
 - Spec 與 Plan 核准時一併核准 Commit Plan。
-- 第一個 batch 必須是 Initial Documentation Batch；完成並經使用者確認 commit 後，才進入 implementation batches。
+- Draft Documentation Batch 在 Spec / Plan 建立後自動 commit，讓使用者能以 Git diff 審查後續修改。
+- 第一個已核准 batch 必須是 Approval Documentation Batch；核准後直接 commit，並停止等待使用者要求開始 implementation。
+- 每個 implementation batch 只在使用者明確要求開始或繼續後執行，完成與驗證後直接 commit。
+- 完整 AI Verification 後直接建立 Verification Documentation commit。
+- Human Acceptance 結果授權 Final 或 Acceptance Feedback Documentation commit。
+- 已授權 batch 不再要求第二次 commit 確認。
 - 不執行未列入 Commit Plan 或尚未核准的 batch。
 - 只改變 batch 分組、順序或 message 時，將 Commit Plan Approval 設回 `pending`；若 Scope 也改變，依 Skill 撤銷完整 Plan 核准。
 - 最終 Documentation Batch 必須位於 Human Acceptance 之後。
