@@ -2,7 +2,7 @@
 
 - 文件狀態：第一版基準
 - 最後更新：2026-08-09
-- 決策來源：[需求討論紀錄](../design/requirements-discussion.md)
+- 決策來源：[需求討論紀錄](../notes/requirements-discussion.md)
 - 相關文件：[申請規則](application-rules.md)、[流程與權限](workflows-and-permissions.md)
 
 ## 1. 產品目標

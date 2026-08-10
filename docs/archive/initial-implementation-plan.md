@@ -1,16 +1,17 @@
-# 點數審核系統－前端實作計畫
+# 點數審核系統－初版前端實作計畫（封存）
 
-- 文件狀態：第一版執行基準
+- 文件狀態：已封存，不再作為現行執行基準
 - 最後更新：2026-08-09
+- 封存說明：保留作為後續實作藍圖的參考來源；新版藍圖將另行建立。
 - 相關文件：
-  - [產品需求](../specs/product-requirements.md)
-  - [申請規則](../specs/application-rules.md)
-  - [流程與權限](../specs/workflows-and-permissions.md)
-  - [路由與頁面](../design/routes-and-pages.md)
-  - [前端架構](../design/frontend-architecture.md)
-  - [API 整合](../design/api-integration.md)
-  - [測試策略](../design/testing-strategy.md)
-  - [後端契約同步清單](../specs/backend-contract-changes.md)
+  - [產品需求](../project/product-requirements.md)
+  - [申請規則](../project/application-rules.md)
+  - [流程與權限](../project/workflows-and-permissions.md)
+  - [路由與頁面](../project/routes-and-pages.md)
+  - [前端架構](../project/frontend-architecture.md)
+  - [API 整合](../project/api-integration.md)
+  - [測試策略](../project/testing-strategy.md)
+  - [後端契約同步清單](../project/backend-contract-changes.md)
 
 ## 1. 執行原則
 

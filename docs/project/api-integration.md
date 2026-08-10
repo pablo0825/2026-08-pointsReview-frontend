@@ -2,7 +2,7 @@
 
 - 文件狀態：第一版基準
 - 最後更新：2026-08-09
-- 相關文件：[前端架構](frontend-architecture.md)、[後端契約異動](../specs/backend-contract-changes.md)
+- 相關文件：[前端架構](frontend-architecture.md)、[後端契約異動](backend-contract-changes.md)
 
 ## 1. 契約策略
 

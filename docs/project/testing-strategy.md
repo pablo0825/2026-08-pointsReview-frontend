@@ -2,7 +2,7 @@
 
 - 文件狀態：第一版基準
 - 最後更新：2026-08-09
-- 相關文件：[產品需求](../specs/product-requirements.md)、[前端架構](frontend-architecture.md)
+- 相關文件：[產品需求](product-requirements.md)、[前端架構](frontend-architecture.md)
 
 ## 1. 測試目標
 

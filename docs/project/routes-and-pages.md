@@ -2,7 +2,7 @@
 
 - 文件狀態：第一版基準
 - 最後更新：2026-08-09
-- 相關文件：[產品需求](../specs/product-requirements.md)、[流程與權限](../specs/workflows-and-permissions.md)
+- 相關文件：[產品需求](product-requirements.md)、[流程與權限](workflows-and-permissions.md)
 
 ## 1. 路由原則
 

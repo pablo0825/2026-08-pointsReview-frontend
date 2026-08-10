@@ -3,7 +3,7 @@
 - 文件狀態：待後端專案逐項同步
 - 最後更新：2026-08-09
 - 用途：記錄前端需求討論後，與既有後端文件或實作計畫不同的契約。
-- 相關文件：[申請規則](application-rules.md)、[流程與權限](workflows-and-permissions.md)、[API 整合](../design/api-integration.md)
+- 相關文件：[申請規則](application-rules.md)、[流程與權限](workflows-and-permissions.md)、[API 整合](api-integration.md)
 
 ## 1. 使用方式
 
