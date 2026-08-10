@@ -1,6 +1,6 @@
 ---
 name: frontend-feature-slice-workflow
-description: Analyze frontend requirement documents to create or reconcile an implementation blueprint, then execute one Feature Slice at a time through Spec and Plan creation, explicit user approval, AI implementation and verification, reviewable user-approved Git commit batches, human integration and acceptance, and final documentation updates. Use when Codex needs to plan, implement, verify, accept, or commit frontend work identified by Feature Slice IDs.
+description: Analyze frontend requirement documents to create, review, revise, or reconcile an implementation blueprint, then execute one Feature Slice at a time through Spec and Plan creation, explicit user approval, AI implementation and verification, reviewable user-approved Git commit batches, human integration and acceptance, and final documentation updates. Use when Codex needs to structure or revise Feature Slices, or plan, implement, verify, accept, or commit frontend work identified by Feature Slice IDs.
 ---
 
 # Frontend Feature Slice Workflow
@@ -13,8 +13,10 @@ description: Analyze frontend requirement documents to create or reconcile an im
 - 使用英文命名檔案、路徑、程式名稱、API、指令、ID、slug 與狀態值。
 - 以通俗、可審查的方式撰寫文件。
 - 將 `docs/blueprint/feature-slice-blueprint.md` 視為 Feature Slice 狀態的唯一權威來源。
-- 一次只處理一個 Feature Slice。
+- 一次只處理一個 Feature Slice；使用者明確核准且本質上涉及多個 Slice 的 Blueprint Revision 除外。
 - 只從需求文件定義產品需求，不從現有程式碼推論產品需求。
+- 將 `docs/project/` 視為產品需求來源；Spec 討論結果不代表已授權修改需求文件。
+- 修改 `docs/project/` 前，先提出明確變更並取得使用者核准；修改後保持需求文件、blueprint、Slice Brief、Spec 與 Plan 一致。
 - 只在 Plan 階段分析現有程式碼，以決定實作方式。
 - 同時產生 Spec 與 Plan，但先完成 Spec，再根據 Spec 產生 Plan。
 - 在使用者明確核准 Spec 與 Plan 前，不得修改實作程式碼。
@@ -22,7 +24,7 @@ description: Analyze frontend requirement documents to create or reconcile an im
 - 不得將未實際執行的檢查標示為通過。
 - 只有使用者能確認 Human Integration 與 Human Acceptance。
 - 將 committed、AI verified 與 human accepted 視為三種不同事實；commit 不代表驗證或驗收通過。
-- 只依核准 Plan 中的 Commit Plan 建立 commit，且每個 commit 前都取得使用者確認。
+- Feature Slice 的文件與實作 commit 只依核准 Plan 中的 Commit Plan 建立；Blueprint Revision commit 只依已核准的 Blueprint Revision Proposal 建立。每個 commit 前都取得使用者確認。
 - 完成目前操作後停止，不自行開始下一個 Feature Slice。
 - 保留與目前 Feature Slice 無關的既有變更。
 - 不 push Git commit。
@@ -47,12 +49,14 @@ description: Analyze frontend requirement documents to create or reconcile an im
 依使用者要求執行下列其中一種操作：
 
 1. 建立或同步 blueprint。
-2. 為指定 Feature Slice 建立 Spec 與 Plan。
-3. 核准指定 Feature Slice 的 Spec 與 Plan。
-4. 實作並執行 AI Verification。
-5. 記錄 Human Integration 或 Human Acceptance。
-6. 更新已變更的 Spec 與 Plan。
-7. 準備並建立下一個核准的 Commit Batch。
+2. 審查並修改 Blueprint Feature Slice 結構。
+3. 提案並套用需求文件變更。
+4. 為指定 Feature Slice 建立 Spec 與 Plan。
+5. 核准指定 Feature Slice 的 Spec 與 Plan。
+6. 實作並執行 AI Verification。
+7. 記錄 Human Integration 或 Human Acceptance。
+8. 更新已變更的 Spec 與 Plan。
+9. 準備並建立下一個核准的 Commit Batch。
 
 不要因為完成某一操作而自行進入下一操作。
 
@@ -92,7 +96,7 @@ docs/verification/<ID>/<ID>-<name>-verification.md
 
 ## Feature Slice 狀態
 
-只使用：`proposed`、`awaiting-approval`、`approved`、`in-progress`、`awaiting-human`、`accepted`、`blocked`。
+只使用：`proposed`、`awaiting-approval`、`approved`、`in-progress`、`awaiting-human`、`accepted`、`blocked`、`withdrawn`。
 
 使用主要流程：
 
@@ -102,7 +106,9 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 使用 `blocked` 表示存在明確阻礙。於 `Status Note` 記錄阻礙原因、阻礙前狀態及恢復條件；解除阻礙時回到適當狀態。
 
-將 `awaiting-approval`、`approved`、`in-progress`、`awaiting-human` 視為 active status。同一時間最多只能有一個 Feature Slice 處於 active status。`proposed`、`accepted`、`blocked` 不視為 active status。
+使用 `withdrawn` 表示尚未實作的 Slice 因拆分、合併或規劃調整而停止使用。`withdrawn` 是終止狀態；不得刪除、重新使用或重新啟用該 ID。
+
+將 `awaiting-approval`、`approved`、`in-progress`、`awaiting-human` 視為 active status。同一時間最多只能有一個 Feature Slice 處於 active status。`proposed`、`accepted`、`blocked`、`withdrawn` 不視為 active status。
 
 ## Blueprint Mode
 
@@ -121,6 +127,35 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 將 `AGENTS.md`、開發規範及架構規範視為實作限制，不視為產品需求來源。
 
 不得從現有元件、頁面、route、API client、tests、TODO、dead code、feature flag 或未被需求文件支持的現有行為推論需求。不得用現有程式碼新增、刪除或改寫 Feature Slice。
+
+### 需求文件變更核准
+
+若 Blueprint 或 Spec 討論顯示需要新增、修改或刪除 `docs/project/` 的產品需求，不得將討論內容直接視為修改授權。先向使用者列出：
+
+- 修改原因。
+- 受影響的需求文件與章節。
+- 預計新增、修改或刪除的需求內容。
+- 受影響的 Feature Slice。
+- 對 Scope、Acceptance、依賴與既有行為的影響。
+
+停止並等待使用者明確核准。不得將「看起來可以」、「應該是這樣」、「先這樣」等模糊回覆視為核准。
+
+取得核准後：
+
+1. 只修改已核准的需求文件、章節與內容。
+2. 重新執行 blueprint reconcile。
+3. 更新受影響的 Source Reference 與 Slice Brief。
+4. 同步更新目前 Slice 的 Spec 與 Plan；若尚未建立則於後續建立時使用更新後的需求來源。
+5. 檢查需求文件、blueprint、Slice Brief、Spec 與 Plan 是否一致。
+6. 回報修改與一致性檢查結果並停止，不自行進入實作。
+
+依受影響 Slice 的狀態處理：
+
+- 尚未 `accepted`：保留原 ID 並更新已存在的 Slice Brief、Spec 與 Plan。若內容構成實質變更且 Spec、Plan 已存在，撤銷既有核准，將文件設為 `draft`，並將 blueprint 設為 `awaiting-approval`；尚未建立 Spec、Plan 時維持 `proposed`。
+- 已 `accepted`：保留舊 Slice 與舊 Spec，建立新 ID 的 `change` Slice，以 `Revises` 指向原 Slice，並使用獨立文件資料夾。
+- 純錯字或不影響含義的修正：不建立新 ID，也不撤銷核准，但仍修正失效的 Source Reference。
+
+若變更影響多個 Slice，先列出所有受影響 ID 並取得整體變更核准。Blueprint reconcile 可以記錄整體影響，但處理目前 Slice 時不得自行修改其他 Slice 的 Spec 或 Plan；依各 Slice 狀態逐一處理需要實質更新的文件。若同一需求文件 diff 無法安全歸屬單一 Slice，停止並請使用者決定拆分方式或 commit 歸屬，不得直接納入目前 Slice 的 batch。
 
 ### 建立 blueprint
 
@@ -142,7 +177,7 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 3. 修正失效或不完整的 Source Reference。
 4. 為全新需求建立 `feature` Slice。
 5. 為改變已 `accepted` 行為的需求建立新 ID 的 `change` Slice，使用 `Revises` 指向舊 Slice。
-6. 不覆寫舊 Slice Brief 或 Spec。
+6. 不覆寫已 `accepted` Slice 的舊 Slice Brief 或 Spec。
 7. 將移除或無法判定的需求列為待確認問題。
 8. 不自行刪除既有 Slice 或標示為 `accepted`。
 9. 回報差異並停止。
@@ -163,17 +198,46 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 若需求缺少必要資訊、彼此矛盾或無法形成可驗收結果，不自行補充需求；記錄 Open Questions，將受影響 Slice 保留為 `proposed` 或設為 `blocked`，並等待使用者釐清。
 
+### Blueprint Slice Revision
+
+只對 `proposed` Slice 直接執行結構調整。若使用者對 Slice 的邊界、Goal、Acceptance、依賴、拆分或合併有疑慮，先讀取主 blueprint、相關 Slice Brief 與 Source Reference，討論時不得修改文件。
+
+提出 Blueprint Revision Proposal，至少列出：
+
+- 修改原因。
+- 修改前後的 Slice 結構。
+- Goal、Included / Excluded、Acceptance 與 Depends On 的差異。
+- 保留、新增及停止使用的 ID。
+- 要修改或建立的 blueprint 與 Slice Brief 文件。
+- 是否改變產品需求及是否需要修改 `docs/project/`。
+- Blueprint Revision Batch 的範圍與 proposed message。
+
+停止並等待使用者明確核准。取得核准後依下列規則修改：
+
+- 一般調整：保留原 ID，更新主 blueprint 與原 Slice Brief。
+- 拆分：最接近原 Goal 的子 Slice 保留原 ID，其餘使用從未使用過的新 ID。若無法合理保留原 ID，將原 Slice 設為 `withdrawn`，並為所有替代 Slice 建立新 ID。
+- 合併：由最能代表合併後 Goal 的主要 Slice 保留 ID，將其他 Slice 設為 `withdrawn`。無法判斷主要 Slice 時停止並請使用者決定。
+- 撤回：將不再規劃且尚未實作的 Slice 設為 `withdrawn`。
+- 所有新 Slice 初始狀態為 `proposed`；不得刪除、重新編號或重複使用既有 ID。
+
+更新主 blueprint 的 Slice Index、Depends On、Status、Status Note、Last Updated、Documents 與 Last Reconciled。更新每個受影響 Slice Brief 的完整內容，並依 [slice-brief-template.md](references/slice-brief-template.md) 記錄 Blueprint Revision lineage。保持主 blueprint 精簡，不新增結構演進欄位；以 Status Note 提供簡短去向，詳細 lineage 只保存在 Slice Brief。
+
+若 Revision 改變產品需求，先完成需求文件變更核准流程。若任何受影響 Slice 不是 `proposed`，不得直接套用此結構調整：已建立 Spec 或 Plan 時依實質變更規則撤銷核准並重新審查；已 `accepted` 時保留歷史文件，需求或行為改變則建立新的 `change` Slice。
+
+修改完成後檢查需求文件、主 blueprint、所有受影響 Slice Brief 及既有 Spec / Plan 的一致性，依 [commit-workflow.md](references/commit-workflow.md) 準備 Blueprint Revision Batch，列出 diff 並停止等待 commit 確認。不得自行開始 Spec、Plan 或實作。
+
 ## Feature Slice Mode
 
 開始指定 Feature Slice 前：
 
 1. 讀取 blueprint。
 2. 確認 Feature Slice ID 存在。
-3. 確認沒有其他 active Slice。
-4. 確認 `Depends On` 中的必要依賴已滿足。
-5. 讀取該 Slice Brief 及其 Source Reference。
-6. 確認要求的操作符合目前狀態。
-7. 不自行處理其他 Feature Slice。
+3. 確認 Feature Slice 不是 `withdrawn`；`withdrawn` Slice 不得進入 Feature Slice Mode。
+4. 確認沒有其他 active Slice。
+5. 確認 `Depends On` 中的必要依賴已滿足。
+6. 讀取該 Slice Brief 及其 Source Reference。
+7. 確認要求的操作符合目前狀態。
+8. 不自行處理其他 Feature Slice。
 
 若依賴未完成，標示或維持 `blocked`，說明原因並停止。
 
@@ -285,7 +349,13 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 執行任何 commit 操作前，完整讀取 [commit-workflow.md](references/commit-workflow.md)。
 
+已核准的 Blueprint Revision Proposal 可以在 Spec 與 Plan 建立前準備 Blueprint Revision Batch。這是「Spec 與 Plan 核准前不建立 Slice commit」的唯一例外，只能包含核准的需求與 Blueprint 文件，不得包含 Spec、Plan、程式碼或測試。
+
 Spec 與 Plan 核准後即可依 Commit Plan 建立文件或實作 batch；不必等待整個 Slice `accepted`。每個 batch 必須可獨立檢視、只包含本 Slice 相關變更，並在 Plan 中預先列出 purpose、files、required verification 與 proposed message。
+
+若本 Slice 包含使用者已核准且尚未提交的 `docs/project/` 變更，將其納入 Initial Documentation Batch，與 Slice Brief、approved Spec、approved Plan 及 blueprint 一起保存。
+
+若 Initial Documentation Batch 已提交後才核准需求文件變更，停止實作，依需求文件變更流程更新文件並撤銷必要核准。不得改寫既有 commit；在 Commit Plan 中新增下一個 Documentation Batch，將 Commit Plan Approval 設回 `pending`，並於重新核准後依序建立新 commit。
 
 Human Acceptance 通過後，使用最終 Documentation Commit Batch 保存 completed Spec / Plan、Verification、blueprint `accepted` 狀態，以及 `change` Slice 的舊 Spec lineage 更新。最終 batch 同樣必須先列出範圍並等待使用者確認。
 

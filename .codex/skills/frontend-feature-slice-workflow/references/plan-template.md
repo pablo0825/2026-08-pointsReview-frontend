@@ -135,6 +135,8 @@
 
 ## Documentation Updates
 
+- [ ] 更新已核准的 `docs/project/` 需求文件；不需要時填寫 `not-applicable`
+- [ ] 確認需求文件、Slice Brief、Spec 與 Plan 一致
 - [ ] 更新 Slice Brief 或 blueprint 文件連結
 - [ ] 更新 Spec 狀態
 - [ ] 更新 Plan 狀態
@@ -150,7 +152,7 @@
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
 |---|---|---|---|---|
-| C1 | 保存已核准的 Slice 文件 | Slice Brief、Spec、Plan、blueprint | 文件一致性 | `docs(<ID>): approve <feature> specification` |
+| C1 | 保存已核准的需求與 Slice 文件 | 已核准的 `docs/project/` 變更（如有）、Slice Brief、Spec、Plan、blueprint | 文件一致性 | `docs(<ID>): approve <feature> specification` |
 | C2 | <第一個可獨立檢視的實作目的> | `<paths>` | <checks> | `<type>(<ID>): <English summary>` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint、必要 lineage 文件 | 文件一致性 | `docs(<ID>): record <feature> acceptance` |
 
@@ -172,6 +174,8 @@ Commit Plan Approval 使用 `pending`、`approved`。每個 batch 只涵蓋一�
 - 核准後不自行增加 Scope。
 - `change` 必須規劃 Target Behavior 與 Preserved Behavior 的驗證。
 - `correction` 必須以 Authoritative Spec 為依據，不改寫原需求。
+- 只有使用者已明確核准的 `docs/project/` 變更才能列入 Files、Documentation Updates 與 Commit Plan。
+- 不得將實作分析或現有程式碼推論出的行為回寫成產品需求。
 - Spec 與 Plan 核准時一併核准 Commit Plan。
 - 第一個 batch 必須是 Initial Documentation Batch；完成並經使用者確認 commit 後，才進入 implementation batches。
 - 不執行未列入 Commit Plan 或尚未核准的 batch。

@@ -51,6 +51,10 @@ Type 只使用 `feature`、`change`、`correction`。Status 只使用 Skill 定�
 - 每個 Source Reference 必須指向實際需求文件。
 - 不將無法追溯的內容當成已確認需求。
 - 不因 reconcile 重新編號、覆寫或刪除既有 Slice。
+- 只在 Blueprint Revision Proposal 經使用者明確核准後調整 `proposed` Slice 的結構。
+- 使用 `withdrawn` 保留因拆分、合併或規劃調整而停止使用的 Slice；不得刪除、重新使用或重新啟用其 ID。
+- 結構調整時更新 Slice Index、Depends On、Status、Status Note、Last Updated、Documents 與 Last Reconciled。
+- 在 Status Note 簡短記錄替代 Slice；詳細 Blueprint Revision lineage 保存在相關 Slice Brief，不增加主索引欄位。
 - 已 `accepted` 需求改變時建立新 ID 的 `change` Slice，並以 `Revises` 連結。
 - 實作違反有效 Spec 時建立新 ID 的 `correction` Slice，並以 `Corrects` 連結。
 - 將需求移除、衝突或無法判定的情況交由使用者確認。
