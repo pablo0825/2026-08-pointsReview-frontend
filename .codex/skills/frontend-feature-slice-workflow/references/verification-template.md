@@ -63,6 +63,14 @@ Result 只使用 `passed`、`failed`、`not-run`、`not-applicable`。記錄本�
 |---|---|---|
 | <Preserved Behavior> | <result> | <evidence> |
 
+## Commit Batch Verification
+
+| Batch | Purpose | Required Verification | Result | Planned Message |
+|---|---|---|---|---|
+| C1 | <purpose> | <checks> | <result> | `<type>(<ID>): <English summary>` |
+
+記錄每個 batch 實際執行的相關驗證摘要。不要在文件中保存目前 commit 自己的 hash；以 Git history 與最終回報作為 Commit ID 的權威來源。
+
 ## Human Integration
 
 ### Required Work
@@ -135,3 +143,5 @@ Status 使用 `pending`、`passed`、`failed`、`changes-requested`。只有使�
 - `change` 必須記錄 Target Behavior 與 Preserved Behavior 的驗證結果。
 - `change` Accepted 後確認舊 Spec 已標示 `superseded` 並連到新 Spec。
 - `correction` 必須確認 Authoritative Spec 仍然有效且未被標示 `superseded`。
+- Commit Batch Verification 只記錄局部檢查，不取代完整 AI Verification。
+- Human Acceptance 失敗後以新的 `fix` batch 記錄修正，不改寫既有 commits。

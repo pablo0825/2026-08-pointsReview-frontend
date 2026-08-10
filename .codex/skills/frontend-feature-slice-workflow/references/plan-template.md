@@ -142,6 +142,20 @@
 - [ ] 更新 blueprint Status、Status Note 與 Last Updated
 - [ ] `change` Accepted 後將舊 Spec 設為 `superseded` 並加入 replacement link
 
+## Commit Plan
+
+- Commit Plan Approval: `pending`
+- Approved By: `pending`
+- Approved At: `pending`
+
+| Batch | Purpose | Files | Required Verification | Proposed Message |
+|---|---|---|---|---|
+| C1 | 保存已核准的 Slice 文件 | Slice Brief、Spec、Plan、blueprint | 文件一致性 | `docs(<ID>): approve <feature> specification` |
+| C2 | <第一個可獨立檢視的實作目的> | `<paths>` | <checks> | `<type>(<ID>): <English summary>` |
+| Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint、必要 lineage 文件 | 文件一致性 | `docs(<ID>): record <feature> acceptance` |
+
+Commit Plan Approval 使用 `pending`、`approved`。每個 batch 只涵蓋一個清楚目的，並保持可獨立檢視。將相關測試與實作放在同一 batch，或確保每個中間 commit 仍具合理可驗證性。
+
 ## Approval
 
 - Approved By: `pending`
@@ -158,3 +172,8 @@
 - 核准後不自行增加 Scope。
 - `change` 必須規劃 Target Behavior 與 Preserved Behavior 的驗證。
 - `correction` 必須以 Authoritative Spec 為依據，不改寫原需求。
+- Spec 與 Plan 核准時一併核准 Commit Plan。
+- 第一個 batch 必須是 Initial Documentation Batch；完成並經使用者確認 commit 後，才進入 implementation batches。
+- 不執行未列入 Commit Plan 或尚未核准的 batch。
+- 只改變 batch 分組、順序或 message 時，將 Commit Plan Approval 設回 `pending`；若 Scope 也改變，依 Skill 撤銷完整 Plan 核准。
+- 最終 Documentation Batch 必須位於 Human Acceptance 之後。

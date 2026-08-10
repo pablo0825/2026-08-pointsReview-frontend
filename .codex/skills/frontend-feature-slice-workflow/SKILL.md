@@ -1,6 +1,6 @@
 ---
 name: frontend-feature-slice-workflow
-description: Analyze frontend requirement documents to create or reconcile an implementation blueprint, then execute one Feature Slice at a time through Spec and Plan creation, explicit user approval, AI implementation and verification, human integration and acceptance, documentation updates, and a user-approved Git commit. Use when Codex needs to plan, implement, verify, accept, or commit frontend work identified by Feature Slice IDs.
+description: Analyze frontend requirement documents to create or reconcile an implementation blueprint, then execute one Feature Slice at a time through Spec and Plan creation, explicit user approval, AI implementation and verification, reviewable user-approved Git commit batches, human integration and acceptance, and final documentation updates. Use when Codex needs to plan, implement, verify, accept, or commit frontend work identified by Feature Slice IDs.
 ---
 
 # Frontend Feature Slice Workflow
@@ -21,6 +21,8 @@ description: Analyze frontend requirement documents to create or reconcile an im
 - 將 AI Verification 與 Human Acceptance 分開。
 - 不得將未實際執行的檢查標示為通過。
 - 只有使用者能確認 Human Integration 與 Human Acceptance。
+- 將 committed、AI verified 與 human accepted 視為三種不同事實；commit 不代表驗證或驗收通過。
+- 只依核准 Plan 中的 Commit Plan 建立 commit，且每個 commit 前都取得使用者確認。
 - 完成目前操作後停止，不自行開始下一個 Feature Slice。
 - 保留與目前 Feature Slice 無關的既有變更。
 - 不 push Git commit。
@@ -50,7 +52,7 @@ description: Analyze frontend requirement documents to create or reconcile an im
 4. 實作並執行 AI Verification。
 5. 記錄 Human Integration 或 Human Acceptance。
 6. 更新已變更的 Spec 與 Plan。
-7. 準備並建立 Feature Slice commit。
+7. 準備並建立下一個核准的 Commit Batch。
 
 不要因為完成某一操作而自行進入下一操作。
 
@@ -183,7 +185,7 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 對 `change` Slice，在新 Spec 記錄 Previous Spec、Current Behavior、Target Behavior 與 Preserved Behavior。對 `correction` Slice，記錄 Authoritative Spec 與必須恢復的既有 Acceptance。不要在新舊 Spec 之間共用資料夾。
 
-完成 Spec 草稿後，才分析專案結構、framework、components、routes、state、API clients、types、styles、tests、tooling、既有實作、Spec 落差、回歸風險與 working tree，並建立定義「怎麼做」的 Plan。
+完成 Spec 草稿後，才分析專案結構、framework、components、routes、state、API clients、types、styles、tests、tooling、既有實作、Spec 落差、回歸風險與 working tree，並建立定義「怎麼做」的 Plan。Plan 必須包含可獨立檢視的 Commit Plan，依序包含 Initial Documentation Batch、一個以上的 implementation batches，以及 Human Acceptance 後的 Final Documentation Batch。
 
 現有程式碼與 Spec 不一致時：
 
@@ -202,6 +204,8 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 若 Spec 的 Goal、User Story、Input / Output、Rules、Included / Excluded、Integration Contract、Acceptance，或 Plan 的 Scope、主要實作方式、核心檔案發生實質變更，同步修改 Plan、撤銷原核准、將文件設為 `draft`、將 blueprint 設為 `awaiting-approval`，並停止實作。純文字修正、證據補充及 checkbox 更新不視為實質變更。
 
+若只改變 Commit Batch 的分組、順序或 message，不撤銷 Spec 核准，但將 Commit Plan Approval 設回 `pending`，並在執行受影響 batch 前取得使用者明確核准。不得以調整 Commit Plan 隱藏實作 Scope 變更。
+
 ## 核准 Spec 與 Plan
 
 只接受使用者明確表達的核准，不將「看起來不錯」、「應該可以」、「先這樣」等模糊回覆推論為核准。
@@ -210,17 +214,21 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 1. 將 Spec 與 Plan 的 `Document Status` 設為 `approved`。
 2. 將 blueprint Status 設為 `approved`。
-3. 記錄核准日期與 Status Note。
-4. 若為 `change`，在被 Revises 的舊 Spec 加入 `Supersession Pending` 提示，但維持其 `Document Status: completed`。
-5. 若為 `correction`，保持原 Spec 不變且有效。
-6. 若使用者只要求核准，更新後停止。
-7. 只有使用者同時要求開始實作時，才繼續實作。
+3. 將 Commit Plan Approval 設為 `approved`。
+4. 記錄核准日期與 Status Note。
+5. 若為 `change`，在被 Revises 的舊 Spec 加入 `Supersession Pending` 提示，但維持其 `Document Status: completed`。
+6. 若為 `correction`，保持原 Spec 不變且有效。
+7. 若使用者只要求核准，更新後停止。
+8. 若使用者同時要求繼續，先準備 Commit Plan 中的 Initial Documentation Batch，停止等待 commit 確認；不得跳過尚未建立的較早 batch。
+9. Initial Documentation Batch 完成且使用者明確要求繼續後，才開始 implementation batch。
 
 ## AI 實作
 
 開始前確認 blueprint 與文件皆為 `approved`，再次檢查 working tree，確認沒有無法安全保留的重疊變更，再將 blueprint 設為 `in-progress`。
 
-只執行已核准 Plan 中的 AI Implementation Tasks。不得擴張 Scope、順便實作其他 Slice、自行回答會改變需求的 Open Question、擴大重構，或覆寫無關變更。
+只執行已核准 Plan 中的 AI Implementation Tasks，並一次只處理一個 Commit Batch。不得擴張 Scope、順便實作其他 Slice、自行回答會改變需求的 Open Question、擴大重構，或覆寫無關變更。
+
+完成一個 Commit Batch 後，執行該 batch 指定的驗證，再依 [commit-workflow.md](references/commit-workflow.md) 列出 message、檔案、diff 摘要、排除項目與驗證結果，停止等待使用者確認。不要因 batch 完成而自動 stage 或 commit。使用者確認後才建立該 commit，回報 Commit ID，然後停止。只有使用者明確要求繼續時才開始下一個 batch。
 
 若必須實質修改 Spec 或 Plan，停止實作，記錄發現，更新文件草稿，將 blueprint 設為 `awaiting-approval`，等待重新核准。若無關變更與本 Slice 修改同一檔案且無法安全分離，停止並詢問使用者。
 
@@ -228,7 +236,7 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 完整讀取 [verification-template.md](references/verification-template.md)。
 
-只執行已核准 Plan 中的 AI Verification。依專案能力執行 build、unit、integration、end-to-end、lint、typecheck、format、accessibility、browser smoke test 或 responsive inspection。
+只執行已核准 Plan 中的 AI Verification。依專案能力執行 build、unit、integration、end-to-end、lint、typecheck、format、accessibility、browser smoke test 或 responsive inspection。Commit Batch 的局部驗證不能取代完成所有實作後的完整 AI Verification。
 
 只使用 `passed`、`failed`、`not-run`、`not-applicable`：
 
@@ -268,30 +276,19 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 6. 將目前 Slice 的 blueprint Status 設為 `accepted`。
 7. 更新 Status Note 與 Last Updated。
 8. 回報 AI Verification、Human Acceptance 與未執行檢查。
-9. 停止，不自行準備 commit 或開始下一個 Slice。
+9. 說明最終 Documentation Commit Batch 已可準備。
+10. 停止，不自行 stage、commit 或開始下一個 Slice。
 
 若回報 `failed`，記錄差異；修正仍在核准範圍內時將 blueprint 設回 `in-progress`，但只在使用者要求修正時繼續。若需改 Spec 或 Plan，退回 `awaiting-approval`。若回報 `changes-requested`，將文件退回 `draft`，同步更新後重新等待核准。
 
-## Commit
+## Commit Batches
 
-只有 blueprint Status 為 `accepted` 時才能準備 commit。
+執行任何 commit 操作前，完整讀取 [commit-workflow.md](references/commit-workflow.md)。
 
-收到 commit 要求後：
+Spec 與 Plan 核准後即可依 Commit Plan 建立文件或實作 batch；不必等待整個 Slice `accepted`。每個 batch 必須可獨立檢視、只包含本 Slice 相關變更，並在 Plan 中預先列出 purpose、files、required verification 與 proposed message。
 
-1. 檢查 `git status` 與本 Slice diff。
-2. 辨識無關修改、未追蹤檔案及既有 staged changes。
-3. 列出預計提交與明確排除的檔案。
-4. 說明無法安全分離的變更。
-5. 停止並等待使用者確認提交範圍。
+Human Acceptance 通過後，使用最終 Documentation Commit Batch 保存 completed Spec / Plan、Verification、blueprint `accepted` 狀態，以及 `change` Slice 的舊 Spec lineage 更新。最終 batch 同樣必須先列出範圍並等待使用者確認。
 
-確認前不 stage、不 commit、不 push，也不修改其他 Git 狀態。
+若已提交的實作需要修正，建立新的 `fix` batch；不要自行 amend、rebase、squash、reset 或改寫歷史。所有 commits 都不得 push。
 
-使用者確認後，只 stage 核准且相關的 Slice Brief、Spec、Plan、verification、程式碼、tests、Markdown 文件、被更新的舊 Spec 與 blueprint。檢查 staged diff；若包含無關或無法分離的修改，停止並回報。
-
-使用：
-
-```text
-feat(<Feature Slice ID>): <English feature name>
-```
-
-Commit 成功後回報 Commit ID、message、修改檔案、AI Verification、Human Integration、Human Acceptance 與最終狀態。不要 push，完成後停止。
+完成整個 Slice 後回報所有 Commit IDs、messages、修改檔案、AI Verification、Human Integration、Human Acceptance 與最終狀態，然後停止。
