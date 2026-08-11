@@ -62,7 +62,7 @@ test('is public, starts unselected, and sends no request before selection', asyn
   expect(requests).toEqual([])
 })
 
-test('loads the current year, navigates the table of contents, and switches years', async ({
+test('loads each type once, navigates the table of contents, and switches years locally', async ({
   page,
 }) => {
   const requests = await mockPublishedInstructions(page)
@@ -74,6 +74,9 @@ test('loads the current year, navigates the table of contents, and switches year
   await expect(
     page.getByRole('heading', { name: '競賽成果申請辦法' }),
   ).toBeVisible()
+  expect(requests).toHaveLength(1)
+  expect(requests[0]).toContain('applicationType=competition')
+  expect(requests[0]).not.toContain('academicYear')
   const tocLink = page
     .getByRole('navigation', { name: '辦法目錄' })
     .getByRole('link', { name: '申請資格' })
@@ -89,7 +92,7 @@ test('loads the current year, navigates the table of contents, and switches year
   await expect(
     page.getByRole('heading', { name: '114 學年度競賽成果申請辦法' }),
   ).toBeVisible()
-  expect(requests.some((search) => search.includes('academicYear=114'))).toBe(true)
+  expect(requests).toHaveLength(1)
 })
 
 test('shows an empty state after a retryable failure', async ({ page }) => {

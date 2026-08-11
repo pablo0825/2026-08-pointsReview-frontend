@@ -7,6 +7,7 @@ import {
   emptyPublicApplicationInstructionsHandler,
   publicApplicationInstructionsUrl,
 } from '../../test/handlers/public-application-instructions'
+import { publishedInstructionFixtures } from '../../test/fixtures/published-instructions'
 import { server } from '../../test/server'
 import { PublishedInstructionsPage } from './published-instructions-page'
 
@@ -44,8 +45,21 @@ describe('PublishedInstructionsPage', () => {
     expect(requestCount).toBe(0)
   })
 
-  it('loads the current year, preserves section order, and switches years', async () => {
+  it('loads each type once, preserves section order, and switches years locally', async () => {
     const user = userEvent.setup()
+    const requests: URL[] = []
+    server.use(
+      http.get(publicApplicationInstructionsUrl, ({ request }) => {
+        const url = new URL(request.url)
+        requests.push(url)
+
+        return HttpResponse.json({
+          data: publishedInstructionFixtures.filter(({ sectionKey }) =>
+            sectionKey.startsWith('competition'),
+          ),
+        })
+      }),
+    )
 
     renderPage()
     await user.click(screen.getByRole('button', { name: '競賽申請' }))
@@ -61,11 +75,15 @@ describe('PublishedInstructionsPage', () => {
       '競賽點數說明',
       '歷史補充說明',
     ])
+    expect(requests).toHaveLength(1)
+    expect(requests[0].searchParams.get('applicationType')).toBe('competition')
+    expect(requests[0].searchParams.has('academicYear')).toBe(false)
 
     await user.selectOptions(screen.getByLabelText('學年度'), '114')
     expect(
       (await screen.findAllByText('114 學年度競賽成果申請辦法')).length,
     ).toBeGreaterThan(0)
+    expect(requests).toHaveLength(1)
   })
 
   it('treats an HTTP 200 empty array as an empty state', async () => {
@@ -87,27 +105,24 @@ describe('PublishedInstructionsPage', () => {
     const user = userEvent.setup()
     let shouldFail = true
     server.use(
-      http.get(publicApplicationInstructionsUrl, ({ request }) => {
+      http.get(publicApplicationInstructionsUrl, () => {
         if (shouldFail) {
           return HttpResponse.json({ code: 'unavailable' }, { status: 503 })
         }
 
-        const academicYear = new URL(request.url).searchParams.get('academicYear')
         return HttpResponse.json({
-          data: academicYear
-            ? [
-                {
-                  academicYear: '115',
-                  revisionNumber: 1,
-                  sectionKey: 'certificate-rules',
-                  title: '證照申請辦法',
-                  content: '重新載入成功。',
-                  displayOrder: 1,
-                  effectiveFrom: '2026-08-01',
-                  effectiveTo: null,
-                },
-              ]
-            : [],
+          data: [
+            {
+              academicYear: '115',
+              revisionNumber: 1,
+              sectionKey: 'certificate-rules',
+              title: '證照申請辦法',
+              content: '重新載入成功。',
+              displayOrder: 1,
+              effectiveFrom: '2026-08-01',
+              effectiveTo: null,
+            },
+          ],
         })
       }),
     )
@@ -126,11 +141,12 @@ describe('PublishedInstructionsPage', () => {
 
   it('does not show a stale result after quickly changing application type', async () => {
     const user = userEvent.setup()
+    const requestedTypes: Array<string | null> = []
     server.use(
       http.get(publicApplicationInstructionsUrl, async ({ request }) => {
         const url = new URL(request.url)
         const applicationType = url.searchParams.get('applicationType')
-        const academicYear = url.searchParams.get('academicYear')
+        requestedTypes.push(applicationType)
 
         if (applicationType === 'competition') {
           await delay(100)
@@ -139,20 +155,18 @@ describe('PublishedInstructionsPage', () => {
         const label =
           applicationType === 'competition' ? '延遲競賽辦法' : '證照申請辦法'
         return HttpResponse.json({
-          data: academicYear
-            ? [
-                {
-                  academicYear: '115',
-                  revisionNumber: 1,
-                  sectionKey: `${applicationType}-rules`,
-                  title: label,
-                  content: label,
-                  displayOrder: 1,
-                  effectiveFrom: '2026-08-01',
-                  effectiveTo: null,
-                },
-              ]
-            : [],
+          data: [
+            {
+              academicYear: '115',
+              revisionNumber: 1,
+              sectionKey: `${applicationType}-rules`,
+              title: label,
+              content: label,
+              displayOrder: 1,
+              effectiveFrom: '2026-08-01',
+              effectiveTo: null,
+            },
+          ],
         })
       }),
     )
@@ -167,6 +181,12 @@ describe('PublishedInstructionsPage', () => {
     await waitFor(() => {
       expect(screen.queryByText('延遲競賽辦法')).not.toBeInTheDocument()
     })
+    expect(
+      requestedTypes.filter((type) => type === 'competition'),
+    ).toHaveLength(1)
+    expect(
+      requestedTypes.filter((type) => type === 'certificate'),
+    ).toHaveLength(1)
   })
 
   it('renders a section returned after effectiveTo without filtering it', async () => {
