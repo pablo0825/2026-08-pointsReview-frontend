@@ -15,17 +15,17 @@
 - Previous Spec: `none`
 - Authoritative Spec: `docs/specs/FS-002/FS-002-published-instructions-spec.md`
 
-## Pending Revision
+## Approved Revision
 
 - 使用者於 Human Integration 期間要求每個申請類型只查詢一次所有公開學年度 sections，年度切換改為前端篩選。
 - 既有 AI Verification 證據仍記錄初版實作實際執行結果，但不代表修訂後單次查詢 Acceptance 已通過。
-- 修訂後實作、tests、完整 AI Verification 與 Human Integration 尚未執行。
+- 修訂後 Spec、Plan 與 Commit Plan 已由使用者核准；F1 實作、tests、完整 AI Verification 與 Human Integration 尚未執行。
 
 ## Implementation Summary
 
 - 已以正式公開頁取代 `/rules` placeholder；初始顯示四個固定申請類型按鈕，選擇前不送出辦法 request。
 - 已建立 credentialed JSON GET client、Zod response validation、申請類型／選填學年度 query、Asia/Taipei 學年度 helper、嚴格 MSW 測試邊界與 fixtures。
-- 初版選擇類型後同時查詢所有年度與目前學年度；此重複查詢將依待核准修訂改為每個類型只查詢一次，年度切換使用已取得的 Response。
+- 初版選擇類型後同時查詢所有年度與目前學年度；已核准修訂將改為每個類型只查詢一次，年度切換使用已取得的 Response。
 - 已建立保留 API section 順序的安全 Markdown renderer、同頁唯一錨點、目錄，以及外部連結安全屬性；前端不依 `effectiveTo` 排除 API 已回傳內容。
 - 真實後端資料與失敗情境尚待 Human Integration；production build 成功，但 Vite 回報主 bundle 超過預設 500 kB 警示，核准範圍未設定 bundle budget。
 
@@ -114,7 +114,7 @@
 - Status: `pending`
 - Confirmed By: `pending`
 - Confirmed At: `pending`
-- Notes: `單次查詢修訂尚待核准與實作，Human Integration 暫停。`
+- Notes: `單次查詢修訂已核准、尚待實作，Human Integration 暫停。`
 
 ## Human Acceptance Instructions
 

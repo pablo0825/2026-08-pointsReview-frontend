@@ -39,7 +39,7 @@
 | ID | Name | Type | Depends On | Revises | Corrects | Status | Status Note | Last Updated |
 |---|---|---|---|---|---|---|---|---|
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
-| FS-002 | `published-instructions` | feature | none | none | none | awaiting-approval | Human Integration 發現初版每個類型產生重複 request；使用者要求改為單次查詢，修訂後 Spec、Plan 與 Commit Plan 等待重新核准。 | 2026-08-11 |
+| FS-002 | `published-instructions` | feature | none | none | none | approved | 單次查詢修訂的 Spec、Plan 與 Commit Plan 已核准；等待使用者明確要求開始 F1 實作。 | 2026-08-11 |
 | FS-003 | `application-entry` | feature | none | none | none | accepted | 完整 AI Verification 已通過，Human Integration 為 `not-applicable`，使用者已確認 Human Acceptance 通過。 | 2026-08-11 |
 | FS-004 | `competition-application` | feature | FS-003 | none | none | proposed | 已補充共用申請表架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |

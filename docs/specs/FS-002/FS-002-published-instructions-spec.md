@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-002`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-11`
 - Last Updated: `2026-08-11`
@@ -154,9 +154,9 @@
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `使用者要求改為每個申請類型只查詢一次；本修訂等待重新核准。`
+- Approved By: `使用者`
+- Approved At: `2026-08-11`
+- Approval Note: `使用者已明確核准每個申請類型只查詢一次的修訂 Spec、Plan 與 Commit Plan。`
 
 ## Template Rules
 
