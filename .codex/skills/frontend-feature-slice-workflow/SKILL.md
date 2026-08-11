@@ -24,7 +24,7 @@ description: Analyze frontend requirement documents to create, review, revise, o
 - 不得將未實際執行的檢查標示為通過。
 - 只有使用者能確認 Human Integration 與 Human Acceptance。
 - 將 committed、AI verified 與 human accepted 視為三種不同事實；commit 不代表驗證或驗收通過。
-- 將使用者對操作、Proposal、Spec / Plan、Commit Plan、下一個 implementation batch 或 Human Acceptance 結果的明確授權視為對應 commit 的授權；完成核准工作並通過必要檢查後直接 commit，不再要求第二次 commit 確認。
+- 將使用者對操作、Proposal、Spec / Plan、下一個 implementation batch 或 Human Acceptance 結果的明確授權視為對應 commit 的授權；Spec 與 Plan 的核准同時涵蓋其內含 Commit Plan 與 Approval Documentation commit，不另行詢問；完成核准工作並通過必要檢查後直接 commit。
 - 每個自動 commit 後停止；下一個 implementation batch 仍須由使用者明確要求開始或繼續。
 - 完成目前操作後停止，不自行開始下一個 Feature Slice。
 - 保留與目前 Feature Slice 無關的既有變更。
@@ -278,13 +278,13 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 ## 核准 Spec 與 Plan
 
-只接受使用者明確表達的核准，不將「看起來不錯」、「應該可以」、「先這樣」等模糊回覆推論為核准。
+只接受使用者對 Spec 與 Plan 明確表達的核准，不將「看起來不錯」、「應該可以」、「先這樣」等模糊回覆推論為核准。此核准同時核准 Plan 內的 Commit Plan，並授權建立 Approval Documentation Batch commit；不得再詢問使用者是否核准 Commit Plan、是否同意建立 commit，或是否同意繼續開發。
 
 取得明確核准後：
 
 1. 將 Spec 與 Plan 的 `Document Status` 設為 `approved`。
 2. 將 blueprint Status 設為 `approved`。
-3. 將 Commit Plan Approval 設為 `approved`。
+3. 自動將 Commit Plan Approval 設為 `approved`，並沿用相同的核准者與核准時間。
 4. 記錄核准日期與 Status Note。
 5. 若為 `change`，在被 Revises 的舊 Spec 加入 `Supersession Pending` 提示，但維持其 `Document Status: completed`。
 6. 若為 `correction`，保持原 Spec 不變且有效。

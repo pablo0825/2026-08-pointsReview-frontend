@@ -179,9 +179,9 @@ Commit Plan Approval 使用 `pending`、`approved`。每個 batch 只涵蓋一�
 - `correction` 必須以 Authoritative Spec 為依據，不改寫原需求。
 - 只有使用者已明確核准的 `docs/project/` 變更才能列入 Files、Documentation Updates 與 Commit Plan。
 - 不得將實作分析或現有程式碼推論出的行為回寫成產品需求。
-- Spec 與 Plan 核准時一併核准 Commit Plan。
+- Spec 與 Plan 經使用者明確核准時，自動將 Commit Plan Approval 設為 `approved`，並使用相同的 Approved By 與 Approved At；不得另行詢問 Commit Plan 核准。
 - Draft Documentation Batch 在 Spec / Plan 建立後自動 commit，讓使用者能以 Git diff 審查後續修改。
-- 第一個已核准 batch 必須是 Approval Documentation Batch；核准後直接 commit，並停止等待使用者要求開始 implementation。
+- 第一個已核准 batch 必須是 Approval Documentation Batch；Spec 與 Plan 的核准即授權此 commit，不得另行詢問 commit；建立後停止，等待使用者要求開始 implementation。
 - 每個 implementation batch 只在使用者明確要求開始或繼續後執行，完成與驗證後直接 commit。
 - 完整 AI Verification 後直接建立 Verification Documentation commit。
 - Human Acceptance 結果授權 Final 或 Acceptance Feedback Documentation commit。

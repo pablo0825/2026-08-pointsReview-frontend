@@ -8,7 +8,7 @@
 - 核准 Blueprint Revision Proposal，授權 Proposal 中的 Blueprint Revision commit。
 - 核准 `docs/project/` 需求變更，授權包含該需求變更的下一個已說明 Documentation Batch。
 - 要求為指定 ID 建立 Spec 與 Plan，授權 Draft Documentation commit。
-- 明確核准 Spec、Plan 與 Commit Plan，授權 Approval Documentation commit，但不授權開始實作。
+- 明確核准 Spec 與 Plan，即同時核准其內含 Commit Plan 並授權 Approval Documentation commit；不得另行要求 Commit Plan 或 commit 確認，但此核准不授權開始實作。
 - 明確要求開始或繼續下一個 implementation batch，授權該 batch 完成後的 commit。
 - 要求執行完整 AI Verification，授權 AI Verification Documentation commit。
 - 明確提供 Human Acceptance 結果，授權 Final 或 Acceptance Feedback Documentation commit。
@@ -126,7 +126,7 @@ docs(<ID>): draft <feature> specification
 
 ### Approval Documentation
 
-使用者明確核准 Spec、Plan 與 Commit Plan 後使用：
+使用者明確核准 Spec 與 Plan 後使用。該核准同時將 Commit Plan Approval 設為 `approved`，並授權直接建立此 commit；不得另設 Commit Plan 或 commit 核准關卡：
 
 ```text
 docs(<ID>): approve <feature> specification
