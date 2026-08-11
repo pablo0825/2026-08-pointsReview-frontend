@@ -1,0 +1,77 @@
+import type { PublishedInstructionSectionWire } from '../../features/rules/api/published-instructions.schema'
+
+export const expiredCompetitionSection: PublishedInstructionSectionWire = {
+  academicYear: '115',
+  revisionNumber: 1,
+  sectionKey: 'competition-expired-note',
+  title: '歷史補充說明',
+  content: '## 已由公開 API 回傳的補充說明\n\n此內容依後端結果呈現。',
+  displayOrder: 3,
+  effectiveFrom: '2026-01-01',
+  effectiveTo: '2026-07-31',
+}
+
+export const publishedInstructionFixtures: PublishedInstructionSectionWire[] = [
+  {
+    academicYear: '115',
+    revisionNumber: 1,
+    sectionKey: 'competition-rules',
+    title: '競賽成果申請辦法',
+    content:
+      '# 競賽成果申請辦法\n\n## 申請資格\n\n符合資格者可提出申請。\n\n## 應備資料\n\n請備妥證明文件。',
+    displayOrder: 1,
+    effectiveFrom: '2026-08-01',
+    effectiveTo: null,
+  },
+  {
+    academicYear: '115',
+    revisionNumber: 1,
+    sectionKey: 'competition-scoring',
+    title: '競賽點數說明',
+    content: '## 點數計算\n\n點數依競賽層級計算。',
+    displayOrder: 2,
+    effectiveFrom: '2026-08-01',
+    effectiveTo: null,
+  },
+  expiredCompetitionSection,
+  {
+    academicYear: '114',
+    revisionNumber: 2,
+    sectionKey: 'competition-rules-114',
+    title: '114 學年度競賽成果申請辦法',
+    content: '# 114 學年度競賽成果申請辦法\n\n## 申請資格\n\n歷史辦法。',
+    displayOrder: 1,
+    effectiveFrom: '2025-08-01',
+    effectiveTo: '2026-07-31',
+  },
+  {
+    academicYear: '115',
+    revisionNumber: 1,
+    sectionKey: 'project-participation-rules',
+    title: '參與計畫申請辦法',
+    content: '# 參與計畫申請辦法\n\n## 申請資格\n\n請依辦法提出申請。',
+    displayOrder: 1,
+    effectiveFrom: '2026-08-01',
+    effectiveTo: null,
+  },
+  {
+    academicYear: '115',
+    revisionNumber: 1,
+    sectionKey: 'certificate-rules',
+    title: '證照申請辦法',
+    content: '# 證照申請辦法\n\n## 申請資格\n\n請依辦法提出申請。',
+    displayOrder: 1,
+    effectiveFrom: '2026-08-01',
+    effectiveTo: null,
+  },
+  {
+    academicYear: '115',
+    revisionNumber: 1,
+    sectionKey: 'exhibition-rules',
+    title: '展覽申請辦法',
+    content: '# 展覽申請辦法\n\n## 申請資格\n\n請依辦法提出申請。',
+    displayOrder: 1,
+    effectiveFrom: '2026-08-01',
+    effectiveTo: null,
+  },
+]
