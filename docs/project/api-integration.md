@@ -158,11 +158,11 @@ GET /public/application-instructions?applicationType=competition
 - `sectionKey`：section 的穩定識別字串。
 - `title`：section 標題。
 - `content`：Markdown 內容。
-- `displayOrder`：同一 `applicationType` 與 `academicYear` 內的 section 顯示順序數字。
+- `displayOrder`：同一 `applicationType` 與 `academicYear` 內的 section 顯示順序數字；後端依此欄位升冪排列 Response。
 - `effectiveFrom`：`YYYY-MM-DD` 生效日期字串。
 - `effectiveTo`：`YYYY-MM-DD` 失效日期字串或 `null`。
 
-同一 `applicationType` 與 `academicYear` 可以包含多筆 sections；前端在呈現前必須依 `displayOrder` 由小到大排序。省略 `academicYear` 時，Response 可用來取得該 `applicationType` 的所有公開學年度及其 sections；提供 `academicYear` 時，`data` 只包含該學年度的 sections。前端仍須以 Zod 驗證每筆資料，並在呈現前清理 Markdown。
+同一 `applicationType` 與 `academicYear` 可以包含多筆 sections；後端保證 Response 已依 `displayOrder` 由小到大排列，前端保留 API 陣列順序，不自行排序。省略 `academicYear` 時，Response 可用來取得該 `applicationType` 的所有公開學年度及其 sections；提供 `academicYear` 時，`data` 只包含該學年度的 sections。前端仍須以 Zod 驗證每筆資料，並在呈現前清理 Markdown。
 
 查無符合條件的公開 sections 時，後端固定回傳 `HTTP 200 OK` 與空陣列，不回傳 `404`：
 
@@ -171,6 +171,10 @@ GET /public/application-instructions?applicationType=competition
   "data": []
 }
 ```
+
+公開端點的後端查詢只回傳符合 `status = published`、`isVisible = true`，且 `effectiveFrom` 不晚於 Asia/Taipei 當日的 sections。公開 Response 不提供 `status` 或 `isVisible` 管理欄位，前端直接信任公開端點的篩選結果，不自行判斷發布、可見或生效狀態。
+
+目前後端不使用 `effectiveTo` 排除內容，因此只能保證回傳內容「已發布、可見且已生效」，不能保證內容尚未超過失效日期。前端不依 `effectiveTo` 自行排除 API 已回傳的 section；即使 `effectiveTo` 早於今天，仍依 Response 呈現並安全清理 Markdown。
 
 ## 6. 正式申請 multipart
 

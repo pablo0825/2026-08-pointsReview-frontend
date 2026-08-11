@@ -27,7 +27,7 @@
 
 - 安裝安全 Markdown、GFM、HTML 解析／清理與 heading slug 所需的最小依賴。
 - 建立第一個實際 API consumer 所需的共用 JSON GET client、安全錯誤正規化與 response envelope 驗證邊界。
-- 建立 feature-local 的公開申請辦法 section 陣列 wire schema、依 `displayOrder` 升冪排序的 mapper、包含申請類型與選填學年度的 query key／query function，以及目前臺灣學年度 helper。
+- 建立 feature-local 的公開申請辦法 section 陣列 wire schema、保留 API 陣列順序的 mapper、包含申請類型與選填學年度的 query key／query function，以及目前臺灣學年度 helper。
 - 建立 MSW server lifecycle、公開申請辦法 fixture 與 handlers，供 component／integration tests 使用。
 - 建立安全 Markdown renderer、同頁唯一 heading anchors、目錄與文章連結安全行為。
 - 以正式頁面取代 `/rules` placeholder，以四個固定文案的大型按鈕完成初始未選擇狀態，並涵蓋選擇前零 request、申請類型與學年度切換、loading、empty、error、success、retry、鍵盤、輔助科技與 360px 狀態。
@@ -61,7 +61,8 @@
 
 ### Integration Points
 
-- `GET /public/application-instructions`：必須提供 `applicationType`；省略 `academicYear` 時取得該類型所有公開學年度 sections，提供時只取得指定年度；同類型、同年度的多筆 sections 由前端依 `displayOrder` 升冪排序；`HTTP 200 OK` 與 `{ "data": [] }` 映射為 empty state，不當成 `404` 或 failure。
+- `GET /public/application-instructions`：必須提供 `applicationType`；省略 `academicYear` 時取得該類型所有公開學年度 sections，提供時只取得指定年度；後端依 `displayOrder` 升冪排列，前端保留 API 陣列順序；`HTTP 200 OK` 與 `{ "data": [] }` 映射為 empty state，不當成 `404` 或 failure。
+- 公開端點由後端限制 `status = published`、`isVisible = true` 與 `effectiveFrom` 不晚於 Asia/Taipei 當日；Response 不含前兩個管理欄位，前端不重複判斷。後端目前不以 `effectiveTo` 排除內容，前端也不自行過濾 API 已回傳的 section。
 - `src/app/providers/app-providers.tsx`：頁面使用 TanStack Query 管理每個申請類型與選填學年度組合的 server state 與取消訊號。
 - `src/app/router/router.tsx`：將 `PublishedInstructionsPage` 掛載至 `/rules`。
 - `src/test/setup.ts`：測試前啟動 MSW、測試後重設 handlers、全部完成後關閉 server，且未處理 request 視為錯誤。
@@ -105,11 +106,11 @@
 - 使用 Mobile First utilities；只在 Markdown 內容行為無法合理由局部 utilities 表達時建立 feature-local CSS。
 - 公開頁最低支援 360px、鍵盤與基本螢幕閱讀器行為；主要互動目標至少 44×44px。
 - 不記錄 response body、內部錯誤、token 或其他敏感資訊。
-- `FS-002` 沒有 blueprint dependency，但資料層 batch 必須先確認公開端點的 visibility contract。
+- `FS-002` 沒有 blueprint dependency；公開端點的排序、empty、visibility 與日期契約皆已確認。
 
 ### Unknowns
 
-- 公開端點是否保證只回傳已發布且可見內容，仍待確認。
+- `none`
 
 ## Files
 
@@ -118,9 +119,9 @@
 - `src/shared/api/api-client.ts`：已使用到的 JSON GET、base URL、credentials、AbortSignal、envelope 與安全錯誤邊界。
 - `src/shared/api/api-client.test.ts`：成功、HTTP 錯誤、無效 body、AbortSignal 與不暴露內部訊息的測試。
 - `src/features/rules/api/published-instructions.schema.ts`：含 section 欄位的正式陣列 wire response Zod schema。
-- `src/features/rules/api/published-instructions.mapper.ts`：section wire data 至申請類型／年度頁面 view model 的明確轉換，並依 `displayOrder` 升冪排序同類型、同年度的 sections。
+- `src/features/rules/api/published-instructions.mapper.ts`：section wire data 至申請類型／年度頁面 view model 的明確轉換，並保留 API 陣列順序。
 - `src/features/rules/api/published-instructions.query.ts`：包含必填申請類型與選填學年度的 query key 及 abortable query function。
-- `src/features/rules/api/published-instructions.test.ts`：query parameters、section schema、亂序 response 的 `displayOrder` mapper 排序、`HTTP 200 OK` 空陣列、成功、error 與 contract failure 測試。
+- `src/features/rules/api/published-instructions.test.ts`：query parameters、section schema、API 順序保留、`HTTP 200 OK` 空陣列、已超過 `effectiveTo` 但仍回傳的內容、成功、error 與 contract failure 測試。
 - `src/features/rules/lib/academic-year.ts`：目前臺灣學年度與 API 格式 helper。
 - `src/features/rules/lib/academic-year.test.ts`：8 月 1 日分界與格式案例。
 - `src/features/rules/components/instructions-article.tsx`：安全 Markdown、heading anchors、目錄與文章連結。
@@ -129,7 +130,7 @@
 - `src/features/rules/published-instructions-page.test.tsx`：驗證標題、四個固定文案按鈕與順序，以及 MSW 初始未選擇／零 request、類型隔離、年度切換、loading、`HTTP 200 OK` 空陣列的 empty state、error、retry、success 與 stale result 防護。
 - `src/test/server.ts`：共用 MSW Node server。
 - `src/test/handlers/public-application-instructions.ts`：預設公開辦法 handler，以及 `HTTP 200 OK` 空陣列與錯誤情境的測試覆寫 helpers。
-- `src/test/fixtures/published-instructions.ts`：不含真實個資且通過正式 schema 的不同申請類型、目前／歷史年度與多 section fixtures。
+- `src/test/fixtures/published-instructions.ts`：不含真實個資且通過正式 schema 的不同申請類型、目前／歷史年度、多 section 與已超過 `effectiveTo` 但仍回傳的 fixtures。
 - `e2e/published-instructions.spec.ts`：desktop／360px、鍵盤、申請類型、年度、目錄、連結、狀態與 overflow browser test。
 
 ### Modify
@@ -144,7 +145,7 @@
 ### Tests
 
 - `src/shared/api/api-client.test.ts`：共用 GET JSON client 與安全 error normalization。
-- `src/features/rules/api/published-instructions.test.ts`：四個合法 `applicationType`、enum 外拒絕、選填 `academicYear`、section wire schema、亂序 response 的 `displayOrder` mapper 排序、`HTTP 200 OK` 空陣列、query input/output 與錯誤。
+- `src/features/rules/api/published-instructions.test.ts`：四個合法 `applicationType`、enum 外拒絕、選填 `academicYear`、section wire schema、API 順序保留、`HTTP 200 OK` 空陣列、已超過 `effectiveTo` 但仍回傳的內容、query input/output 與錯誤。
 - `src/features/rules/lib/academic-year.test.ts`：臺灣學年度 8 月 1 日分界。
 - `src/features/rules/components/instructions-article.test.tsx`：sanitization、heading IDs、TOC 與安全 links。
 - `src/features/rules/published-instructions-page.test.tsx`：標題、四個按鈕文案／順序、初始未選擇／零 request、MSW query states、`HTTP 200 OK` 空陣列的 empty state、申請類型／年度切換、retry 與 stale result。
@@ -155,7 +156,7 @@
 ## Implementation Steps
 
 1. 安裝並鎖定 Markdown、GFM、raw HTML parsing、allowlist sanitization 與 slug 所需依賴，確認既有 build 與 tests 不受影響。
-2. 在剩餘契約決策完成的前提下，建立最小共用 GET JSON client，以及 section 陣列 schema、依 `displayOrder` 升冪排序且將 `HTTP 200 OK` 空陣列保留為 empty result 的 mapper、含必填 `applicationType` 與選填 `academicYear` 的 query、目前臺灣學年度 helper、MSW server／fixture／handler 與對應測試。
+2. 建立最小共用 GET JSON client，以及 section 陣列 schema、保留後端 `displayOrder` 順序且將 `HTTP 200 OK` 空陣列保留為 empty result 的 mapper、含必填 `applicationType` 與選填 `academicYear` 的 query、目前臺灣學年度 helper、MSW server／fixture／handler 與對應測試；驗證前端不依未提供的管理欄位或 `effectiveTo` 再次過濾。
 3. 建立 feature-local instructions article renderer；先由解析後的 heading tree 產生唯一 slug 與目錄，再以 allowlist 清理內容及安全連結行為，並覆蓋惡意與重複 heading 案例。
 4. 建立 `PublishedInstructionsPage`，顯示「請選擇申請類型」及四個固定文案的大型按鈕，初始不選擇類型且停用 query；訪客選擇類型後，才以申請類型及學年度驅動 query key，組合控制項、loading、empty、error／retry 與 success sections，避免前一次查詢結果誤標。
 5. 將正式頁面接入 `/rules`，更新 Router 與既有 application-entry tests，保留 Public Layout、根 redirect 與四個申請目的 routes。
@@ -166,7 +167,7 @@
 
 | Risk / Issue | Impact | Mitigation / Decision Needed |
 |---|---|---|
-| visibility contract 尚未定義 | 無法判斷前端能否信任公開內容的發布與可見性 | 在 I2 前確認 server-side visibility guarantee |
+| 後端未使用 `effectiveTo` 排除失效內容 | 公開頁可能呈現已超過失效日期但仍由 API 回傳的內容 | 前端如實呈現並安全清理 API 結果；在 Human Integration 記錄真實後端行為，後續若契約改變再建立變更 Slice |
 | Raw HTML 與外部 URL 可能造成 XSS、reverse tabnabbing 或危險導覽 | 公開頁可執行不可信內容 | 使用明確 allowlist、protocol 限制與安全 link properties，並以惡意 fixtures 自動驗證 |
 | Markdown heading 可能重複、包含中文或特殊字元 | TOC link 不唯一或無法定位 | 使用確定性的 slugger 與重複 suffix，測試中文、重複與特殊字元 |
 | 申請類型或年度切換產生並行 request | 舊內容可能誤顯示為新選擇 | Query key 包含正規化申請類型與選填年度、傳遞 AbortSignal，且 renderer 只接受目前 query 對應 view model |
@@ -176,7 +177,7 @@
 
 - [ ] 安裝並鎖定安全 Markdown rendering 依賴。
 - [ ] 建立最小共用 GET JSON API client 與安全錯誤處理。
-- [ ] 建立正式 section 陣列 schema、依 `displayOrder` 升冪排序的 mapper、申請類型／學年度 query 與臺灣學年度 helper。
+- [ ] 建立正式 section 陣列 schema、保留 API 順序的 mapper、申請類型／學年度 query 與臺灣學年度 helper，不依 `effectiveTo` 排除已回傳內容。
 - [ ] 建立嚴格 MSW lifecycle、fixtures 與 handlers。
 - [ ] 建立安全 Markdown article、唯一 heading anchors、目錄與安全連結。
 - [ ] 建立 `/rules` 申請類型／年度選擇與 loading、empty、error、success、retry 狀態。
@@ -199,8 +200,9 @@
 
 ## Human Integration
 
-- [ ] 提供可由真實公開端點依申請類型取得的目前學年度、至少一個歷史學年度、一個多 section 年度及一個無公開內容學年度測試資料。
-- [ ] 確認真實後端對未發布／隱藏內容不會由公開端點回傳，並提供可重試失敗情境的驗證方式。
+- [ ] 提供可由真實公開端點依申請類型取得的目前學年度、至少一個歷史學年度、一個多 section 年度、一個無公開內容學年度，以及一筆已超過 `effectiveTo` 但仍會回傳的測試資料。
+- [ ] 確認真實後端依 `displayOrder` 升冪排列，並只回傳 `status = published`、`isVisible = true` 且 `effectiveFrom` 不晚於 Asia/Taipei 當日的內容；同時確認目前不使用 `effectiveTo` 排除內容。
+- [ ] 提供可重試失敗情境的驗證方式。
 
 只有使用者明確確認後才能勾選。
 
@@ -209,6 +211,7 @@
 - [ ] 在桌面寬度閱讀含多層標題的長篇辦法，確認目錄結構、所有章節連結與文章連結正確。
 - [ ] 在 360px 寬度切換申請類型、目前與歷史學年度，確認控制項、目錄與文章易於閱讀和操作。
 - [ ] 驗證沒有公開內容的學年度及可重試 API 失敗狀態。
+- [ ] 確認 API 已回傳且超過 `effectiveTo` 的 section 仍依後端順序顯示，且 Markdown 經安全清理。
 - [ ] 使用鍵盤操作申請類型控制項、學年度選擇器、目錄連結與重試按鈕。
 - [ ] 確認測試用惡意內容不會執行或產生危險導覽。
 
@@ -217,8 +220,9 @@
 ## Documentation Updates
 
 - [x] 已依核准提案更新 `docs/project/api-integration.md` 的公開申請辦法 query 與 section 陣列契約。
-- [x] 已依核准提案更新 `docs/project/api-integration.md` 的多 section 與前端 `displayOrder` 升冪排序責任。
+- [x] 已依後續核准提案將多 section 排序責任改為後端 `displayOrder` 升冪排列，前端保留 API 順序。
 - [x] 已依核准提案更新 `docs/project/api-integration.md` 的 `HTTP 200 OK` 空陣列 empty response 契約。
+- [x] 已依核准提案更新 `docs/project/api-integration.md` 的公開內容篩選與 `effectiveTo` 已知限制。
 - [x] 已依核准提案更新 `docs/project/routes-and-pages.md` 的先選申請類型與選擇前零 request 行為。
 - [x] 已依核准提案更新 `docs/project/routes-and-pages.md` 的申請類型標題、四個大型按鈕與固定文案。
 - [ ] 確認需求文件、Slice Brief、Spec 與 Plan 一致。

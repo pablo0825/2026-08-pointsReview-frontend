@@ -30,10 +30,10 @@
 - 完成公開頁面、API 整合、內容清理、可及性、測試與文件。
 
 ## Human Integration
-- 依申請類型提供含目前、歷史學年度與多 section 的已發布測試內容。
+- 依申請類型提供含目前、歷史學年度、多 section 及已超過 `effectiveTo` 但仍由公開 API 回傳的測試內容。
 
 ## AI Acceptance
-- 自動驗證只呈現所選申請類型與學年度的可見內容、多個 sections 依 `displayOrder` 由小到大排列、`HTTP 200 OK` 空陣列呈現無內容狀態、危險 HTML 被移除、年度與頁面狀態正確。
+- 自動驗證只呈現公開 API 對所選申請類型與學年度回傳的內容、保留後端 `displayOrder` 排序、`HTTP 200 OK` 空陣列呈現無內容狀態、API 已回傳且超過 `effectiveTo` 的內容不被前端排除、危險 HTML 被移除，且年度與頁面狀態正確。
 
 ## Human Acceptance
 - 使用者實際閱讀長篇內容並確認桌面與 360px 導覽、目錄及連結體驗。
