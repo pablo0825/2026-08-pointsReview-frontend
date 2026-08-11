@@ -138,20 +138,20 @@
 
 - [x] 建立最小 npm／Vite／React／TypeScript／Tailwind CSS 專案與 scripts（I1，commit `bba2849`）。
 - [x] 建立 Router、Query Provider、Error Boundary、Public Layout、Tailwind 入口與全域基礎樣式（I1，commit `bba2849`）。
-- [ ] 建立共用公開導覽。
-- [ ] 建立標題與四個大型申請類型連結。
-- [ ] 建立元件／整合與 Playwright tests。
+- [x] 建立共用公開導覽。
+- [x] 建立標題與四個大型申請類型連結。
+- [x] 建立元件／整合與 Playwright tests。
 
 ## AI Verification
 
-- [ ] 執行 `npm run build`
-- [ ] 執行 `npm run test`
-- [ ] 執行 `npm run lint`
-- [ ] 執行 `npm run typecheck`
-- [ ] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts --project=chromium`
-- [ ] 以 Playwright 驗證 desktop 與 360px、鍵盤、44 × 44px targets 及無水平溢位
-- [ ] 驗證 Target Behavior
-- [ ] 回歸驗證 I1 的 redirect、route placeholder、Provider 與 Error Boundary 行為
+- [x] 執行 `npm run build`
+- [x] 執行 `npm run test`
+- [x] 執行 `npm run lint`
+- [x] 執行 `npm run typecheck`
+- [x] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts --project=chromium`
+- [x] 以 Playwright 驗證 desktop 與 360px、鍵盤、44 × 44px targets 及無水平溢位
+- [x] 驗證 Target Behavior
+- [x] 回歸驗證 I1 的 redirect、route placeholder、Provider 與 Error Boundary 行為
 
 ## Human Integration
 
@@ -169,14 +169,14 @@
 
 ## Documentation Updates
 
-- [ ] 確認已核准的 `docs/project/frontend-architecture.md` 與 `docs/project/development-standards.md` Tailwind CSS 標準已反映於實作與驗證。
-- [ ] 確認需求文件、Slice Brief、Spec 與 Plan 一致。
-- [ ] 更新 Slice Brief 或 blueprint 文件連結。
+- [x] 確認已核准的 `docs/project/frontend-architecture.md` 與 `docs/project/development-standards.md` Tailwind CSS 標準已反映於實作與驗證。
+- [x] 確認需求文件、Slice Brief、Spec 與 Plan 一致。
+- [x] 更新 Slice Brief 或 blueprint 文件連結。
 - [ ] 更新 Spec 狀態。
 - [ ] 更新 Plan 狀態。
-- [ ] 更新 verification record。
-- [ ] 更新 blueprint Status、Status Note 與 Last Updated。
-- [ ] `not-applicable`：本 Slice 不是 `change`，不需 supersession lineage。
+- [x] 更新 verification record。
+- [x] 更新 blueprint Status、Status Note 與 Last Updated。
+- [x] `not-applicable`：本 Slice 不是 `change`，不需 supersession lineage。
 
 ## Commit Plan
 

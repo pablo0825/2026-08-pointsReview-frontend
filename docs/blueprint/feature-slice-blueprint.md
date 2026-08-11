@@ -40,7 +40,7 @@
 |---|---|---|---|---|---|---|---|---|
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-002 | `published-instructions` | feature | none | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
-| FS-003 | `application-entry` | feature | none | none | none | in-progress | I1 已完成並保留；I2 已獲明確授權，正在實作共用公開導覽、申請入口與直接相關測試。 | 2026-08-11 |
+| FS-003 | `application-entry` | feature | none | none | none | awaiting-human | 完整 AI Verification 已通過，Human Integration 為 `not-applicable`；等待使用者執行 Human Acceptance。 | 2026-08-11 |
 | FS-004 | `competition-application` | feature | FS-003 | none | none | proposed | 已補充共用申請表架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
 | FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立；證照正規化契約待確認。 | 2026-08-10 |
@@ -64,7 +64,7 @@
 |---|---|---|---|---|
 | FS-001 | `docs/blueprint/slices/FS-001-staff-authentication.md` | pending | pending | pending |
 | FS-002 | `docs/blueprint/slices/FS-002-published-instructions.md` | pending | pending | pending |
-| FS-003 | `docs/blueprint/slices/FS-003-application-entry.md` | `docs/specs/FS-003/FS-003-application-entry-spec.md` | `docs/plans/FS-003/FS-003-application-entry-plan.md` | pending |
+| FS-003 | `docs/blueprint/slices/FS-003-application-entry.md` | `docs/specs/FS-003/FS-003-application-entry-spec.md` | `docs/plans/FS-003/FS-003-application-entry-plan.md` | `docs/verification/FS-003/FS-003-application-entry-verification.md` |
 | FS-004 | `docs/blueprint/slices/FS-004-competition-application.md` | pending | pending | pending |
 | FS-005 | `docs/blueprint/slices/FS-005-project-participation-application.md` | pending | pending | pending |
 | FS-006 | `docs/blueprint/slices/FS-006-certificate-application.md` | pending | pending | pending |
