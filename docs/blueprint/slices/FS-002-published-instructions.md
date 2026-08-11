@@ -13,7 +13,7 @@
 讓公開訪客依申請類型與學年度閱讀後端已發布且可見的申請辦法。
 
 ## User-Visible Result
-訪客可在 `/rules` 選擇申請類型、切換學年度，閱讀由一個或多個 section 組成且具目錄與錨點的安全 Markdown，並看見空白、歷史年度與失敗狀態。
+訪客可在 `/rules` 以四個大型按鈕選擇申請類型、切換學年度，閱讀由一個或多個 section 組成且具目錄與錨點的安全 Markdown，並看見空白、歷史年度與失敗狀態。
 
 ## Source Reference
 - `docs/project/product-requirements.md`, sections 4.1, 10
@@ -21,7 +21,7 @@
 - `docs/project/api-integration.md`, sections 5, 11
 
 ## Included
-- 申請類型與學年度選擇、安全 Markdown sections、目錄、頁內錨點、載入／空白／錯誤與響應式狀態。
+- 固定文案的四個申請類型大型按鈕、學年度選擇、安全 Markdown sections、目錄、頁內錨點、載入／空白／錯誤與響應式狀態。
 
 ## Excluded
 - 申請辦法的管理、草稿、發布與顯示設定。
