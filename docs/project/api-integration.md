@@ -101,6 +101,69 @@
 - 篩選、排序及分頁都放入 Query Key 與 URL Search Params。
 - Response 使用 `exhibitionPoints`，不使用 `externalExhibitionPoints`。
 
+### 5.2 公開申請辦法
+
+`GET /public/application-instructions` 使用下列 Query Parameters：
+
+| Parameter | Required | Format | Behavior |
+| --- | --- | --- | --- |
+| `applicationType` | 是 | 申請類型字串；已確認值包含 `competition`，完整 enum 待確認 | 限制回傳指定申請類型的公開辦法 |
+| `academicYear` | 否 | 民國學年度字串，例如 `"114"` | 提供時只回傳指定學年度；省略時回傳該申請類型的所有可見學年度 |
+
+例如：
+
+```http
+GET /public/application-instructions?applicationType=competition&academicYear=114
+```
+
+省略 `academicYear`：
+
+```http
+GET /public/application-instructions?applicationType=competition
+```
+
+成功 Response 使用陣列：
+
+```json
+{
+  "data": [
+    {
+      "academicYear": "115",
+      "revisionNumber": 1,
+      "sectionKey": "competition_rules",
+      "title": "競賽成果申請辦法",
+      "content": "辦法內容……",
+      "displayOrder": 1,
+      "effectiveFrom": "2026-08-01",
+      "effectiveTo": null
+    },
+    {
+      "academicYear": "114",
+      "revisionNumber": 2,
+      "sectionKey": "competition_rules",
+      "title": "競賽成果申請辦法",
+      "content": "辦法內容……",
+      "displayOrder": 1,
+      "effectiveFrom": "2025-08-01",
+      "effectiveTo": "2026-07-31"
+    }
+  ]
+}
+```
+
+每筆資料包含：
+
+- `academicYear`：民國學年度字串。
+- `revisionNumber`：修訂版號數字。
+- `sectionKey`：section 的穩定識別字串。
+- `title`：section 標題。
+- `content`：Markdown 內容。
+- `displayOrder`：顯示順序數字。
+- `effectiveFrom`：`YYYY-MM-DD` 生效日期字串。
+- `effectiveTo`：`YYYY-MM-DD` 失效日期字串或 `null`。
+
+省略 `academicYear` 時，Response 可用來取得該 `applicationType` 的所有公開學年度及其 sections；提供 `academicYear` 時，`data` 只包含該學年度的 sections。前端仍須以 Zod 驗證每筆資料，並在呈現前清理 Markdown。
+
 ## 6. 正式申請 multipart
 
 `payload` 為 JSON 字串，檔案欄位使用 `attachments[{clientFileKey}]`。每個 metadata 必須剛好對應一個檔案。
