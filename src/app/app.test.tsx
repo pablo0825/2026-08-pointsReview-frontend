@@ -10,7 +10,7 @@ describe('App', () => {
 
     expect(await screen.findByText('點數審核系統')).toBeInTheDocument()
     expect(
-      screen.getByRole('heading', { name: '申請入口準備中' }),
+      screen.getByRole('heading', { name: '請選擇申請類型' }),
     ).toBeInTheDocument()
   })
 })

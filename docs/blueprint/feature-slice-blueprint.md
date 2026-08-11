@@ -40,7 +40,7 @@
 |---|---|---|---|---|---|---|---|---|
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-002 | `published-instructions` | feature | none | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
-| FS-003 | `application-entry` | feature | none | none | none | approved | 修訂後的 Spec、Plan 與 Commit Plan 已重新核准；I1 已完成並保留，等待明確要求開始 I2。 | 2026-08-11 |
+| FS-003 | `application-entry` | feature | none | none | none | in-progress | I1 已完成並保留；I2 已獲明確授權，正在實作共用公開導覽、申請入口與直接相關測試。 | 2026-08-11 |
 | FS-004 | `competition-application` | feature | FS-003 | none | none | proposed | 已補充共用申請表架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
 | FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立；證照正規化契約待確認。 | 2026-08-10 |
