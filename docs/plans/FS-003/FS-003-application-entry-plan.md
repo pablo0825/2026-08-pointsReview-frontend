@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-003`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Based On Spec: `docs/specs/FS-003/FS-003-application-entry-spec.md`
 - Spec Last Updated: `2026-08-11`
 - Created: `2026-08-10`
@@ -182,9 +182,9 @@
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-003): draft application entry specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `pending`
-- Approved By: `pending`
-- Approved At: `pending`
+- Commit Plan Approval: `approved`
+- Approved By: `使用者`
+- Approved At: `2026-08-11`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
 |---|---|---|---|---|
@@ -198,9 +198,9 @@ Commit Plan Approval 使用 `pending`、`approved`。每個 batch 只涵蓋一�
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `需求實質修訂後撤銷原核准，等待使用者重新審查 Spec、Plan 與 Commit Plan。`
+- Approved By: `使用者`
+- Approved At: `2026-08-11`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；I1 已完成，I2 等待下一次明確開始要求。`
 
 ## Template Rules
 
