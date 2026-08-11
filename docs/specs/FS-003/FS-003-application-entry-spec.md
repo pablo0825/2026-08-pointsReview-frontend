@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-003`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `completed`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-10`
 - Last Updated: `2026-08-11`
@@ -108,9 +108,9 @@
 
 ## Human Acceptance
 
-- [ ] 使用者在桌面與 360px 手機 viewport 確認共用導覽與四個申請入口清楚、排列可讀且操作容易辨識。
-- [ ] 使用者逐一確認四個申請入口前往正確路由。
-- [ ] 使用者確認共用導覽的「開始申請」與「申請辦法」前往正確路由。
+- [x] 使用者在桌面與 360px 手機 viewport 確認共用導覽與四個申請入口清楚、排列可讀且操作容易辨識。
+- [x] 使用者逐一確認四個申請入口前往正確路由。
+- [x] 使用者確認共用導覽的「開始申請」與「申請辦法」前往正確路由。
 
 ## Open Questions
 

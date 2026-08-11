@@ -6,7 +6,7 @@
 - Document Status: `active`
 - Requirements Root: `docs/project/`
 - Last Reconciled: `2026-08-11`
-- Active Feature Slice: `FS-003`
+- Active Feature Slice: `none`
 
 ## Purpose
 
@@ -40,7 +40,7 @@
 |---|---|---|---|---|---|---|---|---|
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-002 | `published-instructions` | feature | none | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
-| FS-003 | `application-entry` | feature | none | none | none | awaiting-human | 完整 AI Verification 已通過，Human Integration 為 `not-applicable`；等待使用者執行 Human Acceptance。 | 2026-08-11 |
+| FS-003 | `application-entry` | feature | none | none | none | accepted | 完整 AI Verification 已通過，Human Integration 為 `not-applicable`，使用者已確認 Human Acceptance 通過。 | 2026-08-11 |
 | FS-004 | `competition-application` | feature | FS-003 | none | none | proposed | 已補充共用申請表架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
 | FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立；證照正規化契約待確認。 | 2026-08-10 |

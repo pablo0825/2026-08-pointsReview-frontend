@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-003`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `completed`
 - Based On Spec: `docs/specs/FS-003/FS-003-application-entry-spec.md`
 - Spec Last Updated: `2026-08-11`
 - Created: `2026-08-10`
@@ -161,9 +161,9 @@
 
 ## Human Acceptance
 
-- [ ] 在桌面與 360px viewport 確認共用導覽與四個申請入口清楚且版面可用。
-- [ ] 逐一確認四個申請入口前往正確路由。
-- [ ] 確認共用導覽的「開始申請」與「申請辦法」前往正確路由。
+- [x] 在桌面與 360px viewport 確認共用導覽與四個申請入口清楚且版面可用。
+- [x] 逐一確認四個申請入口前往正確路由。
+- [x] 確認共用導覽的「開始申請」與「申請辦法」前往正確路由。
 
 只有使用者明確確認後才能勾選。
 
@@ -172,8 +172,8 @@
 - [x] 確認已核准的 `docs/project/frontend-architecture.md` 與 `docs/project/development-standards.md` Tailwind CSS 標準已反映於實作與驗證。
 - [x] 確認需求文件、Slice Brief、Spec 與 Plan 一致。
 - [x] 更新 Slice Brief 或 blueprint 文件連結。
-- [ ] 更新 Spec 狀態。
-- [ ] 更新 Plan 狀態。
+- [x] 更新 Spec 狀態。
+- [x] 更新 Plan 狀態。
 - [x] 更新 verification record。
 - [x] 更新 blueprint Status、Status Note 與 Last Updated。
 - [x] `not-applicable`：本 Slice 不是 `change`，不需 supersession lineage。
