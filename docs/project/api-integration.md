@@ -107,7 +107,7 @@
 
 | Parameter | Required | Format | Behavior |
 | --- | --- | --- | --- |
-| `applicationType` | 是 | 申請類型字串；已確認值包含 `competition`，完整 enum 待確認 | 限制回傳指定申請類型的公開辦法 |
+| `applicationType` | 是 | `competition`、`project_participation`、`certificate`、`exhibition` | 限制回傳指定申請類型的公開辦法 |
 | `academicYear` | 否 | 民國學年度字串，例如 `"114"` | 提供時只回傳指定學年度；省略時回傳該申請類型的所有可見學年度 |
 
 例如：

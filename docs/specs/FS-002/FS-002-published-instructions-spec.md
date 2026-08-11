@@ -103,6 +103,7 @@
 ## Preliminary Integration Contract
 
 - 公開頁使用 `GET /public/application-instructions`，必須提供 `applicationType`，可選擇是否提供 `academicYear`。
+- `applicationType` 只接受 `competition`、`project_participation`、`certificate` 或 `exhibition`。
 - `GET /public/application-instructions?applicationType=competition` 回傳 `competition` 的所有公開學年度 sections；加上 `academicYear=114` 時，`data` 只包含 114 學年度的 sections。
 - 成功回應遵循 `{ "data": [...] }` envelope。每筆資料包含 `academicYear`、`revisionNumber`、`sectionKey`、`title`、`content`、`displayOrder`、`effectiveFrom` 與可為 `null` 的 `effectiveTo`。
 - `academicYear`、`sectionKey`、`title` 與 `content` 是字串；`revisionNumber` 與 `displayOrder` 是數字；`effectiveFrom` 與非空的 `effectiveTo` 使用 `YYYY-MM-DD`。
@@ -116,6 +117,7 @@
 
 - [ ] 自動驗證未登入狀態可開啟 `/rules`，且不會被重新導向登入頁。
 - [ ] 自動驗證 request 必須包含所選 `applicationType`，省略 `academicYear` 時可取得該類型所有公開學年度。
+- [ ] 自動驗證四個合法 `applicationType` 均可查詢，且不會送出 enum 以外的值。
 - [ ] 自動驗證選定申請類型後使用目前臺灣學年度，切換申請類型或學年度會查詢並顯示相對應內容。
 - [ ] 自動驗證只顯示公開端點提供的內容；空內容不會顯示成成功文章。
 - [ ] 自動驗證 section 陣列的所有欄位通過契約驗證，並呈現所選學年度的一個或多個 sections。
@@ -136,7 +138,6 @@
 
 ## Open Questions
 
-- `applicationType` 除 `competition` 外的完整 enum 值尚未確認。
 - `/rules` 初次進入時應預選哪個申請類型，或要求訪客先選擇，尚未確認；類型控制項的呈現方式也待決定。
 - 同一學年度存在多個 sections 時，是否由後端保證 `displayOrder` 順序，以及前端是否需自行排序，尚未確認。
 - 沒有內容、未發布與隱藏內容是以 `200` 加上空陣列或其他 HTTP 結果表示，以及公開端點是否保證只回傳已發布且可見內容，仍待確認。

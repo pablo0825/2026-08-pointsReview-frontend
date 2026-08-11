@@ -99,15 +99,15 @@
 - 使用 React、TypeScript、React Router、TanStack Query、Zod、Tailwind CSS、Vitest、Testing Library、MSW 與 Playwright。
 - API base URL 必須由 Vite environment 設定取得；所有 request 使用 `credentials: "include"` 並支援 `AbortSignal`。
 - Wire model 與 page view model 分離；不使用 TypeScript assertion 略過未知 response 的 runtime validation。
+- `applicationType` wire schema 固定為 `competition`、`project_participation`、`certificate` 與 `exhibition`。
 - Markdown 必須經 HTML allowlist sanitizer，禁止 script、event handlers 與危險 URL；heading IDs 必須穩定且同頁唯一。
 - 使用 Mobile First utilities；只在 Markdown 內容行為無法合理由局部 utilities 表達時建立 feature-local CSS。
 - 公開頁最低支援 360px、鍵盤與基本螢幕閱讀器行為；主要互動目標至少 44×44px。
 - 不記錄 response body、內部錯誤、token 或其他敏感資訊。
-- `FS-002` 沒有 blueprint dependency，但資料層與頁面 batch 必須先完成剩餘的 API enum、頁面類型選擇、section 排序及 empty／visibility contract 決策。
+- `FS-002` 沒有 blueprint dependency，但資料層與頁面 batch 必須先完成頁面類型選擇、section 排序及 empty／visibility contract 決策。
 
 ### Unknowns
 
-- `applicationType` 除 `competition` 外的完整 enum 值尚未確認。
 - `/rules` 初次進入時的預設申請類型、是否要求先選擇，以及類型控制項形式尚未確認。
 - 同一學年度有多個 sections 時，後端是否保證 `displayOrder` 順序，或前端是否必須自行排序，尚未確認。
 - empty／hidden／unpublished 的 HTTP 或資料表示方式，以及公開端點是否保證只回傳已發布且可見內容，仍待確認。
@@ -145,7 +145,7 @@
 ### Tests
 
 - `src/shared/api/api-client.test.ts`：共用 GET JSON client 與安全 error normalization。
-- `src/features/rules/api/published-instructions.test.ts`：必填 `applicationType`、選填 `academicYear`、section wire schema、mapper、query input/output 與錯誤。
+- `src/features/rules/api/published-instructions.test.ts`：四個合法 `applicationType`、enum 外拒絕、選填 `academicYear`、section wire schema、mapper、query input/output 與錯誤。
 - `src/features/rules/lib/academic-year.test.ts`：臺灣學年度 8 月 1 日分界。
 - `src/features/rules/components/instructions-article.test.tsx`：sanitization、heading IDs、TOC 與安全 links。
 - `src/features/rules/published-instructions-page.test.tsx`：MSW query states、申請類型／年度切換、retry 與 stale result。
@@ -167,7 +167,7 @@
 
 | Risk / Issue | Impact | Mitigation / Decision Needed |
 |---|---|---|
-| `applicationType` 完整 enum 與頁面類型選擇尚未定義 | 無法完成所有類型的 schema 約束、初始 request 與可驗收 UI | 在 I2 前逐一確認完整 enum、初始選擇與控制項行為；若需求文件需變更，先提出並核准文件修訂 |
+| 頁面類型選擇尚未定義 | 無法確認初始 request 與可驗收 UI | 在 I2 前確認初始選擇與控制項行為；若需求文件需變更，先提出並核准文件修訂 |
 | 多 section 排序與 empty／visibility contract 尚未定義 | 可能以錯誤順序呈現或無法一致區分 empty 與 failure | 在 I2 前確認 `displayOrder` 責任、空陣列／HTTP 行為及 server-side visibility guarantee |
 | Raw HTML 與外部 URL 可能造成 XSS、reverse tabnabbing 或危險導覽 | 公開頁可執行不可信內容 | 使用明確 allowlist、protocol 限制與安全 link properties，並以惡意 fixtures 自動驗證 |
 | Markdown heading 可能重複、包含中文或特殊字元 | TOC link 不唯一或無法定位 | 使用確定性的 slugger 與重複 suffix，測試中文、重複與特殊字元 |
