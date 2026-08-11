@@ -175,28 +175,28 @@
 
 ## AI Implementation Tasks
 
-- [ ] 安裝並鎖定安全 Markdown rendering 依賴。
-- [ ] 建立最小共用 GET JSON API client 與安全錯誤處理。
-- [ ] 建立正式 section 陣列 schema、保留 API 順序的 mapper、申請類型／學年度 query 與臺灣學年度 helper，不依 `effectiveTo` 排除已回傳內容。
-- [ ] 建立嚴格 MSW lifecycle、fixtures 與 handlers。
-- [ ] 建立安全 Markdown article、唯一 heading anchors、目錄與安全連結。
-- [ ] 建立 `/rules` 申請類型／年度選擇與 loading、empty、error、success、retry 狀態。
-- [ ] 建立「請選擇申請類型」與四個固定文案的大型按鈕，不新增額外 UI library。
-- [ ] 確保初始不預選申請類型，且訪客選擇前不發送公開辦法 request。
-- [ ] 建立單元、元件／整合與 Chromium browser tests。
-- [ ] 更新既有 Router 與 application-entry regression tests。
-- [ ] 完成 verification record 與 blueprint 文件更新。
+- [x] 安裝並鎖定安全 Markdown rendering 依賴。
+- [x] 建立最小共用 GET JSON API client 與安全錯誤處理。
+- [x] 建立正式 section 陣列 schema、保留 API 順序的 mapper、申請類型／學年度 query 與臺灣學年度 helper，不依 `effectiveTo` 排除已回傳內容。
+- [x] 建立嚴格 MSW lifecycle、fixtures 與 handlers。
+- [x] 建立安全 Markdown article、唯一 heading anchors、目錄與安全連結。
+- [x] 建立 `/rules` 申請類型／年度選擇與 loading、empty、error、success、retry 狀態。
+- [x] 建立「請選擇申請類型」與四個固定文案的大型按鈕，不新增額外 UI library。
+- [x] 確保初始不預選申請類型，且訪客選擇前不發送公開辦法 request。
+- [x] 建立單元、元件／整合與 Chromium browser tests。
+- [x] 更新既有 Router 與 application-entry regression tests。
+- [x] 完成 verification record 與 blueprint 文件更新。
 
 ## AI Verification
 
-- [ ] 執行 `npm run build`
-- [ ] 執行 `npm run test`
-- [ ] 執行 `npm run lint`
-- [ ] 執行 `npm run typecheck`
-- [ ] 執行 `npm run test:e2e -- e2e/published-instructions.spec.ts e2e/application-entry.spec.ts --project=chromium`
-- [ ] 以 Playwright 驗證 desktop 與 360px、鍵盤、44×44px targets、TOC、連結及無水平溢位
-- [ ] 驗證 Target Behavior
-- [ ] 回歸驗證 `/` redirect、`/apply`、Public Layout 導覽與四個申請目的 route placeholders
+- [x] 執行 `npm run build`
+- [x] 執行 `npm run test`
+- [x] 執行 `npm run lint`
+- [x] 執行 `npm run typecheck`
+- [x] 執行 `npm run test:e2e -- e2e/published-instructions.spec.ts e2e/application-entry.spec.ts --project=chromium`
+- [x] 以 Playwright 驗證 desktop 與 360px、鍵盤、44×44px targets、TOC、連結及無水平溢位
+- [x] 驗證 Target Behavior
+- [x] 回歸驗證 `/` redirect、`/apply`、Public Layout 導覽與四個申請目的 route placeholders
 
 ## Human Integration
 
@@ -226,12 +226,12 @@
 - [x] 已依核准提案更新 `docs/project/routes-and-pages.md` 的先選申請類型與選擇前零 request 行為。
 - [x] 已依核准提案更新 `docs/project/routes-and-pages.md` 的申請類型標題、四個大型按鈕與固定文案。
 - [x] 確認需求文件、Slice Brief、Spec 與 Plan 一致。
-- [ ] 更新 Slice Brief 或 blueprint 文件連結。
+- [x] 更新 Slice Brief 或 blueprint 文件連結。
 - [x] 更新 Spec 狀態。
 - [x] 更新 Plan 狀態。
-- [ ] 更新 verification record。
+- [x] 更新 verification record。
 - [x] 更新 blueprint Status、Status Note 與 Last Updated。
-- [ ] `not-applicable`；本 Slice 不是 `change`，不需 supersession lineage。
+- [x] `not-applicable`；本 Slice 不是 `change`，不需 supersession lineage。
 
 ## Commit Plan
 
