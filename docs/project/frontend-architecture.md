@@ -1,7 +1,7 @@
 # 點數審核系統－前端架構設計
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-09
+- 最後更新：2026-08-11
 - 相關文件：[路由與頁面](routes-and-pages.md)、[API 整合](api-integration.md)、[測試策略](testing-strategy.md)
 
 ## 1. 架構目標
@@ -131,7 +131,17 @@ Authentication Context 不複製使用者資料成另一份永久狀態，只包
 - 公開頁不依賴前端遮罩；只顯示後端已遮罩欄位。
 - 登出及角色變更清除受保護 Query Cache。
 
-## 12. 無障礙與響應式
+## 12. 樣式架構
+
+- Tailwind CSS 是專案預設且標準的樣式方案；頁面與元件原則上在 JSX／TSX 使用 utility classes。
+- 響應式樣式採 Mobile First，先定義窄螢幕基準，再使用 breakpoint utilities 擴充較寬版面。
+- `src/app/styles/global.css` 是 Tailwind 入口，只保存 Tailwind 載入設定、專案共用 theme／design tokens、瀏覽器層級基礎樣式，以及無法由元件局部管理的必要全域行為。
+- 不以 CSS Modules 作為預設方案。只有複雜互動、第三方元件整合、瀏覽器特殊行為，或 utilities 明顯不適合表達時，才使用 feature-local 自訂 CSS。
+- 可重用的視覺模式以具語意的 React 元件封裝；只有實際被多個 Feature 使用後才提升至 `shared/ui`。
+- 導入 Tailwind 不代表建立完整 Design System，也不得自行新增未經需求確認的品牌、色彩或視覺規格。
+- 專案文件不固定 Tailwind 套件版本；實作時選擇彼此相容的版本，並由 `package-lock.json` 鎖定實際安裝結果。
+
+## 13. 無障礙與響應式
 
 - 使用語意 HTML、可見 Label 與原生控制項優先。
 - Dialog 使用符合 WAI-ARIA 行為的元件實作焦點鎖定與返回。
@@ -139,14 +149,14 @@ Authentication Context 不複製使用者資料成另一份永久狀態，只包
 - 表格在手機改為卡片時保留欄位標籤及閱讀順序。
 - 主要操作不只靠 Hover，支援鍵盤、觸控與 200% 放大。
 
-## 13. 錯誤邊界
+## 14. 錯誤邊界
 
 - Route Error Boundary 處理頁面載入失敗。
 - Feature 內 Query Error State 提供重試。
 - Mutation Error 留在操作上下文，保留使用者輸入。
 - API Contract Parse Error 視為系統整合錯誤，對使用者顯示一般訊息，開發環境記錄不含敏感資料的摘要。
 
-## 14. 未來演進
+## 15. 未來演進
 
 - 後端提供 OpenAPI 後評估產生 Wire Type 與 Client。
 - 第二版草稿功能必須使用受控 Token 或登入後端儲存，不直接持久化個資。

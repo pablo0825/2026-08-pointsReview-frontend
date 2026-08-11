@@ -1,7 +1,7 @@
 # 點數審核系統－開發與品質基準
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-10
+- 最後更新：2026-08-11
 - 相關文件：[前端架構](frontend-architecture.md)、[測試策略](testing-strategy.md)
 - 整理來源：[初版前端實作計畫（封存）](../archive/initial-implementation-plan.md)
 
@@ -23,7 +23,16 @@
 - 前端不得將 Session Token、簽名、附件或學生個資寫入未經允許的儲存空間或 Log。
 - 測試層級與工具分工遵循[測試策略](testing-strategy.md)。
 
-## 3. Definition of Done
+## 3. Tailwind CSS 使用規範
+
+- 優先使用既有 theme token 與標準 utility；可由既有尺度表達時，不使用 arbitrary values。
+- 重複出現的專案設計值應提升為 theme token，不在不同元件重複硬編碼。
+- 不因 class 組合相似就過早建立抽象；只有具共同語意與行為的 UI 才封裝為共用元件。
+- 自訂 CSS 必須保留在負責該行為的 Feature 或元件附近，不累積成大型全域樣式表。
+- Tailwind utilities 不取代語意 HTML、可見焦點、色彩對比、鍵盤操作、觸控尺寸與 360px 響應式要求。
+- 自動化測試以行為、可存取名稱及實際版面結果為主，不直接綁定完整 utility class 字串。
+
+## 4. Definition of Done
 
 每個功能必須同時符合以下條件，才可標記為完成：
 
@@ -36,7 +45,7 @@
 - 契約或行為改變時，相關專案文件、Spec 及後端同步清單已更新。
 - Spec 中的驗收條件已逐項確認。
 
-## 4. Commit 策略
+## 5. Commit 策略
 
 - 使用 Conventional Commits。
 - 每個 Commit 保持單一、可說明且可審查的目的。

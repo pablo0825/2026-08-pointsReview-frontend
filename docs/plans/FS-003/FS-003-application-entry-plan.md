@@ -8,7 +8,7 @@
 - Based On Spec: `docs/specs/FS-003/FS-003-application-entry-spec.md`
 - Spec Last Updated: `2026-08-10`
 - Created: `2026-08-10`
-- Last Updated: `2026-08-10`
+- Last Updated: `2026-08-11`
 
 ## Goal
 
@@ -26,6 +26,7 @@
 ### Included
 
 - 使用 npm 建立 React、TypeScript、Vite 專案與必要 scripts。
+- 安裝並設定 Tailwind CSS，作為專案標準樣式方案。
 - 建立 ESLint、Vitest、Testing Library、MSW 與 Playwright 的最小設定。
 - 建立根 Provider、React Router、Route Error Boundary、公開頁 Layout 與全域基礎樣式。
 - 建立 `/` 至 `/apply` 的導向與 `/apply` 入口頁。
@@ -55,13 +56,14 @@
 ### Integration Points
 
 - `docs/project/frontend-architecture.md`：定義 feature-oriented 目錄、Provider 順序、Query ownership 與安全限制。
+- `docs/project/development-standards.md`：定義 Tailwind CSS 使用規範、共通品質要求與 Definition of Done。
 - `docs/project/routes-and-pages.md`：定義 `/`、`/apply`、四個申請路由與 `/rules` 邊界。
 - `docs/project/application-rules.md`：定義四類名稱、基準人數與最低附件要求。
 - 待確認的公開參與人數規則契約：提供四類「目前允許人數」及 loading／empty／failure 行為所需資料。
 
 ### Gaps Against Spec
 
-- 缺少完整可執行的前端專案與所有必要依賴／scripts。
+- 缺少完整可執行的前端專案、Tailwind CSS 與所有必要依賴／scripts。
 - 缺少 Router、Provider、公開頁 Layout、Error Boundary 與基礎樣式。
 - 缺少 `/apply` 頁面、卡片、規則資料整合與所有 Spec Acceptance。
 - 缺少自動化測試、MSW、Playwright 與瀏覽器驗證能力。
@@ -83,6 +85,8 @@
 ### Constraints
 
 - 使用 React、TypeScript、Vite、React Router 與 TanStack Query；API response 以 Zod 驗證。
+- 使用 Tailwind CSS 作為標準樣式方案；採 Mobile First utilities，並將全域 CSS 限制在 Tailwind 入口、theme／design tokens、瀏覽器基礎樣式與必要全域行為。
+- 不以 CSS Modules 作為預設方案；只有專案架構允許的例外情境才建立 feature-local 自訂 CSS。
 - 測試使用 Vitest、Testing Library、MSW 與 Playwright。
 - 僅安裝 `FS-003` 實際需要的依賴；React Hook Form 等尚未使用的依賴留給後續 Slice。
 - 公開頁最低支援 360px，目標 WCAG 2.2 AA，主要觸控目標至少 44 × 44px。
@@ -104,7 +108,7 @@
 - `index.html`：Vite application entry。
 - `.gitignore`：排除 dependencies、build 與測試產物。
 - `tsconfig.json`、`tsconfig.app.json`、`tsconfig.node.json`：瀏覽器與工具 TypeScript 設定。
-- `vite.config.ts`：Vite 與 Vitest 設定入口。
+- `vite.config.ts`：Vite、Tailwind CSS 與 Vitest 設定入口。
 - `eslint.config.js`：TypeScript／React lint 設定。
 - `playwright.config.ts`：Chromium 與本機 web server 測試設定。
 - `src/main.tsx`：React root entry。
@@ -113,13 +117,12 @@
 - `src/app/router/router.tsx`：`/` redirect、`/apply` 與已知目的路由邊界。
 - `src/app/error-boundaries/route-error-page.tsx`：route-level 可重試／返回錯誤畫面。
 - `src/app/layouts/public-layout.tsx`：公開頁共同結構。
-- `src/app/styles/global.css`：Mobile First 基礎樣式、focus 與全域 tokens。
-- `src/features/applications/entry/application-entry-page.tsx`：入口頁 composition 與資料狀態。
-- `src/features/applications/entry/application-entry-card.tsx`：單一類型卡片。
+- `src/app/styles/global.css`：Tailwind 入口、共用 theme／design tokens、Mobile First 基礎樣式與 focus 行為。
+- `src/features/applications/entry/application-entry-page.tsx`：入口頁 composition、資料狀態與 Tailwind utility 樣式。
+- `src/features/applications/entry/application-entry-card.tsx`：單一類型卡片與 Tailwind utility 樣式。
 - `src/features/applications/entry/application-entry.config.ts`：已核准的名稱、文案、路由與最低附件摘要；不保存目前人數。
 - `src/features/applications/entry/application-entry.schema.ts`：核准後的人數規則 response schema。
 - `src/features/applications/entry/application-entry.query.ts`：目前人數資料取得與 Query 設定。
-- `src/features/applications/entry/application-entry.module.css`：入口頁與卡片樣式。
 - `src/test/setup.ts`：Testing Library 與 MSW 測試初始化。
 - `src/test/mocks/server.ts`：MSW server。
 - `src/test/mocks/handlers/application-entry.ts`：核准契約的成功 fixture handler。
@@ -141,10 +144,10 @@
 
 ## Implementation Steps
 
-1. 以 npm 建立最小 Vite React TypeScript 專案，加入 requirements 指定且本 Slice 必要的 Router、Query、Zod、Vitest、Testing Library、MSW、Playwright 與 ESLint，並定義可重複執行的 scripts。
-2. 建立 `src/app/` 根 entry、Query Provider、Router、Route Error Boundary、Public Layout 與 Mobile First 全域樣式；先以最小 placeholder route 保持 buildable。
+1. 以 npm 建立最小 Vite React TypeScript 專案，加入 requirements 指定且本 Slice 必要的 Router、Query、Zod、Tailwind CSS、Vitest、Testing Library、MSW、Playwright 與 ESLint，選擇彼此相容的 Tailwind 套件與 Vite 整合方式，由 `package-lock.json` 鎖定版本，並定義可重複執行的 scripts。
+2. 建立 `src/app/` 根 entry、Query Provider、Router、Route Error Boundary、Public Layout 與 Tailwind 入口；在 `global.css` 保留共用 theme／design tokens、Mobile First 基礎樣式與 focus 行為，先以最小 placeholder route 保持 buildable。
 3. 在契約與卡片文案確認後，建立 feature-local config、Zod schema、Query 與 MSW fixtures，不把目前人數放入本機 fallback。
-4. 建立 `/apply` 頁面與語意化卡片，輸出四個申請 route 及 `/rules` 連結，完成 loading、empty、failure、retry 與 success UI。
+4. 使用 Tailwind utilities 建立 `/apply` 頁面與語意化卡片，輸出四個申請 route 及 `/rules` 連結，完成 loading、empty、failure、retry 與 success UI；不為一般版面建立 CSS Module。
 5. 使用 Testing Library 驗證卡片內容、route、資料狀態、鍵盤與可存取名稱；禁止未處理的 MSW request 靜默通過。
 6. 使用 Playwright 驗證 Chromium desktop／360px 版面、觸控目標、鍵盤導覽、無水平溢位與 route navigation。
 7. 更新實際 commands 文件並執行 typecheck、lint、unit／integration tests、production build 與 targeted Playwright。
@@ -160,8 +163,8 @@
 
 ## AI Implementation Tasks
 
-- [ ] 建立最小 npm／Vite／React／TypeScript 專案與 scripts。
-- [ ] 建立 Router、Query Provider、Error Boundary、Public Layout 與全域基礎樣式。
+- [ ] 建立最小 npm／Vite／React／TypeScript／Tailwind CSS 專案與 scripts。
+- [ ] 建立 Router、Query Provider、Error Boundary、Public Layout、Tailwind 入口與全域基礎樣式。
 - [ ] 依核准契約建立目前人數 Schema、Query 與 MSW fixture。
 - [ ] 建立四類申請入口卡片及完整資料狀態。
 - [ ] 建立元件／整合與 Playwright tests。
@@ -197,7 +200,7 @@
 
 ## Documentation Updates
 
-- [ ] `not-applicable`：目前沒有已核准的 `docs/project/` 需求文件變更。
+- [ ] 確認已核准的 `docs/project/frontend-architecture.md` 與 `docs/project/development-standards.md` Tailwind CSS 標準已反映於實作與驗證。
 - [ ] 確認需求文件、Slice Brief、Spec 與 Plan 一致。
 - [ ] 更新 Slice Brief 或 blueprint 文件連結。
 - [ ] 更新 Spec 狀態。
@@ -217,7 +220,7 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 | Batch | Purpose | Files | Required Verification | Proposed Message |
 |---|---|---|---|---|
 | Approval | 保存已核准的需求與 Slice 文件 | Slice Brief、Spec、Plan、blueprint | 文件一致性、`git diff --check` | `docs(FS-003): approve application entry specification` |
-| I1 | 建立 `FS-003` 所需且可獨立執行的前端基礎 | package／lock、Vite／TypeScript／ESLint／Playwright configs、`src/main.tsx`、`src/app/**`、`src/test/setup.ts`、`AGENTS.md` | `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` | `chore(FS-003): scaffold frontend application foundation` |
+| I1 | 建立 `FS-003` 所需且可獨立執行的 Tailwind 前端基礎 | package／lock、Vite／Tailwind／TypeScript／ESLint／Playwright configs、`src/main.tsx`、`src/app/**`、`src/test/setup.ts`、`AGENTS.md` | `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` | `chore(FS-003): scaffold frontend application foundation` |
 | I2 | 完成公開申請入口與直接相關測試 | `src/features/applications/entry/**`、`src/test/mocks/**`、`src/app/router/router.tsx`、相關 tests、`e2e/application-entry.spec.ts` | `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `feat(FS-003): add public application entry` |
 | Verification | 保存完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、`git diff --check` | `docs(FS-003): record application entry verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-003): record application entry acceptance` |
