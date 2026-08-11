@@ -6,9 +6,9 @@
 - Change Type: `feature`
 - Document Status: `approved`
 - Based On Spec: `docs/specs/FS-002/FS-002-published-instructions-spec.md`
-- Spec Last Updated: `2026-08-11`
+- Spec Last Updated: `2026-08-12`
 - Created: `2026-08-11`
-- Last Updated: `2026-08-11`
+- Last Updated: `2026-08-12`
 
 ## Goal
 
@@ -200,20 +200,20 @@
 
 ## Human Integration
 
-- [ ] 提供可由真實公開端點依申請類型取得的目前學年度、至少一個歷史學年度、一個多 section 年度、一個無公開內容學年度，以及一筆已超過 `effectiveTo` 但仍會回傳的測試資料。
-- [ ] 確認真實後端依 `displayOrder` 升冪排列，並只回傳 `status = published`、`isVisible = true` 且 `effectiveFrom` 不晚於 Asia/Taipei 當日的內容；同時確認目前不使用 `effectiveTo` 排除內容。
-- [ ] 提供可重試失敗情境的驗證方式。
+- [x] 提供可由真實公開端點依申請類型取得的目前學年度、至少一個歷史學年度、一個多 section 年度、一個無公開內容學年度，以及一筆已超過 `effectiveTo` 但仍會回傳的測試資料。
+- [x] 確認真實後端依 `displayOrder` 升冪排列，並只回傳 `status = published`、`isVisible = true` 且 `effectiveFrom` 不晚於 Asia/Taipei 當日的內容；同時確認目前不使用 `effectiveTo` 排除內容。
+- [x] 提供可重試失敗情境的驗證方式。
 
 只有使用者明確確認後才能勾選。
 
 ## Human Acceptance
 
-- [ ] 在桌面寬度閱讀含多層標題的長篇辦法，確認目錄結構、所有章節連結與文章連結正確。
-- [ ] 在 360px 寬度切換申請類型、目前與歷史學年度，確認控制項、目錄與文章易於閱讀和操作。
-- [ ] 驗證沒有公開內容的學年度及可重試 API 失敗狀態。
-- [ ] 確認 API 已回傳且超過 `effectiveTo` 的 section 仍依後端順序顯示，且 Markdown 經安全清理。
-- [ ] 使用鍵盤操作申請類型控制項、學年度選擇器、目錄連結與重試按鈕。
-- [ ] 確認測試用惡意內容不會執行或產生危險導覽。
+- [x] 在桌面寬度閱讀含多層標題的長篇辦法，確認目錄結構、所有章節連結與文章連結正確。
+- [x] 在 360px 寬度切換申請類型、目前與歷史學年度，確認控制項、目錄與文章易於閱讀和操作。
+- [x] 驗證沒有公開內容的學年度及可重試 API 失敗狀態。
+- [x] 確認 API 已回傳且超過 `effectiveTo` 的 section 仍依後端順序顯示，且 Markdown 經安全清理。
+- [x] 使用鍵盤操作申請類型控制項、學年度選擇器、目錄連結與重試按鈕。
+- [x] 確認測試用惡意內容不會執行或產生危險導覽。
 
 只有使用者明確確認後才能勾選。
 

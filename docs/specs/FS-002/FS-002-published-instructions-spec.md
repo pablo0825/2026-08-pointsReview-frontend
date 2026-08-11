@@ -4,10 +4,10 @@
 
 - Feature Slice: `FS-002`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `completed`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-11`
-- Last Updated: `2026-08-11`
+- Last Updated: `2026-08-12`
 
 ## Change Information
 
@@ -125,28 +125,28 @@
 
 ## AI Acceptance
 
-- [ ] 自動驗證未登入狀態可開啟 `/rules`，且不會被重新導向登入頁。
-- [ ] 自動驗證初始顯示「請選擇申請類型」與四個固定文案的大型按鈕，且沒有預選；選擇前不發送公開辦法 request。
-- [ ] 自動驗證每次選定申請類型只發送一個包含所選 `applicationType` 且省略 `academicYear` 的 request，取得該類型所有公開學年度。
-- [ ] 自動驗證四個合法 `applicationType` 均可查詢，且不會送出 enum 以外的值。
-- [ ] 自動驗證選定申請類型後使用目前臺灣學年度；切換申請類型會發送該新類型唯一一次 request，切換學年度不會再發送 request，且兩者都顯示相對應內容。
-- [ ] 自動驗證只顯示公開端點提供的內容；空內容不會顯示成成功文章。
-- [ ] 自動驗證 section 陣列的所有欄位通過契約驗證，並依 API 回傳順序呈現所選申請類型與學年度的一個或多個 sections，不在前端重新排序。
-- [ ] 自動驗證前端不需要 `status` 或 `isVisible` 欄位，且不會依 `effectiveTo` 排除 API 已回傳的內容。
-- [ ] 自動驗證 Markdown 標題會產生唯一錨點，且目錄可正確定位各章節。
-- [ ] 自動驗證惡意 HTML、事件屬性、危險 URL 與其他可執行內容不會進入頁面。
-- [ ] 自動驗證 `HTTP 200 OK` 與 `{ "data": [] }` 呈現無內容狀態，不會被視為 `404`、API failure 或成功文章，並覆蓋載入、API 失敗、契約驗證失敗與成功狀態。
-- [ ] 自動驗證快速切換申請類型時不會把舊 request 結果顯示為新類型，切換學年度時只顯示同一次目前類型 Response 中的 matching sections。
-- [ ] 自動驗證四個按鈕依指定順序支援鍵盤操作、具清楚焦點與至少 44×44px 的目標；非同步狀態可辨識，且 360px 版面無非必要水平捲動。
-- [ ] `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` 與相關 Playwright 流程通過。
+- [x] 自動驗證未登入狀態可開啟 `/rules`，且不會被重新導向登入頁。
+- [x] 自動驗證初始顯示「請選擇申請類型」與四個固定文案的大型按鈕，且沒有預選；選擇前不發送公開辦法 request。
+- [x] 自動驗證每次選定申請類型只發送一個包含所選 `applicationType` 且省略 `academicYear` 的 request，取得該類型所有公開學年度。
+- [x] 自動驗證四個合法 `applicationType` 均可查詢，且不會送出 enum 以外的值。
+- [x] 自動驗證選定申請類型後使用目前臺灣學年度；切換申請類型會發送該新類型唯一一次 request，切換學年度不會再發送 request，且兩者都顯示相對應內容。
+- [x] 自動驗證只顯示公開端點提供的內容；空內容不會顯示成成功文章。
+- [x] 自動驗證 section 陣列的所有欄位通過契約驗證，並依 API 回傳順序呈現所選申請類型與學年度的一個或多個 sections，不在前端重新排序。
+- [x] 自動驗證前端不需要 `status` 或 `isVisible` 欄位，且不會依 `effectiveTo` 排除 API 已回傳的內容。
+- [x] 自動驗證 Markdown 標題會產生唯一錨點，且目錄可正確定位各章節。
+- [x] 自動驗證惡意 HTML、事件屬性、危險 URL 與其他可執行內容不會進入頁面。
+- [x] 自動驗證 `HTTP 200 OK` 與 `{ "data": [] }` 呈現無內容狀態，不會被視為 `404`、API failure 或成功文章，並覆蓋載入、API 失敗、契約驗證失敗與成功狀態。
+- [x] 自動驗證快速切換申請類型時不會把舊 request 結果顯示為新類型，切換學年度時只顯示同一次目前類型 Response 中的 matching sections。
+- [x] 自動驗證四個按鈕依指定順序支援鍵盤操作、具清楚焦點與至少 44×44px 的目標；非同步狀態可辨識，且 360px 版面無非必要水平捲動。
+- [x] `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` 與相關 Playwright 流程通過。
 
 ## Human Acceptance
 
-- [ ] 在桌面寬度閱讀一篇含多層標題的長篇辦法，確認目錄結構清楚且所有章節連結正確。
-- [ ] 在 360px 寬度切換申請類型、目前與歷史學年度，確認控制項、目錄與文章仍易於閱讀和操作。
-- [ ] 驗證一個沒有公開內容的學年度，以及一次可重試的 API 失敗狀態。
-- [ ] 使用鍵盤操作申請類型控制項、學年度選擇器、目錄連結與重試按鈕。
-- [ ] 確認文章中的安全連結行為符合預期，且不會執行測試用惡意內容。
+- [x] 在桌面寬度閱讀一篇含多層標題的長篇辦法，確認目錄結構清楚且所有章節連結正確。
+- [x] 在 360px 寬度切換申請類型、目前與歷史學年度，確認控制項、目錄與文章仍易於閱讀和操作。
+- [x] 驗證一個沒有公開內容的學年度，以及一次可重試的 API 失敗狀態。
+- [x] 使用鍵盤操作申請類型控制項、學年度選擇器、目錄連結與重試按鈕。
+- [x] 確認文章中的安全連結行為符合預期，且不會執行測試用惡意內容。
 
 ## Open Questions
 

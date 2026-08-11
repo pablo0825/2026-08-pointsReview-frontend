@@ -4,9 +4,9 @@
 
 - Feature Slice: `FS-002`
 - Change Type: `feature`
-- Verification Status: `awaiting-human`
+- Verification Status: `completed`
 - Created: `2026-08-11`
-- Last Updated: `2026-08-11`
+- Last Updated: `2026-08-12`
 
 ## Change Context
 
@@ -19,7 +19,7 @@
 
 - 使用者於 Human Integration 期間要求每個申請類型只查詢一次所有公開學年度 sections，年度切換改為前端篩選。
 - 既有 AI Verification 證據仍記錄初版實作實際執行結果，但不代表修訂後單次查詢 Acceptance 已通過。
-- 修訂後 Spec、Plan 與 Commit Plan 已由使用者核准；F1 實作、tests 與完整 AI Verification 已通過，Human Integration 尚待重新執行。
+- 修訂後 Spec、Plan 與 Commit Plan 已由使用者核准；F1 實作、tests、完整 AI Verification、Human Integration 與 Human Acceptance 均已通過。
 
 ## Implementation Summary
 
@@ -27,7 +27,7 @@
 - 已建立 credentialed JSON GET client、Zod response validation、申請類型／選填學年度 query、Asia/Taipei 學年度 helper、嚴格 MSW 測試邊界與 fixtures。
 - 選擇類型後只查詢一次所有公開學年度 sections，年度選單及內容均使用已驗證的同一 Response；年度切換不新增 request。
 - 已建立保留 API section 順序的安全 Markdown renderer、同頁唯一錨點、目錄，以及外部連結安全屬性；前端不依 `effectiveTo` 排除 API 已回傳內容。
-- 真實後端資料與失敗情境尚待 Human Integration；production build 成功，但 Vite 回報主 bundle 超過預設 500 kB 警示，核准範圍未設定 bundle budget。
+- 真實後端資料、CORS、單次查詢、年度切換、empty、failure／retry、過期內容與多 section 情境均已完成 Human Integration；production build 成功，但 Vite 回報主 bundle 超過預設 500 kB 警示，核准範圍未設定 bundle budget。
 
 ## Changed Files
 
@@ -111,10 +111,10 @@
 
 ### Result
 
-- Status: `pending`
-- Confirmed By: `pending`
-- Confirmed At: `pending`
-- Notes: `單次查詢修訂與 AI Verification 已完成；等待使用者重新執行真實後端整合。`
+- Status: `passed`
+- Confirmed By: `使用者`
+- Confirmed At: `2026-08-11`
+- Notes: `使用者以真實後端確認 CORS、目前與歷史學年度、多 section 順序、HTTP 200 empty、可重試失敗、單次省略 academicYear 的 request，以及 effectiveTo 已過期內容仍正常顯示。`
 
 ## Human Acceptance Instructions
 
@@ -154,18 +154,18 @@
 
 ## Human Acceptance Result
 
-- Status: `pending`
-- Confirmed By: `pending`
-- Confirmed At: `pending`
-- User Feedback: `pending`
+- Status: `passed`
+- Confirmed By: `使用者`
+- Confirmed At: `2026-08-12`
+- User Feedback: `FS-002 驗收通過；功能與各狀態測試正常。多 section 桌面排版觀感可於後續另行優化，不阻擋本 Slice 驗收。`
 
 ## Final Summary
 
 - AI Verification: `passed；修訂後所有核准自動檢查均於 2026-08-11 重新執行並通過。`
-- Human Integration: `pending；需重新以真實公開端點確認單次 request、資料與錯誤情境。`
-- Human Acceptance: `pending；等待使用者依更新步驟驗收。`
-- Remaining Issues: `後端 effectiveTo 已知限制，以及非阻擋的 Vite bundle size 警示。`
-- Final Feature Slice Status: `awaiting-human`
+- Human Integration: `passed；使用者已以真實公開端點確認單次 request、資料與錯誤情境。`
+- Human Acceptance: `passed；使用者已於 2026-08-12 明確確認 FS-002 驗收通過。`
+- Remaining Issues: `後端 effectiveTo 已知限制、非阻擋的 Vite bundle size 警示，以及使用者提出的桌面排版後續優化。`
+- Final Feature Slice Status: `accepted`
 
 ## Document Lineage Update
 
