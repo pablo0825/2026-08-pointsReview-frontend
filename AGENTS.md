@@ -2,18 +2,23 @@
 
 ## Project Structure & Module Organization
 
-This repository is documentation-first; application source and package scripts have not been scaffolded. Treat `docs/project/` as authoritative for requirements, architecture, API contracts, and quality standards. `docs/blueprint/` contains the feature-slice index and briefs; create approved specifications in `docs/specs/<ID>/` and plans in `docs/plans/<ID>/`. Discussion context belongs in `docs/notes/`; `docs/archive/` is historical only.
+This repository contains a React, TypeScript, Vite, and Tailwind CSS application. Treat `docs/project/` as authoritative for requirements, architecture, API contracts, and quality standards. `docs/blueprint/` contains the feature-slice index and briefs; create approved specifications in `docs/specs/<ID>/` and plans in `docs/plans/<ID>/`. Discussion context belongs in `docs/notes/`; `docs/archive/` is historical only.
 
 The planned application layout is feature-oriented: `src/app/` for routing and providers, `src/features/` for domain modules, `src/shared/` for genuinely cross-feature code, and `src/test/` for shared test infrastructure. Keep feature-specific schemas, mappers, queries, components, and tests within their feature.
 
 ## Build, Test, and Development Commands
 
-No `package.json` or runnable frontend exists yet, so no install, dev, build, lint, or test commands are valid. For documentation-only changes, use:
+- `npm install` — install the locked dependencies.
+- `npm run dev` — start the local Vite development server.
+- `npm run typecheck` — type-check application and tooling code.
+- `npm run lint` — run ESLint across the repository.
+- `npm run test` — run Vitest unit and component tests once.
+- `npm run test:watch` — run Vitest in watch mode.
+- `npm run build` — type-check and build the production bundle.
+- `npm run test:e2e` — run the Playwright browser suite after browser binaries are installed.
+- `npm run preview` — preview the production bundle locally.
 
-- `git diff --check` — detect whitespace errors.
-- `rg "<term>" docs` — check terminology and cross-document consistency.
-
-When tooling is added, document scripts for development, type-checking, linting, tests, and production builds.
+For documentation-only changes, also run `git diff --check` and use `rg "<term>" docs` when checking terminology or cross-document consistency.
 
 ## Coding Style & Naming Conventions
 
