@@ -1,7 +1,7 @@
 # 點數審核系統－API 整合設計
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-09
+- 最後更新：2026-08-11
 - 相關文件：[前端架構](frontend-architecture.md)、[後端契約異動](backend-contract-changes.md)
 
 ## 1. 契約策略
@@ -92,6 +92,8 @@
 | POST | `/public/applications/revisions/:token` | multipart 補件重送 |
 | GET | `/public/student-points` | 遮罩後公開點數 |
 
+第一版不提供公開參與人數規則 API。各申請類型使用 `application-rules.md` 定義的固定人數限制，正式送件與補件仍由後端驗證；動態人數規則 API 留待第二版另行定義。
+
 ### 5.1 公開點數查詢
 
 - 必須提供 `grade`＋`classNumber`，或至少 2 字元 `keyword`。
@@ -162,7 +164,7 @@ for (const attachment of attachments) {
 
 - Users：列表、詳情、建立、更新、啟用、停用、啟用信、重設密碼、管理員移交。
 - Advisors：列表、建立、更新、啟用、停用、指派主任。
-- Rules：點數規則與人數規則列表、建立新版本、提前停用。
+- Rules：點數規則列表、建立新版本、提前停用。
 - Instructions：列表、草稿、Revision、發布、顯示與隱藏。
 - Applications：全部列表與唯讀詳情。
 - Transactions：學生點數流水帳查詢。

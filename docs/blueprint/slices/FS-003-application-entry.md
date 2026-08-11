@@ -10,33 +10,33 @@
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 
 ## Goal
-讓申請人理解四種申請用途並選擇正確入口。
+讓申請人從簡潔且一致的公開導覽選擇正確的申請入口。
 
 ## User-Visible Result
-訪客在 `/apply` 看到競賽、參與計畫、證照、展覽四張卡片及人數、最低附件、開始申請與查看辦法入口。
+訪客可從共用公開導覽前往申請入口或申請辦法，並在 `/apply` 從四個大型連結選擇競賽、參與計畫、證照或展覽申請。
 
 ## Source Reference
 - `docs/project/product-requirements.md`, sections 4.1, 5
 - `docs/project/routes-and-pages.md`, sections 1–3, 11
-- `docs/project/application-rules.md`, sections 1, 7
+- `docs/project/application-rules.md`, section 1.1
 
 ## Included
-- `/` 導向、四類型卡片、摘要資訊、申請與辦法連結、公開頁響應式與狀態。
+- Production 根路徑、`/` 導向、共用公開導覽、四個申請類型連結，以及公開頁響應式與無障礙行為。
 
 ## Excluded
-- 各類五步表單、補件、草稿與進度查詢。
+- 類型說明、人數與附件摘要、各類五步表單、`/rules` 內容、補件、草稿與進度查詢。
 
 ## AI Responsibility
-- 建立公開頁 Layout、Router 基礎與申請入口骨架，並完成入口頁、必要資料整合、導覽、自動化測試與文件。
+- 保留已建立的公開頁 Layout 與 Router 基礎，完成共用公開導覽、申請入口、路由邊界、自動化測試與文件。
 
 ## Human Integration
-- 提供目前有效的人數與附件規則資料。
+- `not-applicable`；第一版入口頁不依賴外部資料，production 使用根路徑 `/`。
 
 ## AI Acceptance
-- 自動驗證四張卡片內容與連結、資料狀態、鍵盤操作及 360px 版面。
+- 自動驗證共用公開導覽、標題、四個申請連結、鍵盤操作及 360px 版面。
 
 ## Human Acceptance
-- 使用者確認卡片資訊足以分辨類型並能正確進入四個申請路由。
+- 使用者確認共用導覽與四個申請入口清楚，並能前往正確路由。
 
 ## Template Rules
 

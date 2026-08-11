@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-003`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `draft`
 - Based On Spec: `docs/specs/FS-003/FS-003-application-entry-spec.md`
 - Spec Last Updated: `2026-08-11`
 - Created: `2026-08-10`
@@ -12,7 +12,7 @@
 
 ## Goal
 
-先建立足以支撐 `FS-003` 的最小 React／TypeScript／Vite 專案、Router、Provider、公開頁 Layout 與測試工具，再以 feature-local 結構完成 `/apply` 四類申請入口、必要規則資料狀態、響應式與無障礙驗證；不預建其他 Slice 尚未使用的表單、後台或共用抽象。
+保留 I1 已建立的 React／TypeScript／Vite／Tailwind CSS 專案、Router、Provider、公開頁 Layout 與測試工具，再以 feature-local 結構完成共用公開導覽及 `/apply` 四個申請入口、響應式與無障礙驗證；不預建其他 Slice 尚未使用的表單、後台或共用抽象。
 
 ## Change Context
 
@@ -25,48 +25,48 @@
 
 ### Included
 
-- 使用 npm 建立 React、TypeScript、Vite 專案與必要 scripts。
-- 安裝並設定 Tailwind CSS，作為專案標準樣式方案。
-- 建立 ESLint、Vitest、Testing Library、MSW 與 Playwright 的最小設定。
-- 建立根 Provider、React Router、Route Error Boundary、公開頁 Layout 與全域基礎樣式。
+- 保留 I1 已完成並提交的 React、TypeScript、Vite、Tailwind CSS、ESLint、Vitest、Testing Library、MSW、Playwright、根 Provider、Router、Route Error Boundary、公開頁 Layout 與全域基礎樣式。
 - 建立 `/` 至 `/apply` 的導向與 `/apply` 入口頁。
-- 建立四類申請卡片、固定路由／最低附件摘要及已確認的簡短適用情境。
-- 依核准後的正式契約整合目前允許人數，處理 loading、empty、failure、retry 與 success。
+- 在共用公開 Layout 建立「開始申請」與「申請辦法」導覽。
+- 建立標題「請選擇申請類型」與四個大型申請類型連結。
 - 建立元件／整合測試及 Chromium browser test，覆蓋 360px、鍵盤與主要導覽。
 
 ### Excluded
 
 - 四種五步申請表單、送件、補件與申請資料模型。
 - `/rules` 頁面內容及其他公開頁面內容。
+- 類型適用情境、參與人數、最低附件摘要及公開規則資料整合。
 - Authentication Context、登入、後台 Layout 與角色權限。
 - 完整 Design System、未出現第二個使用者的通用抽象及額外全域狀態。
-- 未經核准的新後端 endpoint、臨時假契約或把文件數值硬編碼為「目前規則」。
+- 參與人數規則 API、管理功能或任何第一版不需要的遠端入口資料。
 
 ## Current Implementation Assessment
 
 ### Existing Behavior
 
-- Repository 為 documentation-first，沒有 `package.json`、`src/`、前端 route、頁面、樣式或測試工具。
-- `/` 與 `/apply` 目前都沒有可執行行為。
+- I1 已於 commit `bba2849` 建立可執行的 React／TypeScript／Vite／Tailwind CSS 專案與必要 scripts。
+- Router 已提供 `/` 至 `/apply` 的導向、`/apply` placeholder 及四個申請目的 route placeholder。
+- Public Layout、Route Error Boundary、Query Provider、Vitest、Testing Library、MSW 基礎設定及 Playwright 設定已存在。
 
 ### Reusable Components
 
-- `not-applicable`；目前沒有可重用的前端元件或程式碼。
+- `src/app/layouts/public-layout.tsx`：加入共用公開導覽的既有頁面骨架。
+- `src/app/router/router.tsx`：保留既有 redirect 與 route placeholder，將 `/apply` placeholder 換成入口頁。
+- `src/app/styles/global.css`：既有 Tailwind CSS 入口、theme tokens 與全域 focus 基礎。
 
 ### Integration Points
 
 - `docs/project/frontend-architecture.md`：定義 feature-oriented 目錄、Provider 順序、Query ownership 與安全限制。
 - `docs/project/development-standards.md`：定義 Tailwind CSS 使用規範、共通品質要求與 Definition of Done。
+- `docs/project/testing-strategy.md`：定義入口連結、鍵盤、響應式與 browser test 的驗證層級。
 - `docs/project/routes-and-pages.md`：定義 `/`、`/apply`、四個申請路由與 `/rules` 邊界。
-- `docs/project/application-rules.md`：定義四類名稱、基準人數與最低附件要求。
-- 待確認的公開參與人數規則契約：提供四類「目前允許人數」及 loading／empty／failure 行為所需資料。
+- `docs/project/application-rules.md`：定義四類名稱及第一版固定人數；入口頁不顯示或取得人數。
 
 ### Gaps Against Spec
 
-- 缺少完整可執行的前端專案、Tailwind CSS 與所有必要依賴／scripts。
-- 缺少 Router、Provider、公開頁 Layout、Error Boundary 與基礎樣式。
-- 缺少 `/apply` 頁面、卡片、規則資料整合與所有 Spec Acceptance。
-- 缺少自動化測試、MSW、Playwright 與瀏覽器驗證能力。
+- 缺少共用公開導覽列。
+- `/apply` 仍是 placeholder，缺少標題與四個申請類型連結。
+- 缺少入口頁直接相關的元件／整合與 Playwright 測試。
 
 ### Preserved Behavior
 
@@ -75,100 +75,72 @@
 
 ### Regression Risks
 
-- 目前沒有既有前端行為可回歸；主要風險是初始化設定偏離文件架構，或過早建立其他 Slice 才需要的抽象。
-- 入口頁建立的 Router、Provider 與公開 Layout 將成為後續公開 Slice 的基礎，錯誤邊界或樣式決策可能放大後續修改成本。
+- I1 基礎已被既有 smoke tests 覆蓋；I2 必須避免破壞 redirect、目的 route placeholder、Error Boundary 與 Provider 組合。
+- 公開導覽會成為後續公開 Slice 的共用入口，語意、active state 與窄螢幕排列需保持穩定。
 
 ### Compatibility / Migration
 
-- `not-applicable`；沒有既有 application source、package lock 或使用者流程需要遷移。
+- 不修改 I1 commit history；在現有 source 上追加 I2，保留 package lock 與既有 scripts。
 
 ### Constraints
 
-- 使用 React、TypeScript、Vite、React Router 與 TanStack Query；API response 以 Zod 驗證。
+- 使用 React、TypeScript、Vite、React Router 與 TanStack Query；本 Slice 不讀取 API，後續 API response 仍須以 Zod 驗證。
 - 使用 Tailwind CSS 作為標準樣式方案；採 Mobile First utilities，並將全域 CSS 限制在 Tailwind 入口、theme／design tokens、瀏覽器基礎樣式與必要全域行為。
 - 不以 CSS Modules 作為預設方案；只有專案架構允許的例外情境才建立 feature-local 自訂 CSS。
 - 測試使用 Vitest、Testing Library、MSW 與 Playwright。
 - 僅安裝 `FS-003` 實際需要的依賴；React Hook Form 等尚未使用的依賴留給後續 Slice。
 - 公開頁最低支援 360px，目標 WCAG 2.2 AA，主要觸控目標至少 44 × 44px。
 - 不得把 Session Token、個資或敏感資料寫入不允許的儲存空間或 Log；本 Slice 不處理此類資料。
-- 操作開始時可用 Node `v24.4.1` 與 npm `11.4.2`，但專案 engines 與 CI runtime 尚未由需求指定。
+- Production 使用根路徑 `/`；現有 Vite 與 Router 設定可維持。
 
 ### Unknowns
 
-- 尚未定義「目前允許人數」的公開 endpoint、response schema、錯誤語意與 cache policy。
-- 尚未提供四張卡片簡短適用情境的核准文案。
-- Repository 尚未指定 production deploy base path；Router 與 Vite 先使用 root base，若部署環境不同需在實作前確認。
+- `none`；公開人數 API、入口文案與 production base path 均已決定。
 
 ## Files
 
 ### Create
 
-- `package.json`：npm scripts 與 `FS-003` 必要 runtime／development dependencies。
-- `package-lock.json`：鎖定已安裝依賴。
-- `index.html`：Vite application entry。
-- `.gitignore`：排除 dependencies、build 與測試產物。
-- `tsconfig.json`、`tsconfig.app.json`、`tsconfig.node.json`：瀏覽器與工具 TypeScript 設定。
-- `vite.config.ts`：Vite、Tailwind CSS 與 Vitest 設定入口。
-- `eslint.config.js`：TypeScript／React lint 設定。
-- `playwright.config.ts`：Chromium 與本機 web server 測試設定。
-- `src/main.tsx`：React root entry。
-- `src/app/app.tsx`：根應用程式組合。
-- `src/app/providers/app-providers.tsx`：Query Client 與後續 Provider 擴充邊界。
-- `src/app/router/router.tsx`：`/` redirect、`/apply` 與已知目的路由邊界。
-- `src/app/error-boundaries/route-error-page.tsx`：route-level 可重試／返回錯誤畫面。
-- `src/app/layouts/public-layout.tsx`：公開頁共同結構。
-- `src/app/styles/global.css`：Tailwind 入口、共用 theme／design tokens、Mobile First 基礎樣式與 focus 行為。
-- `src/features/applications/entry/application-entry-page.tsx`：入口頁 composition、資料狀態與 Tailwind utility 樣式。
-- `src/features/applications/entry/application-entry-card.tsx`：單一類型卡片與 Tailwind utility 樣式。
-- `src/features/applications/entry/application-entry.config.ts`：已核准的名稱、文案、路由與最低附件摘要；不保存目前人數。
-- `src/features/applications/entry/application-entry.schema.ts`：核准後的人數規則 response schema。
-- `src/features/applications/entry/application-entry.query.ts`：目前人數資料取得與 Query 設定。
-- `src/test/setup.ts`：Testing Library 與 MSW 測試初始化。
-- `src/test/mocks/server.ts`：MSW server。
-- `src/test/mocks/handlers/application-entry.ts`：核准契約的成功 fixture handler。
-- `src/app/app.test.tsx`：基礎應用程式可啟動與公開 Layout smoke test。
-- `src/app/router/router.test.tsx`：redirect 與 route 邊界測試。
-- `src/features/applications/entry/application-entry-page.test.tsx`：卡片、狀態、連結與 accessibility 測試。
+- `src/features/applications/entry/application-entry-page.tsx`：標題、四個大型申請類型連結與 Tailwind utility 樣式。
+- `src/features/applications/entry/application-entry.config.ts`：四個顯示名稱與固定目的路由；不保存文案、人數或附件摘要。
+- `src/features/applications/entry/application-entry-page.test.tsx`：標題、四個連結、排除內容與 accessibility 測試。
 - `e2e/application-entry.spec.ts`：桌面／360px、鍵盤、導覽與 overflow browser test。
 
 ### Modify
 
-- `AGENTS.md`：加入實際可用的 install、dev、build、typecheck、lint、test 與 e2e commands。
+- `src/app/layouts/public-layout.tsx`：加入「開始申請」與「申請辦法」共用公開導覽。
+- `src/app/router/router.tsx`：以正式入口頁取代 `/apply` placeholder，保留其他目的 route placeholder。
+- `src/app/router/router.test.tsx`：補充 redirect、共用導覽與 route 邊界測試。
 
 ### Tests
 
-- `src/app/app.test.tsx`：專案初始化後的 root Provider 與公開 Layout smoke test。
-- `src/app/router/router.test.tsx`：`/` 導向 `/apply` 與公開 route 邊界。
-- `src/features/applications/entry/application-entry-page.test.tsx`：四卡內容、目前人數、最低附件、loading／empty／failure／retry／success 與連結。
+- `src/app/router/router.test.tsx`：`/` 導向 `/apply`、共用公開導覽與目的 route 邊界。
+- `src/features/applications/entry/application-entry-page.test.tsx`：標題、四個連結、排除摘要內容、鍵盤與可存取名稱。
 - `e2e/application-entry.spec.ts`：Chromium 360px／desktop、鍵盤順序、44px targets、無水平溢位與 route navigation。
 
 ## Implementation Steps
 
-1. 以 npm 建立最小 Vite React TypeScript 專案，加入 requirements 指定且本 Slice 必要的 Router、Query、Zod、Tailwind CSS、Vitest、Testing Library、MSW、Playwright 與 ESLint，選擇彼此相容的 Tailwind 套件與 Vite 整合方式，由 `package-lock.json` 鎖定版本，並定義可重複執行的 scripts。
-2. 建立 `src/app/` 根 entry、Query Provider、Router、Route Error Boundary、Public Layout 與 Tailwind 入口；在 `global.css` 保留共用 theme／design tokens、Mobile First 基礎樣式與 focus 行為，先以最小 placeholder route 保持 buildable。
-3. 在契約與卡片文案確認後，建立 feature-local config、Zod schema、Query 與 MSW fixtures，不把目前人數放入本機 fallback。
-4. 使用 Tailwind utilities 建立 `/apply` 頁面與語意化卡片，輸出四個申請 route 及 `/rules` 連結，完成 loading、empty、failure、retry 與 success UI；不為一般版面建立 CSS Module。
-5. 使用 Testing Library 驗證卡片內容、route、資料狀態、鍵盤與可存取名稱；禁止未處理的 MSW request 靜默通過。
-6. 使用 Playwright 驗證 Chromium desktop／360px 版面、觸控目標、鍵盤導覽、無水平溢位與 route navigation。
-7. 更新實際 commands 文件並執行 typecheck、lint、unit／integration tests、production build 與 targeted Playwright。
+1. 保留 I1 的專案與 route 基礎，在 `public-layout.tsx` 使用語意化導覽及 Tailwind utilities 加入「開始申請」與「申請辦法」。
+2. 建立 feature-local config 與 `/apply` 頁面，顯示指定標題與四個大型 route links，不建立 API、Query、Schema、MSW handler 或摘要資料模型。
+3. 更新 Router，以正式入口頁取代 `/apply` placeholder，並保留四個目的 route placeholder 供導覽驗證。
+4. 使用 Testing Library 驗證標題、連結、共用導覽、排除內容、鍵盤與可存取名稱。
+5. 使用 Playwright 驗證 Chromium desktop／360px 版面、觸控目標、鍵盤導覽、無水平溢位與 route navigation。
+6. 執行 typecheck、lint、unit／integration tests、production build 與 targeted Playwright。
 
 ## Risks / Open Issues
 
 | Risk / Issue | Impact | Mitigation / Decision Needed |
 |---|---|---|
-| 目前允許人數沒有已定義公開 API | 無法安全實作 success／loading／error contract，I2 不得用硬編碼取代 | 在核准 Spec／Plan 前確認既有 endpoint，或另行核准 `docs/project/api-integration.md` 與相關需求文件變更 |
-| 四張卡片適用情境沒有核准文案 | UI copy 與 Human Acceptance 無法形成穩定基準 | 使用者提供文案，或明確授權採用後續提案並同步修訂 Spec／Plan |
-| production base path 未指定 | 非 root 部署可能導致 asset 與 route 失效 | 實作前確認部署使用 root；若不是 root，更新 Plan 的 Router／Vite 設定 |
-| 第一個 Slice 承擔專案初始化 | 設定範圍容易膨脹或預建未使用架構 | I1 僅建立 `FS-003` 必要能力，其他 Provider、表單與後台架構延後 |
+| 共用導覽會被後續公開頁共用 | 不一致的 route active state 或窄螢幕排列會影響後續 Slice | 使用 React Router link semantics、清楚焦點狀態與 360px browser test |
+| I2 修改 I1 已建立的 Router 與 Layout | 可能回歸 redirect、Error Boundary 或目的 route placeholder | 保留既有 smoke tests 並增加針對共用導覽與各目的 route 的測試 |
 
 ## AI Implementation Tasks
 
-- [ ] 建立最小 npm／Vite／React／TypeScript／Tailwind CSS 專案與 scripts。
-- [ ] 建立 Router、Query Provider、Error Boundary、Public Layout、Tailwind 入口與全域基礎樣式。
-- [ ] 依核准契約建立目前人數 Schema、Query 與 MSW fixture。
-- [ ] 建立四類申請入口卡片及完整資料狀態。
+- [x] 建立最小 npm／Vite／React／TypeScript／Tailwind CSS 專案與 scripts（I1，commit `bba2849`）。
+- [x] 建立 Router、Query Provider、Error Boundary、Public Layout、Tailwind 入口與全域基礎樣式（I1，commit `bba2849`）。
+- [ ] 建立共用公開導覽。
+- [ ] 建立標題與四個大型申請類型連結。
 - [ ] 建立元件／整合與 Playwright tests。
-- [ ] 更新實際開發 commands 文件。
 
 ## AI Verification
 
@@ -179,22 +151,19 @@
 - [ ] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts --project=chromium`
 - [ ] 以 Playwright 驗證 desktop 與 360px、鍵盤、44 × 44px targets 及無水平溢位
 - [ ] 驗證 Target Behavior
-- [ ] 回歸驗證 repository 文件未被產品實作分析改寫
+- [ ] 回歸驗證 I1 的 redirect、route placeholder、Provider 與 Error Boundary 行為
 
 ## Human Integration
 
-- [ ] 使用者或後端團隊提供並確認「目前允許人數」公開契約與可用測試環境。
-- [ ] 使用者確認四張卡片的簡短適用情境文案。
-- [ ] 使用者確認 production 使用 root base path，或提供實際 base path。
+- `not-applicable`；入口頁不依賴外部資料，且 production 根路徑 `/` 已確認。
 
 只有使用者明確確認後才能勾選。
 
 ## Human Acceptance
 
-- [ ] 在桌面與 360px viewport 確認四張卡片資訊清楚且版面可用。
-- [ ] 確認四種適用情境、目前人數與最低附件摘要能協助正確選擇。
-- [ ] 逐一確認申請與辦法連結前往正確路由。
-- [ ] 確認規則資料失敗訊息與重試操作清楚。
+- [ ] 在桌面與 360px viewport 確認共用導覽與四個申請入口清楚且版面可用。
+- [ ] 逐一確認四個申請入口前往正確路由。
+- [ ] 確認共用導覽的「開始申請」與「申請辦法」前往正確路由。
 
 只有使用者明確確認後才能勾選。
 
@@ -213,25 +182,25 @@
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-003): draft application entry specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `approved`
-- Approved By: `使用者`
-- Approved At: `2026-08-11`
+- Commit Plan Approval: `pending`
+- Approved By: `pending`
+- Approved At: `pending`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
 |---|---|---|---|---|
 | Approval | 保存已核准的需求與 Slice 文件 | Slice Brief、Spec、Plan、blueprint | 文件一致性、`git diff --check` | `docs(FS-003): approve application entry specification` |
 | I1 | 建立 `FS-003` 所需且可獨立執行的 Tailwind 前端基礎 | package／lock、Vite／Tailwind／TypeScript／ESLint／Playwright configs、`src/main.tsx`、`src/app/**`、`src/test/setup.ts`、`AGENTS.md` | `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` | `chore(FS-003): scaffold frontend application foundation` |
-| I2 | 完成公開申請入口與直接相關測試 | `src/features/applications/entry/**`、`src/test/mocks/**`、`src/app/router/router.tsx`、相關 tests、`e2e/application-entry.spec.ts` | `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `feat(FS-003): add public application entry` |
+| I2 | 完成共用公開導覽、申請入口與直接相關測試 | `src/features/applications/entry/**`、`src/app/layouts/public-layout.tsx`、`src/app/router/router.tsx`、相關 tests、`e2e/application-entry.spec.ts` | `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `feat(FS-003): add public application entry` |
 | Verification | 保存完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、`git diff --check` | `docs(FS-003): record application entry verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-003): record application entry acceptance` |
 
-Commit Plan Approval 使用 `pending`、`approved`。每個 batch 只涵蓋一個清楚目的，並保持可獨立檢視。I2 必須在公開人數契約與卡片文案確認後才能開始。
+Commit Plan Approval 使用 `pending`、`approved`。每個 batch 只涵蓋一個清楚目的，並保持可獨立檢視。I1 已完成並提交；需求修訂後 I2 必須等待 Spec、Plan 與 Commit Plan 重新核准。
 
 ## Approval
 
-- Approved By: `使用者`
-- Approved At: `2026-08-11`
-- Approval Note: `使用者已確認本 Spec、Plan 與 Commit Plan，可以開始後續開發批次；I2 仍須遵守公開人數契約與卡片文案的開始條件。`
+- Approved By: `pending`
+- Approved At: `pending`
+- Approval Note: `需求實質修訂後撤銷原核准，等待使用者重新審查 Spec、Plan 與 Commit Plan。`
 
 ## Template Rules
 

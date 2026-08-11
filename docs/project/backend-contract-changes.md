@@ -1,7 +1,7 @@
 # 後端契約同步清單
 
 - 文件狀態：待後端專案逐項同步
-- 最後更新：2026-08-09
+- 最後更新：2026-08-11
 - 用途：記錄前端需求討論後，與既有後端文件或實作計畫不同的契約。
 - 相關文件：[申請規則](application-rules.md)、[流程與權限](workflows-and-permissions.md)、[API 整合](api-integration.md)
 
@@ -46,7 +46,7 @@
 
 - `shared_total` 每位參與者點數必須大於 0 且為 0.5 的倍數。
 - 合計精確等於總點數。
-- 實際最多人數為人數規則上限與 `FLOOR(total / 0.5)` 的較小值。
+- 實際最多人數為 B12 的競賽固定上限 10 人與 `FLOOR(total / 0.5)` 的較小值。
 - 第一版不接受 `other_award`。
 
 **後端影響**
@@ -151,6 +151,22 @@ GET /reviewer/applications/review?status=needs_revision
 - 證照編號 trim／大小寫正規化方式。
 - 併發送件時防止重複的資料庫或 Transaction 策略。
 
+### B12 第一版固定參與人數限制
+
+**決策**
+
+- `competition`：1–10 人。
+- `project_participation`：1 人。
+- `certificate`：1 人。
+- `exhibition`：1–15 人。
+- 正式送件、補件與核准皆由後端依相同固定限制驗證。
+- 第一版不建立參與人數規則 ID、有效期間、版本、管理端維護 API 或公開查詢 API。
+- 參與人數規則管理、版本化與公開 API 延後至第二版，啟用前須另行定義 Migration、契約及既有申請適用方式。
+
+**後端影響**
+
+- Application Request Schema、Domain／Service 驗證、API 文件與四類申請測試。
+
 ## 3. 已確認不需新增的第一版 API
 
 - 不新增學生進度查詢 Token 或頁面。
@@ -160,6 +176,7 @@ GET /reviewer/applications/review?status=needs_revision
 - 不新增承辦人案件認領或指派 API。
 - 不新增管理員稽核紀錄查詢 API。
 - 不啟用核准後點數異動 API。
+- 不新增公開參與人數規則 API 或管理端參與人數規則 API。
 
 ## 4. 前端串接驗收
 

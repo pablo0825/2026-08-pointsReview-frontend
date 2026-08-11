@@ -1,7 +1,7 @@
 # 點數審核系統－路由與頁面設計
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-09
+- 最後更新：2026-08-11
 - 相關文件：[產品需求](product-requirements.md)、[流程與權限](workflows-and-permissions.md)
 
 ## 1. 路由原則
@@ -12,12 +12,14 @@
 - 已登入但角色或權限不符時顯示 403 頁。
 - 不存在或基於安全理由不可揭露的資源顯示 404 頁。
 - `/` 第一版直接導向 `/apply`，不額外建立行銷首頁。
+- Production 以根路徑 `/` 部署，不設定子路徑 base path。
+- 共用公開導覽列提供「開始申請」前往 `/apply`，以及「申請辦法」前往 `/rules`。
 
 ## 2. 公開路由
 
 | 路由 | 頁面 | 說明 |
 | --- | --- | --- |
-| `/apply` | 申請類型入口 | 四種類型卡片 |
+| `/apply` | 申請類型入口 | 四個申請類型連結 |
 | `/apply/competition` | 競賽申請 | 五步表單 |
 | `/apply/project-participation` | 參與計畫申請 | 五步表單 |
 | `/apply/certificate` | 證照申請 | 五步表單 |
@@ -32,14 +34,14 @@
 
 ## 3. 公開申請入口
 
-`/apply` 顯示四張卡片：
+`/apply` 顯示標題「請選擇申請類型」，並提供四個大型申請類型連結：
 
 - 競賽申請
 - 參與計畫申請
 - 證照申請
 - 展覽申請
 
-每張卡片顯示簡短適用情境、目前允許人數與最低附件要求，並提供「開始申請」及「查看申請辦法」。完整規則不嵌入卡片。
+四個連結分別前往 `/apply/competition`、`/apply/project-participation`、`/apply/certificate` 與 `/apply/exhibition`。入口頁不顯示額外說明、參與人數、最低附件摘要或個別的「查看申請辦法」；完整辦法統一由共用公開導覽列前往 `/rules`。
 
 ## 4. 類型專屬五步表單
 
@@ -161,7 +163,6 @@
 | `/admin/users/:userId` | 帳號詳情 |
 | `/admin/advisors` | 老師與主任管理 |
 | `/admin/rules/points` | 四類點數規則 |
-| `/admin/rules/participants` | 參與人數規則 |
 | `/admin/instructions` | 年度申請辦法管理 |
 
 桌面使用左側導覽，手機使用可展開選單。`/admin` 直接導向 `/admin/applications`，第一版不建立統計儀表板。

@@ -30,7 +30,7 @@
 
 ## Open Questions
 
-- `docs/project/backend-contract-changes.md` 的 B01–B11 尚未標示後端同步完成情況；各相關 Slice 可先依最終契約與 MSW 開發，但真實後端整合驗收需等待對應契約可用。
+- `docs/project/backend-contract-changes.md` 的 B01–B12 尚未標示後端同步完成情況；各相關 Slice 可先依最終契約與 MSW 開發，但真實後端整合驗收需等待對應契約可用。
 - 證照編號 trim／大小寫正規化及併發防止重複申請的後端策略尚未定案；會影響 `FS-006` 的 Integration Contract 與真實驗收資料。
 - 管理端 Users、Advisors、Rules、Instructions、Applications 與 Transactions 只定義功能群組，尚缺完整 endpoint、欄位、分頁、錯誤與權限契約；會影響 `FS-015` 至 `FS-019` 的 Spec 與 Plan。
 
@@ -40,7 +40,7 @@
 |---|---|---|---|---|---|---|---|---|
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-002 | `published-instructions` | feature | none | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
-| FS-003 | `application-entry` | feature | none | none | none | in-progress | I1 前端基礎已完成；等待明確要求繼續 I2，且須先確認公開人數契約與卡片文案。 | 2026-08-11 |
+| FS-003 | `application-entry` | feature | none | none | none | awaiting-approval | I1 前端基礎已完成並保留；入口需求已改為共用公開導覽與四個申請連結，Spec／Plan 已撤銷核准，等待重新審查。 | 2026-08-11 |
 | FS-004 | `competition-application` | feature | FS-003 | none | none | proposed | 已補充共用申請表架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
 | FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已由第一版需求建立；證照正規化契約待確認。 | 2026-08-10 |
@@ -55,7 +55,7 @@
 | FS-015 | `admin-application-oversight` | feature | FS-001, FS-012 | none | none | proposed | 已補充管理員工作區共用架構責任；管理端細部 API 契約待確認。 | 2026-08-10 |
 | FS-016 | `admin-user-management` | feature | FS-001 | none | none | proposed | 已由第一版需求建立；管理端細部 API 契約待確認。 | 2026-08-10 |
 | FS-017 | `admin-advisor-management` | feature | FS-001 | none | none | proposed | 已由第一版需求建立；管理端細部 API 契約待確認。 | 2026-08-10 |
-| FS-018 | `admin-rule-management` | feature | FS-001 | none | none | proposed | 已由第一版需求建立；管理端細部 API 契約待確認。 | 2026-08-10 |
+| FS-018 | `admin-rule-management` | feature | FS-001 | none | none | proposed | 第一版範圍已限縮為點數規則管理；管理端細部 API 契約待確認。 | 2026-08-11 |
 | FS-019 | `admin-instruction-management` | feature | FS-001, FS-002 | none | none | proposed | 已由第一版需求建立；管理端細部 API 契約待確認。 | 2026-08-10 |
 
 ## Documents
