@@ -9,8 +9,8 @@
 - 核准 `docs/project/` 需求變更，授權包含該需求變更的下一個已說明 Documentation Batch。
 - 要求為指定 ID 建立 Spec 與 Plan，授權 Draft Documentation commit。
 - 明確核准 Spec 與 Plan，即同時核准其內含 Commit Plan 並授權 Approval Documentation commit；不得另行要求 Commit Plan 或 commit 確認，但此核准不授權開始實作。
-- 明確要求開始或繼續下一個 implementation batch，授權該 batch 完成後的 commit。
-- 要求執行完整 AI Verification，授權 AI Verification Documentation commit。
+- 對 `continuous` Plan，明確要求開始實作，授權依序完成所有尚未提交的 implementation batches、各 batch commits、完整 AI Verification 與 AI Verification Documentation commit。
+- 對沒有 `Implementation Execution` 欄位的 legacy `per-batch` Plan，明確要求開始或繼續下一個 implementation batch，只授權該 batch commit；完整 AI Verification 維持明確執行要求。
 - 明確提供 Human Acceptance 結果，授權 Final 或 Acceptance Feedback Documentation commit。
 
 模糊回覆不構成需求、Blueprint、Spec / Plan、implementation 或 Human Acceptance 的工作授權。取得工作授權後，不再另問是否 commit。
@@ -19,8 +19,8 @@
 
 - `committed` 不代表 AI Verification 通過。
 - AI Verification 通過不代表 Human Acceptance 通過。
-- 一次只執行並提交一個 batch；commit 後停止。
-- 下一個 implementation batch 必須由使用者再次明確要求開始或繼續。
+- 一個 batch 恰好對應一個 commit。`continuous` sequence 一次仍只執行並提交一個 batch，但 commit 後直接進入下一個已核准 batch。
+- Approval Documentation commit 後停止並詢問是否開始實作。`continuous` sequence 只在 Verification Documentation commit、停止條件或 Human Acceptance checkpoint 停止；legacy `per-batch` Plan 維持每個 commit 後停止。
 - 依核准 Commit Plan 的順序執行，不跳過尚未建立的較早 batch。
 - 不建立空 commit，不 push，也不改寫既有 commit history。
 
@@ -39,21 +39,27 @@
 
 讓每個 batch：
 
-- 只有一個清楚目的。
+- 只回答一個清楚的審查問題，並恰好建立一個 commit。
 - 包含明確且有限的檔案。
 - 不包含其他 Feature Slice 或無關變更；已核准且本質上涉及多個 Slice 的 Blueprint batch 除外。
 - 能以 Required Verification 提供合理信心。
-- 儘可能保持 buildable，並將行為實作與直接相關測試放在同一 batch。
+- 保持 buildable 或至少通過該階段適用的 typecheck、lint 或其他基礎檢查。
+- 原則上分開 build / dependency / tooling、test infrastructure、runtime / routing / providers、使用者可見功能、tests 與 documentation。只有拆分會造成中間 commit 無法建置或無法合理運作時，才合併不可分割的內容。
+- 預設將可獨立審查的測試放入緊接對應實作的 `test` batch；若測試是讓實作 commit 可驗證或安全成立的必要部分，允許放在同一 batch。
+- 能獨立理解並合理回退。不得以 `foundation`、`setup` 或同類寬泛目的包入多種審查工作。
 - 使用已授權操作、Blueprint Revision Proposal 或核准 Commit Plan 中的 message。
+- 不在 I1 或任何單一 batch 內隱藏多個 commits，也不建立 Commit Plan 未列出的 implementation commit。
 
 允許 message type：
 
 ```text
 docs
 chore
+build
 feat
 test
 fix
+refactor
 ```
 
 使用格式：
@@ -62,7 +68,13 @@ fix
 <type>(<scope>): <English summary>
 ```
 
-一般 batch 的 scope 使用 Feature Slice ID；跨 Slice 的 Blueprint batch 使用 `blueprint`。
+Implementation batch 的 scope 使用穩定且能辨識受影響模組的英文名稱，例如 `tooling`、`testing`、`app`、`routing`、`points` 或 `public`，並在 commit body 加入：
+
+```text
+Feature-Slice: <ID>
+```
+
+Feature Slice 文件 checkpoint 的 scope 使用 Feature Slice ID；跨 Slice 的 Blueprint batch 使用 `blueprint`。
 
 ## 自動建立 Commit
 
@@ -75,10 +87,10 @@ fix
 5. 只 stage 本次操作的明確檔案。
 6. 檢查 staged file list、staged diff 與排除項目。
 7. 使用已授權 message 建立 commit。
-8. 回報 Commit ID、message、檔案、排除項目與驗證結果。
-9. 停止，不自行開始下一個操作或 batch。
+8. 記錄 Commit ID、message、檔案、排除項目與驗證結果，供 sequence 完成或中斷時統一回報。
+9. 若為 `continuous` sequence 且仍有已核准 implementation batch，直接執行下一個；若 implementation 已完成，直接執行完整 AI Verification。其他文件 checkpoint、legacy batch、停止條件或 Verification Documentation commit 完成時才停止。
 
-若檔案、message、Scope、驗證要求或 batch 順序與授權內容不一致，停止並說明差異，不 stage 或 commit。若 stage 後才發現異常，只撤銷本次操作新增的 staging，不改動 working tree 或操作開始前的 Git 狀態，然後停止等待使用者處理。
+若檔案、message、Scope、驗證要求或 batch 順序與授權內容不一致，停止並說明差異，不 stage 或 commit。若 stage 後才發現異常，只撤銷本次操作新增的 staging，不改動 working tree 或操作開始前的 Git 狀態，然後停止等待使用者處理。若問題能在目前 batch 核准的 Purpose、Files 與 Scope 內於 commit 前修正，修正並重跑驗證，不需中斷 sequence。新增或重組 batch、修改未核准檔案、改變 Spec / Plan / Integration Contract、處理範圍外失敗、取得使用者決策或 Human Integration，以及無法安全分離 working tree 變更時必須停止。
 
 ## 文件 Checkpoints
 
@@ -132,7 +144,7 @@ docs(<ID>): draft <feature> specification
 docs(<ID>): approve <feature> specification
 ```
 
-包含 approved Spec、approved Plan、Slice Brief、blueprint `approved` 狀態，以及尚未提交且已核准的 `docs/project/` 變更。commit 後停止；只有使用者再次要求繼續時才開始第一個 implementation batch。
+包含 approved Spec、approved Plan、Slice Brief、blueprint `approved` 狀態，以及尚未提交且已核准的 `docs/project/` 變更。commit 後停止、回報 Commit ID 並詢問是否開始實作；只有使用者再次明確要求開始實作時才進入 implementation。
 
 ### Specification Revision
 
@@ -146,7 +158,7 @@ docs(<ID>): revise <feature> specification
 
 ### Implementation
 
-每個 implementation batch 只在使用者明確要求開始或繼續後執行。完成 Required Verification 後，使用 Commit Plan 中的 message 直接 commit；若 required check 未達到 Plan 要求，停止且不 commit。
+`continuous` Plan 只在使用者明確要求開始實作後進入 sequence；該授權涵蓋所有尚未提交的 implementation batches 與後續完整 AI Verification。每個 batch 完成 Required Verification 後，使用 Commit Plan 中的 message 與 `Feature-Slice: <ID>` body 直接 commit，然後繼續下一個 batch。若 required check 未達到 Plan 要求且無法在目前 batch 核准範圍內修正，停止且不 commit。legacy `per-batch` Plan 維持每個 batch 需明確要求、commit 後停止的行為。
 
 ### AI Verification Documentation
 

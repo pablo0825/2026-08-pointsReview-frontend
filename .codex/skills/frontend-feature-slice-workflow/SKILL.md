@@ -24,8 +24,8 @@ description: Analyze frontend requirement documents to create, review, revise, o
 - 不得將未實際執行的檢查標示為通過。
 - 只有使用者能確認 Human Integration 與 Human Acceptance。
 - 將 committed、AI verified 與 human accepted 視為三種不同事實；commit 不代表驗證或驗收通過。
-- 將使用者對操作、Proposal、Spec / Plan、下一個 implementation batch 或 Human Acceptance 結果的明確授權視為對應 commit 的授權；Spec 與 Plan 的核准同時涵蓋其內含 Commit Plan 與 Approval Documentation commit，不另行詢問；完成核准工作並通過必要檢查後直接 commit。
-- 每個自動 commit 後停止；下一個 implementation batch 仍須由使用者明確要求開始或繼續。
+- 將使用者對操作、Proposal、Spec / Plan、開始實作或 Human Acceptance 結果的明確授權視為對應 commit 的授權；Spec 與 Plan 的核准同時涵蓋其內含 Commit Plan 與 Approval Documentation commit，不另行詢問；完成核准工作並通過必要檢查後直接 commit。
+- 文件核准與 Human Acceptance checkpoint 在自動 commit 後停止。`continuous` Plan 的 implementation batches 各自 commit，但批次之間不中斷；完成所有 implementation batches 後直接執行完整 AI Verification，直到 Verification Documentation commit 後才停止。
 - 完成目前操作後停止，不自行開始下一個 Feature Slice。
 - 保留與目前 Feature Slice 無關的既有變更。
 - 不 push Git commit。
@@ -57,7 +57,7 @@ description: Analyze frontend requirement documents to create, review, revise, o
 6. 實作並執行 AI Verification。
 7. 記錄 Human Integration 或 Human Acceptance。
 8. 更新已變更的 Spec 與 Plan。
-9. 執行並自動提交下一個已授權的 Commit Batch。
+9. 執行並自動提交已授權的 implementation sequence。
 
 不要因為完成某一操作而自行進入下一操作。
 
@@ -254,7 +254,9 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 對 `change` Slice，在新 Spec 記錄 Previous Spec、Current Behavior、Target Behavior 與 Preserved Behavior。對 `correction` Slice，記錄 Authoritative Spec 與必須恢復的既有 Acceptance。不要在新舊 Spec 之間共用資料夾。
 
-完成 Spec 草稿後，才分析專案結構、framework、components、routes、state、API clients、types、styles、tests、tooling、既有實作、Spec 落差、回歸風險與 working tree，並建立定義「怎麼做」的 Plan。Plan 必須包含可獨立檢視的 Commit Plan，依序包含 Approval Documentation Batch、一個以上的 implementation batches、AI Verification Documentation Batch，以及 Human Acceptance 後的 Final Documentation Batch。Draft Documentation Batch 由建立 Spec / Plan 的明確要求授權，不屬於尚未核准的 Commit Plan。
+完成 Spec 草稿後，才分析專案結構、framework、components、routes、state、API clients、types、styles、tests、tooling、既有實作、Spec 落差、回歸風險與 working tree，並建立定義「怎麼做」的 Plan。新 Plan 必須標示 `Implementation Execution: continuous`，並包含可獨立檢視的 Commit Plan，依序列出 Approval Documentation Batch、一個以上依明確目的拆分的 implementation batches、AI Verification Documentation Batch，以及 Human Acceptance 後的 Final Documentation Batch。每個 implementation batch 恰好對應一個 commit，不得在單一 I1 內隱藏多個 commit，也不得為了增加 commit 數量而拆開不可分割的工作。Draft Documentation Batch 由建立 Spec / Plan 的明確要求授權，不屬於尚未核准的 Commit Plan。
+
+已核准且沒有 `Implementation Execution` 欄位的既有 Plan 視為 legacy `per-batch`。不得因 Skill 更新而重新拆分、修改或撤銷其核准；只有使用者主動要求修訂 Commit Plan 時，才能改用新規則。
 
 現有程式碼與 Spec 不一致時：
 
@@ -278,7 +280,7 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 ## 核准 Spec 與 Plan
 
-只接受使用者對 Spec 與 Plan 明確表達的核准，不將「看起來不錯」、「應該可以」、「先這樣」等模糊回覆推論為核准。此核准同時核准 Plan 內的 Commit Plan，並授權建立 Approval Documentation Batch commit；不得再詢問使用者是否核准 Commit Plan、是否同意建立 commit，或是否同意繼續開發。
+只接受使用者對 Spec 與 Plan 明確表達的核准，不將「看起來不錯」、「應該可以」、「先這樣」等模糊回覆推論為核准。此核准同時核准 Plan 內的 Commit Plan，並授權建立 Approval Documentation Batch commit；不得再詢問使用者是否核准 Commit Plan 或是否同意建立 commit。核准不授權開始實作。
 
 取得明確核准後：
 
@@ -289,24 +291,26 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 5. 若為 `change`，在被 Revises 的舊 Spec 加入 `Supersession Pending` 提示，但維持其 `Document Status: completed`。
 6. 若為 `correction`，保持原 Spec 不變且有效。
 7. 直接建立 Commit Plan 中的 Approval Documentation Batch commit。
-8. 回報 Commit ID 後停止；即使使用者同時要求繼續，也不在同一操作開始 implementation batch。
-9. 只有使用者再次明確要求開始或繼續時，才執行第一個 implementation batch。
+8. 回報 Commit ID 後停止，並詢問使用者是否開始實作；即使使用者同時要求繼續，也不在同一操作開始 implementation batch。
+9. 只有使用者再次明確要求開始實作時，才進入 implementation sequence。
 
 ## AI 實作
 
 開始前確認 blueprint 與文件皆為 `approved`，再次檢查 working tree，確認沒有無法安全保留的重疊變更，再將 blueprint 設為 `in-progress`。
 
-只在使用者明確要求開始或繼續下一個 batch 後，執行已核准 Plan 中的 AI Implementation Tasks，並一次只處理一個 Commit Batch。不得擴張 Scope、順便實作其他 Slice、自行回答會改變需求的 Open Question、擴大重構，或覆寫無關變更。
+對標示 `Implementation Execution: continuous` 的 Plan，只在使用者明確要求開始實作後執行。這一次授權涵蓋 Commit Plan 中所有尚未完成的 implementation batches、各 batch 的 Required Verification、完整 AI Verification 與 Verification Documentation commit。嚴格依 I1、I2、…、In 順序執行；每個 batch 恰好建立一個 commit，完成 commit 後直接繼續下一個 batch，不詢問或等待使用者。
 
-完成一個 Commit Batch 後，執行該 batch 指定的驗證，再依 [commit-workflow.md](references/commit-workflow.md) 檢查 message、檔案、diff、排除項目與驗證結果，直接建立 commit。回報 Commit ID 後停止；只有使用者再次明確要求繼續時才開始下一個 batch。
+每個 batch 開始前重新檢查 working tree；完成後執行該 batch 指定的驗證，再依 [commit-workflow.md](references/commit-workflow.md) 檢查 message、檔案、diff、排除項目與驗證結果並直接 commit。完成所有 implementation batches 後，不停下詢問，直接執行完整 AI Verification。
 
-若必須實質修改 Spec 或 Plan，停止實作，記錄發現，更新文件草稿，將 blueprint 設為 `awaiting-approval`，等待重新核准。若無關變更與本 Slice 修改同一檔案且無法安全分離，停止並詢問使用者。
+不得擴張 Scope、順便實作其他 Slice、自行回答會改變需求的 Open Question、擴大重構、覆寫無關變更，或建立未列入 Commit Plan 的隱藏 commit。若問題能在目前 batch 的核准 Scope 與檔案範圍內於 commit 前修正，修正、重跑驗證並繼續。若必須新增或重組 batch、修改未核准檔案、實質修改 Spec / Plan / Integration Contract、處理無法在範圍內修正的驗證失敗、取得使用者決策或 Human Integration，或分離重疊的 working tree 變更，停止並說明。
+
+對沒有 `Implementation Execution` 欄位的 legacy `per-batch` Plan，維持既有行為：每次只在使用者明確要求開始或繼續後執行下一個 batch，commit 後停止。從中斷恢復時，依 Plan 與 Git history 從第一個尚未提交的 batch 繼續，不重做已提交 batch。
 
 ## AI Verification
 
 完整讀取 [verification-template.md](references/verification-template.md)。
 
-只執行已核准 Plan 中的 AI Verification。依專案能力執行 build、unit、integration、end-to-end、lint、typecheck、format、accessibility、browser smoke test 或 responsive inspection。Commit Batch 的局部驗證不能取代完成所有實作後的完整 AI Verification。
+只執行已核准 Plan 中的 AI Verification。`continuous` implementation sequence 在最後一個 implementation commit 後自動進入完整 AI Verification，不另行要求授權；legacy `per-batch` Plan 維持既有的明確執行要求。依專案能力執行 build、unit、integration、end-to-end、lint、typecheck、format、accessibility、browser smoke test 或 responsive inspection。Commit Batch 的局部驗證不能取代完成所有實作後的完整 AI Verification。
 
 只使用 `passed`、`failed`、`not-run`、`not-applicable`：
 
@@ -358,7 +362,7 @@ proposed -> awaiting-approval -> approved -> in-progress -> awaiting-human -> ac
 
 建立 Blueprint 的明確要求、已核准的 Blueprint Revision Proposal，以及建立 draft Spec / Plan 的明確要求，都可以在 Spec 與 Plan 核准前授權對應的文件 commit。這些 commit 只能包含該操作產生的需求與規劃文件，不得包含未核准的程式碼或測試。
 
-Spec 與 Plan 核准後即可依 Commit Plan 自動建立文件或實作 batch；不必等待整個 Slice `accepted`。每個 batch 必須可獨立檢視、只包含本 Slice 相關變更，並在 Plan 中預先列出 purpose、files、required verification 與 proposed message。
+Spec 與 Plan 核准後即可依 Commit Plan 自動建立文件 checkpoint；implementation 仍須等待使用者在 Approval commit 後明確要求開始。`continuous` Plan 開始後依 Commit Plan 連續建立所有 implementation commits 與 Verification Documentation commit；不必等待整個 Slice `accepted`。每個 batch 必須可獨立檢視、只包含本 Slice 相關變更，並在 Plan 中預先列出 purpose、files、required verification 與 proposed message。
 
 若本 Slice 包含使用者已核准且尚未提交的 `docs/project/` 變更，將其納入 Draft、Blueprint Revision 或 Approval Documentation Batch 中最接近且已授權的文件 checkpoint；不得重複提交。
 

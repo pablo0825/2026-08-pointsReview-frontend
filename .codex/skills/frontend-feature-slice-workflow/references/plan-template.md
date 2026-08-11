@@ -151,15 +151,18 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 - Commit Plan Approval: `pending`
 - Approved By: `pending`
 - Approved At: `pending`
+- Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
 |---|---|---|---|---|
 | Approval | 保存已核准的需求與 Slice 文件 | 已核准的 `docs/project/` 變更（如有）、Slice Brief、Spec、Plan、blueprint | 文件一致性 | `docs(<ID>): approve <feature> specification` |
-| I1 | <第一個可獨立檢視的實作目的> | `<paths>` | <checks> | `<type>(<ID>): <English summary>` |
+| I1 | <第一個原子實作目的> | `<specific paths>` | <batch checks> | `<type>(<module>): <English summary>` |
+| I2 | <第二個原子實作目的> | `<specific paths>` | <batch checks> | `<type>(<module>): <English summary>` |
+| I3 | <第三個原子實作目的；依實際需要增減 implementation rows> | `<specific paths>` | <batch checks> | `<type>(<module>): <English summary>` |
 | Verification | 保存完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據 | `docs(<ID>): record <feature> verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint、必要 lineage 文件 | 文件一致性 | `docs(<ID>): record <feature> acceptance` |
 
-Commit Plan Approval 使用 `pending`、`approved`。每個 batch 只涵蓋一個清楚目的，並保持可獨立檢視。將相關測試與實作放在同一 batch，或確保每個中間 commit 仍具合理可驗證性。
+Commit Plan Approval 使用 `pending`、`approved`。新 Plan 的 Implementation Execution 固定使用 `continuous`；缺少此欄位的已核准既有 Plan 視為 legacy `per-batch`，不得自動補欄位或套用新執行方式。每個 implementation batch 恰好對應一個 commit，並在 commit body 加入 `Feature-Slice: <ID>`。
 
 ## Approval
 
@@ -181,11 +184,16 @@ Commit Plan Approval 使用 `pending`、`approved`。每個 batch 只涵蓋一�
 - 不得將實作分析或現有程式碼推論出的行為回寫成產品需求。
 - Spec 與 Plan 經使用者明確核准時，自動將 Commit Plan Approval 設為 `approved`，並使用相同的 Approved By 與 Approved At；不得另行詢問 Commit Plan 核准。
 - Draft Documentation Batch 在 Spec / Plan 建立後自動 commit，讓使用者能以 Git diff 審查後續修改。
-- 第一個已核准 batch 必須是 Approval Documentation Batch；Spec 與 Plan 的核准即授權此 commit，不得另行詢問 commit；建立後停止，等待使用者要求開始 implementation。
-- 每個 implementation batch 只在使用者明確要求開始或繼續後執行，完成與驗證後直接 commit。
-- 完整 AI Verification 後直接建立 Verification Documentation commit。
+- 第一個已核准 batch 必須是 Approval Documentation Batch；Spec 與 Plan 的核准即授權此 commit，不得另行詢問 commit；建立後停止、回報 Commit ID 並詢問使用者是否開始 implementation。
+- 一個 implementation batch 恰好對應一個 commit；不得在 I1 或其他單一 batch 內隱藏多個 commits。
+- 依 build / dependency / tooling、test infrastructure、runtime / routing / providers、使用者可見功能、tests 與 documentation 等審查目的拆分；只有拆開會造成中間 commit 無法建置或無法合理運作時才能合併。
+- 每個 batch 必須能獨立理解並合理回退，Files 使用具體且有限的路徑，並列出自己的 Required Verification；不得以 `foundation`、`setup` 或同類寬泛目的合併不同工作。
+- 測試預設放入緊接對應實作的 `test` batch；若測試是讓實作 commit 可驗證或安全成立的必要部分，允許與實作同一 batch。
+- Implementation message 使用 `build`、`chore`、`feat`、`fix`、`test`、`refactor` 或 `docs`，scope 使用英文模組名稱；文件 checkpoint 繼續使用 Feature Slice ID。
+- 使用者明確要求開始實作後，依 I1、I2、…、In 順序連續執行所有 implementation batches；每個 batch 完成與驗證後直接 commit，批次之間不停止或詢問。
+- 完成最後一個 implementation batch 後不停止詢問，直接執行完整 AI Verification 並建立 Verification Documentation commit。
 - Human Acceptance 結果授權 Final 或 Acceptance Feedback Documentation commit。
 - 已授權 batch 不再要求第二次 commit 確認。
-- 不執行未列入 Commit Plan 或尚未核准的 batch。
+- 不執行或建立未列入 Commit Plan、尚未核准或隱藏在其他 batch 內的 implementation commit；需要新增或重組 batch 時停止並重新核准 Commit Plan。
 - 只改變 batch 分組、順序或 message 時，將 Commit Plan Approval 設回 `pending`；若 Scope 也改變，依 Skill 撤銷完整 Plan 核准。
 - 最終 Documentation Batch 必須位於 Human Acceptance 之後。
