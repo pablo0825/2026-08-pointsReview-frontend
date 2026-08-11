@@ -158,11 +158,11 @@ GET /public/application-instructions?applicationType=competition
 - `sectionKey`：section 的穩定識別字串。
 - `title`：section 標題。
 - `content`：Markdown 內容。
-- `displayOrder`：顯示順序數字。
+- `displayOrder`：同一 `applicationType` 與 `academicYear` 內的 section 顯示順序數字。
 - `effectiveFrom`：`YYYY-MM-DD` 生效日期字串。
 - `effectiveTo`：`YYYY-MM-DD` 失效日期字串或 `null`。
 
-省略 `academicYear` 時，Response 可用來取得該 `applicationType` 的所有公開學年度及其 sections；提供 `academicYear` 時，`data` 只包含該學年度的 sections。前端仍須以 Zod 驗證每筆資料，並在呈現前清理 Markdown。
+同一 `applicationType` 與 `academicYear` 可以包含多筆 sections；前端在呈現前必須依 `displayOrder` 由小到大排序。省略 `academicYear` 時，Response 可用來取得該 `applicationType` 的所有公開學年度及其 sections；提供 `academicYear` 時，`data` 只包含該學年度的 sections。前端仍須以 Zod 驗證每筆資料，並在呈現前清理 Markdown。
 
 ## 6. 正式申請 multipart
 

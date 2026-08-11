@@ -43,7 +43,7 @@
 - 選定申請類型後，頁面預設顯示目前臺灣學年度的公開申請辦法。
 - 訪客可切換至可供閱讀的其他學年度；目前與歷史內容有清楚標示。
 - 頁面只呈現後端判定為已發布且可見的內容。
-- 一個學年度可由一個或多個辦法 section 組成；各 section 的 Markdown 保留可閱讀的標題階層，並提供目錄與可定位的章節錨點。
+- 一個申請類型與學年度可由一個或多個辦法 section 組成；頁面依 `displayOrder` 由小到大排列，各 section 的 Markdown 保留可閱讀的標題階層，並提供目錄與可定位的章節錨點。
 - 頁面具有明確的載入、無內容與失敗狀態；失敗時可重試。
 - 桌面與 360px 寬度皆可閱讀、操作，不產生非必要的水平捲動。
 
@@ -78,7 +78,7 @@
 6. 選定申請類型後，頁面預設顯示目前臺灣學年度。
 7. 學年度選擇器只顯示所選申請類型可供公開閱讀的學年度，並允許切換目前與歷史內容。
 8. 頁面只呈現後端提供的已發布且可見內容，不得顯示草稿、未發布或隱藏內容。
-9. 同一申請類型與學年度可包含一個或多個 sections；每個 section 必須保留其標題與 Markdown 內容。
+9. 同一申請類型與學年度可包含一個或多個 sections；前端必須依 `displayOrder` 由小到大排列，每個 section 必須保留其標題與 Markdown 內容。
 10. Markdown 標題必須具有同頁唯一的錨點；目錄項目必須對應並可前往相關標題。
 11. Markdown 或內嵌 HTML 中的腳本、事件處理屬性、危險 URL 與其他可執行內容不得進入頁面；文章連結必須具備安全行為。
 12. 查詢期間顯示載入狀態；查無公開內容時顯示所選申請類型與學年度的無內容狀態；查詢失敗時顯示安全、可理解的錯誤訊息與重試操作。
@@ -110,6 +110,7 @@
 - `GET /public/application-instructions?applicationType=competition` 回傳 `competition` 的所有公開學年度 sections；加上 `academicYear=114` 時，`data` 只包含 114 學年度的 sections。
 - 成功回應遵循 `{ "data": [...] }` envelope。每筆資料包含 `academicYear`、`revisionNumber`、`sectionKey`、`title`、`content`、`displayOrder`、`effectiveFrom` 與可為 `null` 的 `effectiveTo`。
 - `academicYear`、`sectionKey`、`title` 與 `content` 是字串；`revisionNumber` 與 `displayOrder` 是數字；`effectiveFrom` 與非空的 `effectiveTo` 使用 `YYYY-MM-DD`。
+- 同一 `applicationType` 與 `academicYear` 可包含多筆 sections；前端呈現前依 `displayOrder` 由小到大排序。
 - 省略 `academicYear` 的回應提供所選 `applicationType` 可切換的公開學年度；提供 `academicYear` 的回應限制為指定年度。
 - 每次查詢皆以所選 `applicationType` 與選填 `academicYear` 為輸入；切換任一條件時，舊查詢不得覆蓋目前選擇的結果。
 - 回應不符合正式 wire contract 時，以安全的失敗狀態呈現，不顯示未驗證內容。
@@ -124,7 +125,7 @@
 - [ ] 自動驗證四個合法 `applicationType` 均可查詢，且不會送出 enum 以外的值。
 - [ ] 自動驗證選定申請類型後使用目前臺灣學年度，切換申請類型或學年度會查詢並顯示相對應內容。
 - [ ] 自動驗證只顯示公開端點提供的內容；空內容不會顯示成成功文章。
-- [ ] 自動驗證 section 陣列的所有欄位通過契約驗證，並呈現所選學年度的一個或多個 sections。
+- [ ] 自動驗證 section 陣列的所有欄位通過契約驗證，並將所選申請類型與學年度的一個或多個 sections 依 `displayOrder` 由小到大呈現。
 - [ ] 自動驗證 Markdown 標題會產生唯一錨點，且目錄可正確定位各章節。
 - [ ] 自動驗證惡意 HTML、事件屬性、危險 URL 與其他可執行內容不會進入頁面。
 - [ ] 自動驗證載入、無內容、API 失敗、契約驗證失敗與成功狀態。
@@ -142,7 +143,6 @@
 
 ## Open Questions
 
-- 同一學年度存在多個 sections 時，是否由後端保證 `displayOrder` 順序，以及前端是否需自行排序，尚未確認。
 - 沒有內容、未發布與隱藏內容是以 `200` 加上空陣列或其他 HTTP 結果表示，以及公開端點是否保證只回傳已發布且可見內容，仍待確認。
 
 上述問題不阻擋 Draft 文件修訂，但在開始資料層與頁面實作前必須確認。
