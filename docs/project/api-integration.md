@@ -164,6 +164,14 @@ GET /public/application-instructions?applicationType=competition
 
 同一 `applicationType` 與 `academicYear` 可以包含多筆 sections；前端在呈現前必須依 `displayOrder` 由小到大排序。省略 `academicYear` 時，Response 可用來取得該 `applicationType` 的所有公開學年度及其 sections；提供 `academicYear` 時，`data` 只包含該學年度的 sections。前端仍須以 Zod 驗證每筆資料，並在呈現前清理 Markdown。
 
+查無符合條件的公開 sections 時，後端固定回傳 `HTTP 200 OK` 與空陣列，不回傳 `404`：
+
+```json
+{
+  "data": []
+}
+```
+
 ## 6. 正式申請 multipart
 
 `payload` 為 JSON 字串，檔案欄位使用 `attachments[{clientFileKey}]`。每個 metadata 必須剛好對應一個檔案。
