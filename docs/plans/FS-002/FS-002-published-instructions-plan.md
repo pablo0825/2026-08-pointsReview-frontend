@@ -184,19 +184,19 @@
 - [x] 建立單元、元件／整合與 Chromium browser tests。
 - [x] 更新既有 Router 與 application-entry regression tests。
 - [x] 完成 verification record 與 blueprint 文件更新。
-- [ ] 將頁面改為每個申請類型只查詢一次所有年度，並在前端依學年度篩選且保留 API 順序。
-- [ ] 更新元件與 Chromium tests，驗證類型選擇恰好一個 request、年度切換不新增 request，以及快速類型切換不顯示 stale result。
+- [x] 將頁面改為每個申請類型只查詢一次所有年度，並在前端依學年度篩選且保留 API 順序。
+- [x] 更新元件與 Chromium tests，驗證類型選擇恰好一個 request、年度切換不新增 request，以及快速類型切換不顯示 stale result。
 
 ## AI Verification
 
-- [ ] 執行 `npm run build`
-- [ ] 執行 `npm run test`
-- [ ] 執行 `npm run lint`
-- [ ] 執行 `npm run typecheck`
-- [ ] 執行 `npm run test:e2e -- e2e/published-instructions.spec.ts e2e/application-entry.spec.ts --project=chromium`
-- [ ] 以 Playwright 驗證單次類型查詢、年度切換零新增 request、desktop 與 360px、鍵盤、44×44px targets、TOC、連結及無水平溢位
-- [ ] 驗證修訂後 Target Behavior
-- [ ] 回歸驗證 `/` redirect、`/apply`、Public Layout 導覽與四個申請目的 route placeholders
+- [x] 執行 `npm run build`
+- [x] 執行 `npm run test`
+- [x] 執行 `npm run lint`
+- [x] 執行 `npm run typecheck`
+- [x] 執行 `npm run test:e2e -- e2e/published-instructions.spec.ts e2e/application-entry.spec.ts --project=chromium`
+- [x] 以 Playwright 驗證單次類型查詢、年度切換零新增 request、desktop 與 360px、鍵盤、44×44px targets、TOC、連結及無水平溢位
+- [x] 驗證修訂後 Target Behavior
+- [x] 回歸驗證 `/` redirect、`/apply`、Public Layout 導覽與四個申請目的 route placeholders
 
 ## Human Integration
 
@@ -229,7 +229,7 @@
 - [x] 更新 Slice Brief 或 blueprint 文件連結。
 - [x] 更新 Spec 狀態。
 - [x] 更新 Plan 狀態。
-- [ ] 更新 verification record。
+- [x] 更新 verification record。
 - [x] 更新 blueprint Status、Status Note 與 Last Updated。
 - [x] `not-applicable`；本 Slice 不是 `change`，不需 supersession lineage。
 - [x] `docs/project/` 與 API wire contract 不需修改；現有文件已允許省略 `academicYear` 取得所有年度 sections。
