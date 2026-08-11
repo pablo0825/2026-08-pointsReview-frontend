@@ -7,6 +7,7 @@ import {
 import { RouteErrorPage } from '../error-boundaries/route-error-page'
 import { PublicLayout } from '../layouts/public-layout'
 import { ApplicationEntryPage } from '../../features/applications/entry/application-entry-page'
+import { PublishedInstructionsPage } from '../../features/rules/published-instructions-page'
 
 function createRoutePlaceholder(title: string) {
   return (
@@ -50,7 +51,7 @@ export const appRoutes: RouteObject[] = [
       },
       {
         path: 'rules',
-        element: createRoutePlaceholder('申請辦法準備中'),
+        element: <PublishedInstructionsPage />,
       },
     ],
   },

@@ -2,13 +2,22 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 
+import { AppProviders } from '../providers/app-providers'
 import { appRoutes } from './router'
+
+function renderRouter(router: ReturnType<typeof createMemoryRouter>) {
+  return render(
+    <AppProviders>
+      <RouterProvider router={router} />
+    </AppProviders>,
+  )
+}
 
 describe('application router', () => {
   it('redirects the root route to the application entry', async () => {
     const router = createMemoryRouter(appRoutes, { initialEntries: ['/'] })
 
-    render(<RouterProvider router={router} />)
+    renderRouter(router)
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe('/apply')
@@ -21,7 +30,7 @@ describe('application router', () => {
   it('provides the shared public navigation', () => {
     const router = createMemoryRouter(appRoutes, { initialEntries: ['/apply'] })
 
-    render(<RouterProvider router={router} />)
+    renderRouter(router)
 
     const navigation = screen.getByRole('navigation', { name: '主要導覽' })
     expect(
@@ -36,13 +45,13 @@ describe('application router', () => {
     const user = userEvent.setup()
     const router = createMemoryRouter(appRoutes, { initialEntries: ['/apply'] })
 
-    render(<RouterProvider router={router} />)
+    renderRouter(router)
 
     await user.click(screen.getByRole('link', { name: '申請辦法' }))
 
     expect(router.state.location.pathname).toBe('/rules')
     expect(
-      screen.getByRole('heading', { name: '申請辦法準備中' }),
+      screen.getByRole('heading', { name: '請選擇申請類型' }),
     ).toBeInTheDocument()
   })
 })

@@ -44,7 +44,7 @@ test('navigates to every public application boundary and the rules boundary', as
   await page.getByRole('link', { name: '申請辦法' }).click()
   await expect(page).toHaveURL(/\/rules$/)
   await expect(
-    page.getByRole('heading', { name: '申請辦法準備中' }),
+    page.getByRole('heading', { name: '請選擇申請類型' }),
   ).toBeVisible()
 })
 
