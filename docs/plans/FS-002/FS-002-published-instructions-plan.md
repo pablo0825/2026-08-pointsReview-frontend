@@ -30,7 +30,7 @@
 - 建立 feature-local 的公開申請辦法 section 陣列 wire schema、mapper、包含申請類型與選填學年度的 query key／query function，以及目前臺灣學年度 helper。
 - 建立 MSW server lifecycle、公開申請辦法 fixture 與 handlers，供 component／integration tests 使用。
 - 建立安全 Markdown renderer、同頁唯一 heading anchors、目錄與文章連結安全行為。
-- 以正式頁面取代 `/rules` placeholder，涵蓋申請類型與學年度切換、loading、empty、error、success、retry、鍵盤、輔助科技與 360px 狀態。
+- 以正式頁面取代 `/rules` placeholder，涵蓋初始未選擇狀態、選擇前零 request、申請類型與學年度切換、loading、empty、error、success、retry、鍵盤、輔助科技與 360px 狀態。
 - 建立單元、元件／整合及 Chromium Playwright tests。
 
 ### Excluded
@@ -104,11 +104,11 @@
 - 使用 Mobile First utilities；只在 Markdown 內容行為無法合理由局部 utilities 表達時建立 feature-local CSS。
 - 公開頁最低支援 360px、鍵盤與基本螢幕閱讀器行為；主要互動目標至少 44×44px。
 - 不記錄 response body、內部錯誤、token 或其他敏感資訊。
-- `FS-002` 沒有 blueprint dependency，但資料層與頁面 batch 必須先完成頁面類型選擇、section 排序及 empty／visibility contract 決策。
+- `FS-002` 沒有 blueprint dependency，但頁面 batch 必須先確認申請類型控制項形式，資料層 batch 必須先確認 section 排序及 empty／visibility contract。
 
 ### Unknowns
 
-- `/rules` 初次進入時的預設申請類型、是否要求先選擇，以及類型控制項形式尚未確認。
+- 申請類型控制項的具體呈現形式尚未確認。
 - 同一學年度有多個 sections 時，後端是否保證 `displayOrder` 順序，或前端是否必須自行排序，尚未確認。
 - empty／hidden／unpublished 的 HTTP 或資料表示方式，以及公開端點是否保證只回傳已發布且可見內容，仍待確認。
 
@@ -127,7 +127,7 @@
 - `src/features/rules/components/instructions-article.tsx`：安全 Markdown、heading anchors、目錄與文章連結。
 - `src/features/rules/components/instructions-article.test.tsx`：標題、重複／非 ASCII heading、目錄與惡意內容測試。
 - `src/features/rules/published-instructions-page.tsx`：申請類型／年度選擇與所有 query states 的頁面組合。
-- `src/features/rules/published-instructions-page.test.tsx`：MSW 驗證類型隔離、年度切換、loading、empty、error、retry、success 與 stale result 防護。
+- `src/features/rules/published-instructions-page.test.tsx`：MSW 驗證初始未選擇／零 request、類型隔離、年度切換、loading、empty、error、retry、success 與 stale result 防護。
 - `src/test/server.ts`：共用 MSW Node server。
 - `src/test/handlers/public-application-instructions.ts`：預設公開辦法 handler 與測試覆寫 helpers。
 - `src/test/fixtures/published-instructions.ts`：不含真實個資且通過正式 schema 的不同申請類型、目前／歷史年度與多 section fixtures。
@@ -148,7 +148,7 @@
 - `src/features/rules/api/published-instructions.test.ts`：四個合法 `applicationType`、enum 外拒絕、選填 `academicYear`、section wire schema、mapper、query input/output 與錯誤。
 - `src/features/rules/lib/academic-year.test.ts`：臺灣學年度 8 月 1 日分界。
 - `src/features/rules/components/instructions-article.test.tsx`：sanitization、heading IDs、TOC 與安全 links。
-- `src/features/rules/published-instructions-page.test.tsx`：MSW query states、申請類型／年度切換、retry 與 stale result。
+- `src/features/rules/published-instructions-page.test.tsx`：初始未選擇／零 request、MSW query states、申請類型／年度切換、retry 與 stale result。
 - `src/app/router/router.test.tsx`：公開 route、既有 redirect 與導覽回歸。
 - `e2e/published-instructions.spec.ts`：Chromium desktop／360px、鍵盤、44px targets、TOC、links 與無水平溢位。
 - `e2e/application-entry.spec.ts`：既有申請入口與 rules navigation 回歸。
@@ -158,7 +158,7 @@
 1. 安裝並鎖定 Markdown、GFM、raw HTML parsing、allowlist sanitization 與 slug 所需依賴，確認既有 build 與 tests 不受影響。
 2. 在剩餘契約決策完成的前提下，建立最小共用 GET JSON client，以及 section 陣列 schema、mapper、含必填 `applicationType` 與選填 `academicYear` 的 query、目前臺灣學年度 helper、MSW server／fixture／handler 與對應測試。
 3. 建立 feature-local instructions article renderer；先由解析後的 heading tree 產生唯一 slug 與目錄，再以 allowlist 清理內容及安全連結行為，並覆蓋惡意與重複 heading 案例。
-4. 建立 `PublishedInstructionsPage`，以所選申請類型及學年度驅動 query key，組合控制項、loading、empty、error／retry 與 success sections，避免前一次查詢結果誤標。
+4. 建立 `PublishedInstructionsPage`，初始不選擇類型且停用 query；訪客選擇類型後，才以申請類型及學年度驅動 query key，組合控制項、loading、empty、error／retry 與 success sections，避免前一次查詢結果誤標。
 5. 將正式頁面接入 `/rules`，更新 Router 與既有 application-entry tests，保留 Public Layout、根 redirect 與四個申請目的 routes。
 6. 建立 Chromium browser flow，驗證未登入公開存取、申請類型與年度切換、長篇目錄、鍵盤、44px targets、desktop／360px 與無水平溢位。
 7. 執行完整 AI Verification，建立 verification record 並更新 blueprint 狀態；真實後端內容留待 Human Integration 與 Acceptance。
@@ -167,7 +167,7 @@
 
 | Risk / Issue | Impact | Mitigation / Decision Needed |
 |---|---|---|
-| 頁面類型選擇尚未定義 | 無法確認初始 request 與可驗收 UI | 在 I2 前確認初始選擇與控制項行為；若需求文件需變更，先提出並核准文件修訂 |
+| 申請類型控制項形式尚未定義 | 無法完成可驗收 UI 的具體互動 | 在 I4 前確認控制項呈現方式；若需求文件需變更，先提出並核准文件修訂 |
 | 多 section 排序與 empty／visibility contract 尚未定義 | 可能以錯誤順序呈現或無法一致區分 empty 與 failure | 在 I2 前確認 `displayOrder` 責任、空陣列／HTTP 行為及 server-side visibility guarantee |
 | Raw HTML 與外部 URL 可能造成 XSS、reverse tabnabbing 或危險導覽 | 公開頁可執行不可信內容 | 使用明確 allowlist、protocol 限制與安全 link properties，並以惡意 fixtures 自動驗證 |
 | Markdown heading 可能重複、包含中文或特殊字元 | TOC link 不唯一或無法定位 | 使用確定性的 slugger 與重複 suffix，測試中文、重複與特殊字元 |
@@ -182,6 +182,7 @@
 - [ ] 建立嚴格 MSW lifecycle、fixtures 與 handlers。
 - [ ] 建立安全 Markdown article、唯一 heading anchors、目錄與安全連結。
 - [ ] 建立 `/rules` 申請類型／年度選擇與 loading、empty、error、success、retry 狀態。
+- [ ] 確保初始不預選申請類型，且訪客選擇前不發送公開辦法 request。
 - [ ] 建立單元、元件／整合與 Chromium browser tests。
 - [ ] 更新既有 Router 與 application-entry regression tests。
 - [ ] 完成 verification record 與 blueprint 文件更新。
@@ -217,6 +218,7 @@
 ## Documentation Updates
 
 - [x] 已依核准提案更新 `docs/project/api-integration.md` 的公開申請辦法 query 與 section 陣列契約。
+- [x] 已依核准提案更新 `docs/project/routes-and-pages.md` 的先選申請類型與選擇前零 request 行為。
 - [ ] 確認需求文件、Slice Brief、Spec 與 Plan 一致。
 - [ ] 更新 Slice Brief 或 blueprint 文件連結。
 - [ ] 更新 Spec 狀態。
