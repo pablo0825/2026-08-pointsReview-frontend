@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-002`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `draft`
 - Based On Spec: `docs/specs/FS-002/FS-002-published-instructions-spec.md`
 - Spec Last Updated: `2026-08-11`
 - Created: `2026-08-11`
@@ -12,7 +12,7 @@
 
 ## Goal
 
-重用既有公開頁骨架、Router 與 Query Provider，建立 `/rules` 依申請類型與學年度取得公開辦法 sections 的資料存取、安全 Markdown 文章、目錄、頁內錨點與完整頁面狀態，並以元件、整合及 Chromium browser tests 驗證類型隔離、安全性、年度切換、鍵盤操作與 360px 版面。
+重用既有公開頁骨架、Router 與 Query Provider，建立 `/rules` 每個申請類型只查詢一次所有公開學年度 sections，再以前端所選學年度篩選安全 Markdown 文章、目錄與頁內錨點，並以元件、整合及 Chromium browser tests 驗證單次查詢、類型隔離、安全性、年度切換、鍵盤操作與 360px 版面。
 
 ## Change Context
 
@@ -27,10 +27,10 @@
 
 - 安裝安全 Markdown、GFM、HTML 解析／清理與 heading slug 所需的最小依賴。
 - 建立第一個實際 API consumer 所需的共用 JSON GET client、安全錯誤正規化與 response envelope 驗證邊界。
-- 建立 feature-local 的公開申請辦法 section 陣列 wire schema、保留 API 陣列順序的 mapper、包含申請類型與選填學年度的 query key／query function，以及目前臺灣學年度 helper。
+- 建立 feature-local 的公開申請辦法 section 陣列 wire schema、保留 API 陣列順序的 mapper、支援申請類型與選填學年度的 query function，以及目前臺灣學年度 helper；頁面 query key 只使用申請類型並省略 `academicYear`。
 - 建立 MSW server lifecycle、公開申請辦法 fixture 與 handlers，供 component／integration tests 使用。
 - 建立安全 Markdown renderer、同頁唯一 heading anchors、目錄與文章連結安全行為。
-- 以正式頁面取代 `/rules` placeholder，以四個固定文案的大型按鈕完成初始未選擇狀態，並涵蓋選擇前零 request、申請類型與學年度切換、loading、empty、error、success、retry、鍵盤、輔助科技與 360px 狀態。
+- 以正式頁面取代 `/rules` placeholder，以四個固定文案的大型按鈕完成初始未選擇狀態，並涵蓋選擇前零 request、每個申請類型單次 request、前端學年度篩選、loading、empty、error、success、retry、鍵盤、輔助科技與 360px 狀態。
 - 建立單元、元件／整合及 Chromium Playwright tests。
 
 ### Excluded
@@ -45,25 +45,24 @@
 
 ### Existing Behavior
 
-- React／TypeScript／Vite／Tailwind CSS 專案、ESLint、Vitest、Testing Library、MSW 套件與 Playwright 已由 `FS-003` 建立。
-- `/rules` 已位於 Public Layout 下，但目前只顯示「申請辦法準備中」placeholder。
-- 共用公開導覽已提供「申請辦法」連結，並在 `/rules` 使用 active state。
-- 根 App 已提供 TanStack Query Client；目前 query 預設不自動重試。
-- 尚無共用 API client、MSW server lifecycle、feature data layer 或 Markdown renderer。
+- `/rules` 正式頁面、資料層、安全 Markdown、目錄、所有狀態及自動化測試均已完成先前核准版本。
+- 選定申請類型後，目前同時查詢省略 `academicYear` 的所有年度資料與提供目前年度的資料，因此初次會發送兩個 request。
+- 切換學年度時，目前會再發送提供 `academicYear` 的 request，而不是使用第一次已取得的所有年度資料。
+- 既有 API query function 已支援省略 `academicYear`，不需要修改後端契約或共用 API client。
 
 ### Reusable Components
 
 - `src/app/layouts/public-layout.tsx`：重用公開導覽、skip link、main content 與響應式頁面骨架，不修改其導覽資訊架構。
-- `src/app/providers/app-providers.tsx`：重用既有 Query Client；本 Slice 以 feature query key 隔離各申請類型與學年度快取。
-- `src/app/router/router.tsx`：只將 `/rules` placeholder 換成正式 feature page，保留其他 routes。
+- `src/app/providers/app-providers.tsx`：重用既有 Query Client；修訂後以申請類型隔離所有年度 Response 快取。
+- `src/features/rules/api/published-instructions.query.ts`：重用既有省略 `academicYear` 的 query key 與 abortable query function。
 - `src/app/styles/global.css`：重用 Tailwind 入口與全域 focus 基礎；文章視覺原則上以 feature component utilities 表達。
-- `src/test/setup.ts`：擴充現有 Testing Library cleanup，加入 MSW lifecycle。
+- `src/test/setup.ts`：重用現有嚴格 MSW lifecycle。
 
 ### Integration Points
 
 - `GET /public/application-instructions`：必須提供 `applicationType`；省略 `academicYear` 時取得該類型所有公開學年度 sections，提供時只取得指定年度；後端依 `displayOrder` 升冪排列，前端保留 API 陣列順序；`HTTP 200 OK` 與 `{ "data": [] }` 映射為 empty state，不當成 `404` 或 failure。
 - 公開端點由後端限制 `status = published`、`isVisible = true` 與 `effectiveFrom` 不晚於 Asia/Taipei 當日；Response 不含前兩個管理欄位，前端不重複判斷。後端目前不以 `effectiveTo` 排除內容，前端也不自行過濾 API 已回傳的 section。
-- `src/app/providers/app-providers.tsx`：頁面使用 TanStack Query 管理每個申請類型與選填學年度組合的 server state 與取消訊號。
+- `src/app/providers/app-providers.tsx`：頁面使用 TanStack Query 管理每個申請類型的所有年度 server state 與取消訊號；年度選擇維持本地 UI state。
 - `src/app/router/router.tsx`：將 `PublishedInstructionsPage` 掛載至 `/rules`。
 - `src/test/setup.ts`：測試前啟動 MSW、測試後重設 handlers、全部完成後關閉 server，且未處理 request 視為錯誤。
 - `docs/project/frontend-architecture.md`：feature-local ownership、API client、安全 Markdown、Query 與 Tailwind 限制。
@@ -71,11 +70,9 @@
 
 ### Gaps Against Spec
 
-- `/rules` 尚無正式頁面、申請類型／學年度控制項或任何資料查詢。
-- 尚無公開申請辦法的 wire schema、response validation、mapper、query 或 API client 實作。
-- 尚無 Markdown rendering、allowlist sanitization、heading anchors 或目錄。
-- 尚無 loading、empty、error、retry、快速申請類型／年度切換或安全內容測試。
-- 現有 e2e 仍斷言 `/rules` placeholder，需更新為正式頁面邊界並增加 rules browser flow。
+- `PublishedInstructionsPage` 目前以兩個 queries 分別取得所有年度及指定年度，違反修訂後每個申請類型只查詢一次的要求。
+- 年度切換目前產生新的 request；修訂後應由前端對已驗證的目前類型 Response 篩選 matching sections。
+- 現有 component 與 Playwright tests 驗證年度 request，需改為斷言類型選擇恰好一個 request、年度切換零新增 request。
 
 ### Preserved Behavior
 
@@ -126,12 +123,12 @@
 - `src/features/rules/lib/academic-year.test.ts`：8 月 1 日分界與格式案例。
 - `src/features/rules/components/instructions-article.tsx`：安全 Markdown、heading anchors、目錄與文章連結。
 - `src/features/rules/components/instructions-article.test.tsx`：標題、重複／非 ASCII heading、目錄與惡意內容測試。
-- `src/features/rules/published-instructions-page.tsx`：申請類型／年度選擇與所有 query states 的頁面組合。
-- `src/features/rules/published-instructions-page.test.tsx`：驗證標題、四個固定文案按鈕與順序，以及 MSW 初始未選擇／零 request、類型隔離、年度切換、loading、`HTTP 200 OK` 空陣列的 empty state、error、retry、success 與 stale result 防護。
+- `src/features/rules/published-instructions-page.tsx`：申請類型單次 query、前端年度篩選與所有 query states 的頁面組合。
+- `src/features/rules/published-instructions-page.test.tsx`：驗證標題、四個固定文案按鈕與順序，以及 MSW 初始零 request、每個類型恰好一個 request、年度切換零新增 request、類型隔離、loading、`HTTP 200 OK` 空陣列的 empty state、error、retry、success 與 stale result 防護。
 - `src/test/server.ts`：共用 MSW Node server。
 - `src/test/handlers/public-application-instructions.ts`：預設公開辦法 handler，以及 `HTTP 200 OK` 空陣列與錯誤情境的測試覆寫 helpers。
 - `src/test/fixtures/published-instructions.ts`：不含真實個資且通過正式 schema 的不同申請類型、目前／歷史年度、多 section 與已超過 `effectiveTo` 但仍回傳的 fixtures。
-- `e2e/published-instructions.spec.ts`：desktop／360px、鍵盤、申請類型、年度、目錄、連結、狀態與 overflow browser test。
+- `e2e/published-instructions.spec.ts`：單次類型 query、前端年度切換、desktop／360px、鍵盤、目錄、連結、狀態與 overflow browser test。
 
 ### Modify
 
@@ -148,9 +145,9 @@
 - `src/features/rules/api/published-instructions.test.ts`：四個合法 `applicationType`、enum 外拒絕、選填 `academicYear`、section wire schema、API 順序保留、`HTTP 200 OK` 空陣列、已超過 `effectiveTo` 但仍回傳的內容、query input/output 與錯誤。
 - `src/features/rules/lib/academic-year.test.ts`：臺灣學年度 8 月 1 日分界。
 - `src/features/rules/components/instructions-article.test.tsx`：sanitization、heading IDs、TOC 與安全 links。
-- `src/features/rules/published-instructions-page.test.tsx`：標題、四個按鈕文案／順序、初始未選擇／零 request、MSW query states、`HTTP 200 OK` 空陣列的 empty state、申請類型／年度切換、retry 與 stale result。
+- `src/features/rules/published-instructions-page.test.tsx`：標題、四個按鈕文案／順序、初始零 request、每個類型單次 request、年度切換零新增 request、MSW query states、`HTTP 200 OK` 空陣列、retry 與 stale result。
 - `src/app/router/router.test.tsx`：公開 route、既有 redirect 與導覽回歸。
-- `e2e/published-instructions.spec.ts`：Chromium desktop／360px、鍵盤、44px targets、TOC、links 與無水平溢位。
+- `e2e/published-instructions.spec.ts`：Chromium 單次 query／本地年度切換、desktop／360px、鍵盤、44px targets、TOC、links 與無水平溢位。
 - `e2e/application-entry.spec.ts`：既有申請入口與 rules navigation 回歸。
 
 ## Implementation Steps
@@ -158,7 +155,7 @@
 1. 安裝並鎖定 Markdown、GFM、raw HTML parsing、allowlist sanitization 與 slug 所需依賴，確認既有 build 與 tests 不受影響。
 2. 建立最小共用 GET JSON client，以及 section 陣列 schema、保留後端 `displayOrder` 順序且將 `HTTP 200 OK` 空陣列保留為 empty result 的 mapper、含必填 `applicationType` 與選填 `academicYear` 的 query、目前臺灣學年度 helper、MSW server／fixture／handler 與對應測試；驗證前端不依未提供的管理欄位或 `effectiveTo` 再次過濾。
 3. 建立 feature-local instructions article renderer；先由解析後的 heading tree 產生唯一 slug 與目錄，再以 allowlist 清理內容及安全連結行為，並覆蓋惡意與重複 heading 案例。
-4. 建立 `PublishedInstructionsPage`，顯示「請選擇申請類型」及四個固定文案的大型按鈕，初始不選擇類型且停用 query；訪客選擇類型後，才以申請類型及學年度驅動 query key，組合控制項、loading、empty、error／retry 與 success sections，避免前一次查詢結果誤標。
+4. 建立 `PublishedInstructionsPage`，顯示「請選擇申請類型」及四個固定文案的大型按鈕，初始不選擇類型且停用 query；訪客選擇類型後，只以申請類型驅動一次所有年度 query，年度切換以前端篩選 matching sections，並組合 loading、empty、error／retry 與 success states，避免前一次類型查詢結果誤標。
 5. 將正式頁面接入 `/rules`，更新 Router 與既有 application-entry tests，保留 Public Layout、根 redirect 與四個申請目的 routes。
 6. 建立 Chromium browser flow，驗證未登入公開存取、申請類型與年度切換、長篇目錄、鍵盤、44px targets、desktop／360px 與無水平溢位。
 7. 執行完整 AI Verification，建立 verification record 並更新 blueprint 狀態；真實後端內容留待 Human Integration 與 Acceptance。
@@ -170,7 +167,8 @@
 | 後端未使用 `effectiveTo` 排除失效內容 | 公開頁可能呈現已超過失效日期但仍由 API 回傳的內容 | 前端如實呈現並安全清理 API 結果；在 Human Integration 記錄真實後端行為，後續若契約改變再建立變更 Slice |
 | Raw HTML 與外部 URL 可能造成 XSS、reverse tabnabbing 或危險導覽 | 公開頁可執行不可信內容 | 使用明確 allowlist、protocol 限制與安全 link properties，並以惡意 fixtures 自動驗證 |
 | Markdown heading 可能重複、包含中文或特殊字元 | TOC link 不唯一或無法定位 | 使用確定性的 slugger 與重複 suffix，測試中文、重複與特殊字元 |
-| 申請類型或年度切換產生並行 request | 舊內容可能誤顯示為新選擇 | Query key 包含正規化申請類型與選填年度、傳遞 AbortSignal，且 renderer 只接受目前 query 對應 view model |
+| 申請類型快速切換產生並行 request | 舊內容可能誤顯示為新選擇 | Query key 只包含正規化申請類型、傳遞 AbortSignal，且 renderer 只接受目前類型 query 對應 view model |
+| 所有年度內容一次下載 | 歷史 Markdown 會增加單次 response 大小 | 依使用者核准決策使用現有 API；若資料量日後成為問題，再提案加入只回傳年度 metadata 的後端契約 |
 | 真實後端尚無已發布測試內容 | AI 可完成 mock verification，但不能完成真實整合與 Human Acceptance | Human Integration 提供目前、歷史、空內容及失敗情境的測試資料／環境 |
 
 ## AI Implementation Tasks
@@ -186,17 +184,19 @@
 - [x] 建立單元、元件／整合與 Chromium browser tests。
 - [x] 更新既有 Router 與 application-entry regression tests。
 - [x] 完成 verification record 與 blueprint 文件更新。
+- [ ] 將頁面改為每個申請類型只查詢一次所有年度，並在前端依學年度篩選且保留 API 順序。
+- [ ] 更新元件與 Chromium tests，驗證類型選擇恰好一個 request、年度切換不新增 request，以及快速類型切換不顯示 stale result。
 
 ## AI Verification
 
-- [x] 執行 `npm run build`
-- [x] 執行 `npm run test`
-- [x] 執行 `npm run lint`
-- [x] 執行 `npm run typecheck`
-- [x] 執行 `npm run test:e2e -- e2e/published-instructions.spec.ts e2e/application-entry.spec.ts --project=chromium`
-- [x] 以 Playwright 驗證 desktop 與 360px、鍵盤、44×44px targets、TOC、連結及無水平溢位
-- [x] 驗證 Target Behavior
-- [x] 回歸驗證 `/` redirect、`/apply`、Public Layout 導覽與四個申請目的 route placeholders
+- [ ] 執行 `npm run build`
+- [ ] 執行 `npm run test`
+- [ ] 執行 `npm run lint`
+- [ ] 執行 `npm run typecheck`
+- [ ] 執行 `npm run test:e2e -- e2e/published-instructions.spec.ts e2e/application-entry.spec.ts --project=chromium`
+- [ ] 以 Playwright 驗證單次類型查詢、年度切換零新增 request、desktop 與 360px、鍵盤、44×44px targets、TOC、連結及無水平溢位
+- [ ] 驗證修訂後 Target Behavior
+- [ ] 回歸驗證 `/` redirect、`/apply`、Public Layout 導覽與四個申請目的 route placeholders
 
 ## Human Integration
 
@@ -229,17 +229,18 @@
 - [x] 更新 Slice Brief 或 blueprint 文件連結。
 - [x] 更新 Spec 狀態。
 - [x] 更新 Plan 狀態。
-- [x] 更新 verification record。
+- [ ] 更新 verification record。
 - [x] 更新 blueprint Status、Status Note 與 Last Updated。
 - [x] `not-applicable`；本 Slice 不是 `change`，不需 supersession lineage。
+- [x] `docs/project/` 與 API wire contract 不需修改；現有文件已允許省略 `academicYear` 取得所有年度 sections。
 
 ## Commit Plan
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-002): draft published instructions specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `approved`
-- Approved By: `使用者`
-- Approved At: `2026-08-11`
+- Commit Plan Approval: `pending`
+- Approved By: `pending`
+- Approved At: `pending`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -249,16 +250,19 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 | I2 | 建立經驗證且可測試的公開申請辦法資料存取 | `src/shared/api/**`、`src/features/rules/api/**`、`src/features/rules/lib/academic-year*`、`src/test/server.ts`、`src/test/setup.ts`、`src/test/handlers/public-application-instructions.ts`、`src/test/fixtures/published-instructions.ts` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` | `feat(rules): add published instructions data access` |
 | I3 | 建立安全 Markdown 文章、唯一 heading anchors 與目錄 | `src/features/rules/components/instructions-article.tsx`、`src/features/rules/components/instructions-article.test.tsx` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` | `feat(rules): add safe instructions renderer` |
 | I4 | 完成 `/rules` 頁面、年度與狀態互動及 browser flow | `src/features/rules/published-instructions-page*`、`src/app/router/router.tsx`、`src/app/router/router.test.tsx`、`e2e/published-instructions.spec.ts`、`e2e/application-entry.spec.ts` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `feat(rules): add published instructions page` |
-| Verification | 保存完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、`git diff --check` | `docs(FS-002): record published instructions verification` |
+| Initial Verification | 保存初版完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、`git diff --check` | `docs(FS-002): record published instructions verification` |
+| Revision Approval | 保存單次查詢修訂的核准文件 | blueprint、Spec、Plan、Verification | 文件一致性、`git diff --check` | `docs(FS-002): approve published instructions specification` |
+| F1 | 將每個申請類型改為單次查詢並以前端篩選年度 | `src/features/rules/published-instructions-page.tsx`、`src/features/rules/published-instructions-page.test.tsx`、`e2e/published-instructions.spec.ts` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `fix(rules): avoid duplicate instructions requests` |
+| Reverification | 保存修訂後完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、`git diff --check` | `docs(FS-002): update published instructions verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint、必要 lineage 文件 | 文件一致性、`git diff --check` | `docs(FS-002): record published instructions acceptance` |
 
 Commit Plan Approval 使用 `pending`、`approved`。新 Plan 的 Implementation Execution 固定使用 `continuous`；缺少此欄位的已核准既有 Plan 視為 legacy `per-batch`，不得自動補欄位或套用新執行方式。每個 implementation batch 恰好對應一個 commit，並在 commit body 加入 `Feature-Slice: FS-002`。
 
 ## Approval
 
-- Approved By: `使用者`
-- Approved At: `2026-08-11`
-- Approval Note: `使用者已明確核准 Spec、Plan 與 Commit Plan；等待下一次明確開始實作要求。`
+- Approved By: `pending`
+- Approved At: `pending`
+- Approval Note: `使用者要求改為每個申請類型只查詢一次；修訂後 Spec、Plan 與 Commit Plan 等待重新核准。`
 
 ## Template Rules
 

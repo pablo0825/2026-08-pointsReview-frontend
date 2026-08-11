@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-002`
 - Change Type: `feature`
-- Verification Status: `awaiting-human`
+- Verification Status: `in-progress`
 - Created: `2026-08-11`
 - Last Updated: `2026-08-11`
 
@@ -15,11 +15,17 @@
 - Previous Spec: `none`
 - Authoritative Spec: `docs/specs/FS-002/FS-002-published-instructions-spec.md`
 
+## Pending Revision
+
+- 使用者於 Human Integration 期間要求每個申請類型只查詢一次所有公開學年度 sections，年度切換改為前端篩選。
+- 既有 AI Verification 證據仍記錄初版實作實際執行結果，但不代表修訂後單次查詢 Acceptance 已通過。
+- 修訂後實作、tests、完整 AI Verification 與 Human Integration 尚未執行。
+
 ## Implementation Summary
 
 - 已以正式公開頁取代 `/rules` placeholder；初始顯示四個固定申請類型按鈕，選擇前不送出辦法 request。
 - 已建立 credentialed JSON GET client、Zod response validation、申請類型／選填學年度 query、Asia/Taipei 學年度 helper、嚴格 MSW 測試邊界與 fixtures。
-- 選擇類型後預設查詢目前臺灣學年度，並從省略 `academicYear` 的結果提供可切換年度；loading、empty、error／retry 與 success 均有明確狀態。
+- 初版選擇類型後同時查詢所有年度與目前學年度；此重複查詢將依待核准修訂改為每個類型只查詢一次，年度切換使用已取得的 Response。
 - 已建立保留 API section 順序的安全 Markdown renderer、同頁唯一錨點、目錄，以及外部連結安全屬性；前端不依 `effectiveTo` 排除 API 已回傳內容。
 - 真實後端資料與失敗情境尚待 Human Integration；production build 成功，但 Vite 回報主 bundle 超過預設 500 kB 警示，核准範圍未設定 bundle budget。
 
@@ -47,13 +53,14 @@
 | Unit / Integration Tests | `npm run test` | passed | 8 files、32 tests passed | 覆蓋 client、schema、query、日期、sanitizer、頁面與 Router。 |
 | Production Build | `npm run build` | passed | exit code 0；455 modules transformed | Bundle 成功產生；另有超過 Vite 預設 500 kB 的非阻擋警示。 |
 | Browser / Responsive | `npm run test:e2e -- e2e/published-instructions.spec.ts e2e/application-entry.spec.ts --project=chromium` | passed | 9 tests passed | 覆蓋 desktop、360px、鍵盤、44px targets、TOC、安全連結、狀態與 regression。 |
-| Target Behavior | Spec 與自動化測試逐項比對 | passed | Vitest、MSW 與 Playwright assertions | 未發現 Spec 落差。 |
+| Revised Target Behavior | 修訂後 Spec 與自動化測試逐項比對 | not-run | 等待 F1 實作 | 單次類型查詢與年度切換零新增 request 尚未驗證。 |
 
 ## AI Acceptance Summary
 
 | Criterion | Result | Evidence |
 |---|---|---|
 | `/rules` 公開可達且初始零 request | passed | Router test、page request counter 與 Chromium public route test。 |
+| 每個申請類型只查詢一次，年度切換不新增 request | not-run | 等待 F1 component 與 Chromium request-count assertions。 |
 | 四個固定類型、合法 wire values 與類型隔離 | passed | Page control assertions、query parameter tests 與 stale-result test。 |
 | 預設目前臺灣學年度並可切換歷史年度 | passed | 8 月 1 日單元測試、MSW page test 與 Chromium select flow。 |
 | 保留 API section 順序且完整驗證 contract | passed | Schema／mapper tests 與 page section-order assertion。 |
@@ -90,7 +97,9 @@
 | I2 | 建立公開申請辦法資料存取 | targeted Vitest、typecheck、lint、test、build | passed | `feat(rules): add published instructions data access` |
 | I3 | 建立安全 Markdown renderer 與目錄 | targeted Vitest、typecheck、lint、test、build | passed | `feat(rules): add safe instructions renderer` |
 | I4 | 完成 `/rules` 頁面與 browser flow | targeted Vitest、typecheck、lint、test、build、Chromium Playwright | passed | `feat(rules): add published instructions page` |
-| Verification | 保存完整 AI Verification 與狀態 | 完整證據、文件一致性、`git diff --check` | passed | `docs(FS-002): record published instructions verification` |
+| Initial Verification | 保存初版完整 AI Verification 與狀態 | 完整證據、文件一致性、`git diff --check` | passed | `docs(FS-002): record published instructions verification` |
+| F1 | 每個申請類型改為單次查詢並以前端篩選年度 | targeted Vitest、typecheck、lint、test、build、Chromium Playwright | not-run | `fix(rules): avoid duplicate instructions requests` |
+| Reverification | 保存修訂後完整 AI Verification 與狀態 | 完整證據、文件一致性、`git diff --check` | not-run | `docs(FS-002): update published instructions verification` |
 
 ## Human Integration
 
@@ -105,7 +114,7 @@
 - Status: `pending`
 - Confirmed By: `pending`
 - Confirmed At: `pending`
-- Notes: `等待使用者以真實後端完成整合確認。`
+- Notes: `單次查詢修訂尚待核准與實作，Human Integration 暫停。`
 
 ## Human Acceptance Instructions
 
@@ -152,11 +161,11 @@
 
 ## Final Summary
 
-- AI Verification: `passed；所有核准自動檢查均於 2026-08-11 執行並通過。`
-- Human Integration: `pending；需以真實公開端點確認資料與錯誤情境。`
-- Human Acceptance: `pending；等待使用者依上述步驟驗收。`
-- Remaining Issues: `後端 effectiveTo 已知限制，以及非阻擋的 Vite bundle size 警示。`
-- Final Feature Slice Status: `awaiting-human`
+- AI Verification: `初版 passed；修訂後單次查詢行為 not-run。`
+- Human Integration: `pending；修訂核准、實作與重新驗證後再以真實公開端點確認。`
+- Human Acceptance: `pending；修訂後等待使用者依更新步驟驗收。`
+- Remaining Issues: `待完成單次查詢修訂；另有後端 effectiveTo 已知限制，以及非阻擋的 Vite bundle size 警示。`
+- Final Feature Slice Status: `awaiting-approval`
 
 ## Document Lineage Update
 
