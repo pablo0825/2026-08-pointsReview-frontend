@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-002`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Based On Spec: `docs/specs/FS-002/FS-002-published-instructions-spec.md`
 - Spec Last Updated: `2026-08-11`
 - Created: `2026-08-11`
@@ -225,21 +225,21 @@
 - [x] 已依核准提案更新 `docs/project/api-integration.md` 的公開內容篩選與 `effectiveTo` 已知限制。
 - [x] 已依核准提案更新 `docs/project/routes-and-pages.md` 的先選申請類型與選擇前零 request 行為。
 - [x] 已依核准提案更新 `docs/project/routes-and-pages.md` 的申請類型標題、四個大型按鈕與固定文案。
-- [ ] 確認需求文件、Slice Brief、Spec 與 Plan 一致。
+- [x] 確認需求文件、Slice Brief、Spec 與 Plan 一致。
 - [ ] 更新 Slice Brief 或 blueprint 文件連結。
-- [ ] 更新 Spec 狀態。
-- [ ] 更新 Plan 狀態。
+- [x] 更新 Spec 狀態。
+- [x] 更新 Plan 狀態。
 - [ ] 更新 verification record。
-- [ ] 更新 blueprint Status、Status Note 與 Last Updated。
+- [x] 更新 blueprint Status、Status Note 與 Last Updated。
 - [ ] `not-applicable`；本 Slice 不是 `change`，不需 supersession lineage。
 
 ## Commit Plan
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-002): draft published instructions specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `pending`
-- Approved By: `pending`
-- Approved At: `pending`
+- Commit Plan Approval: `approved`
+- Approved By: `使用者`
+- Approved At: `2026-08-11`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -256,9 +256,9 @@ Commit Plan Approval 使用 `pending`、`approved`。新 Plan 的 Implementation
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `pending`
+- Approved By: `使用者`
+- Approved At: `2026-08-11`
+- Approval Note: `使用者已明確核准 Spec、Plan 與 Commit Plan；等待下一次明確開始實作要求。`
 
 ## Template Rules
 
