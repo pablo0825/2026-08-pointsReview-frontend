@@ -1,7 +1,7 @@
 # 點數審核系統－前端架構設計
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-12
+- 最後更新：2026-08-13
 - 相關文件：[路由與頁面](routes-and-pages.md)、[API 整合](api-integration.md)、[測試策略](testing-strategy.md)
 
 ## 1. 架構目標
@@ -69,6 +69,7 @@ Authentication Context 不複製使用者資料成另一份永久狀態，只包
 | URL 篩選與分頁 | React Router Search Params | 可返回、重新整理與分享 |
 | Dialog、展開狀態 | React local state | 不放入全域 Store |
 | 未送出申請 | React 記憶體 | 第一版不持久化 |
+| 正式送件 Key 與 request 快照 | React 記憶體 | 只供同一次結果不確定的 Idempotent retry，不寫入 Browser Storage |
 
 ## 5. 申請表架構
 
@@ -77,7 +78,7 @@ Authentication Context 不複製使用者資料成另一份永久狀態，只包
 - 共用參與者、老師與附件元件不得知道類型專屬後端資料表。
 - 使用 Discriminated Union 表示四種表單及 API payload。
 - 學年度、申請人及參與者一致性集中在共用 Mapper 驗證。
-- 切換步驟不觸發 API 建立；正式送出只有一次 Mutation。
+- 切換步驟不觸發 API 建立；正式送出視為一次邏輯 Mutation，結果不確定時只能以相同 Idempotency Key 與不可變快照重試同一次操作。
 
 ## 6. 點數運算
 
@@ -93,7 +94,7 @@ Authentication Context 不複製使用者資料成另一份永久狀態，只包
 - Key 包含所有影響結果的狀態、篩選、排序與分頁。
 - Mutation 成功後只 invalidate 受影響資源，不清空整個 Cache。
 - 審核狀態改變時同步使待審、補件中及歷史列表失效。
-- Mutation 不自動重試，避免重複送件、簽名或核准。
+- Mutation 不自動重試。公開正式送件由使用者確認後才以相同 Idempotency Key 與不可變快照重試；其他 Mutation 仍避免直接重送。
 - GET 可針對網路或 5xx 做有限重試；401、403、404、409、422 不自動重試。
 - 規則與老師清單可以合理設定 Stale Time，但正式送件仍由後端重新驗證。
 
@@ -104,6 +105,7 @@ Authentication Context 不複製使用者資料成另一份永久狀態，只包
 - 後端 `fields[].path` 轉成 React Hook Form Path，無法可靠對應時顯示表單層級錯誤。
 - 多步表單下一步只驗證該步相關欄位；最後送出前驗證完整 Schema。
 - 動態陣列使用穩定 Client Key，不使用畫面 index 作為 React Key。
+- 正式送件開始時凍結 payload 與附件描述／檔案參照的 request 快照；修改任何表單資料或附件即廢棄原 Key 與快照。
 
 ## 9. API Client
 

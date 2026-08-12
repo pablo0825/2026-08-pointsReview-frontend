@@ -1,7 +1,7 @@
 # 點數審核系統－前端測試策略
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-11
+- 最後更新：2026-08-13
 - 相關文件：[產品需求](product-requirements.md)、[前端架構](frontend-architecture.md)
 
 ## 1. 測試目標
@@ -66,6 +66,10 @@
 - 老師搜尋姓名、職稱、系所；不顯示主任。
 - 附件分類、其他類型、數量、大小及最低要求。
 - 422 欄位錯誤返回正確步驟並聚焦。
+- 重複點擊只開始一次邏輯送件；`Idempotency-Key` 必須是 UUID v4。
+- 結果不確定後以相同 Key、payload 與附件快照重試，只建立一筆案件並重放相同 `201` 結果。
+- 修改 payload 或附件後廢棄舊 Key，下一次送件產生新 Key；`409 idempotency_key_conflict` 不再沿用衝突 Key。
+- Idempotent retry 與 `429 rate_limited` 狀態可分別辨識，且 Mutation 不自動重試。
 - 成功頁顯示申請編號。
 
 ### 4.2 老師

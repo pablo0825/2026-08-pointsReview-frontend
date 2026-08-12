@@ -1,7 +1,7 @@
 # 點數審核系統－API 整合設計
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-12
+- 最後更新：2026-08-13
 - 相關文件：[前端架構](frontend-architecture.md)、[後端契約異動](backend-contract-changes.md)
 
 ## 1. 契約策略
@@ -196,6 +196,16 @@ for (const attachment of attachments) {
 
 前端送出前驗證 Key 唯一、metadata 與檔案一一對應。後端仍重新驗證所有檔案與資料。
 
+### 6.1 正式申請 Idempotency
+
+- `POST /public/applications` 必須帶入 UUID v4 `Idempotency-Key`；每次新的邏輯送件以 `crypto.randomUUID()` 產生新 Key。
+- Network Error、timeout、連線中斷或未收到明確 Response 時，前端保留原 Key 與不可變 request 快照；由使用者確認重試後，必須沿用相同 Key、payload、附件內容、檔名、MIME type 與 `clientFileKey`。
+- 第一次 request 若已成功，後端以相同 Key 與內容重放原本的 `201` Response，不重複建立案件、附件或 Email 通知。
+- 收到明確 `201` 後清除 Key 並顯示成功頁；使用者修改 payload 或附件時丟棄原 Key 與快照，下一次送件使用新 Key。
+- Key 缺少或不是 UUID v4 時，後端回傳 `422 validation_failed`，欄位路徑為 `headers.idempotency-key`。
+- 相同 Key 搭配不同 payload 或附件時，後端回傳 `409 idempotency_key_conflict`；前端停止使用該 Key，返回表單確認內容，下一次送件產生新 Key。
+- Idempotent retry 仍計入同一 IP 每小時 20 次的 Rate Limit；前端不自動重試。
+
 ## 7. 老師 API
 
 | Method | Endpoint | 用途 |
@@ -265,12 +275,12 @@ for (const attachment of attachments) {
 | 401 | 清除登入 Cache，導向登入並保留安全返回路徑 |
 | 403 | 顯示權限不足 |
 | 404 | 顯示不存在、不可揭露或 Token 失效 |
-| 409 | 關閉操作 Dialog，重新載入最新狀態 |
+| 409 | 依穩定 `code` 處理；`idempotency_key_conflict` 廢棄原 Key 並返回表單確認，後台併發衝突則關閉操作 Dialog 並重新載入最新狀態 |
 | 422 | 映射 `fields` 到表單並聚焦第一個錯誤 |
 | 429 | 保留資料，提示稍後重試 |
 | 5xx／Network | 保留資料，顯示重試 |
 
-Mutation 不自動重試。任何不確定是否已成功的送件、簽名或核准都先重新查詢狀態，不直接重送。
+Mutation 不自動重試。公開正式送件結果不確定時，因第一版沒有學生進度查詢 API，僅允許使用者以相同 `Idempotency-Key` 與完全相同的不可變 request 快照重新確認同一次送件；簽名、核准及其他沒有已確認 Idempotency 契約的 Mutation 仍先重新查詢狀態，不直接重送。
 
 ## 12. Query Key 範例
 
