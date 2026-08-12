@@ -2,35 +2,33 @@
 
 ## Project Structure & Module Organization
 
-This repository contains a React, TypeScript, Vite, and Tailwind CSS application. Treat `docs/project/` as authoritative for requirements, architecture, API contracts, and quality standards. `docs/blueprint/` contains the feature-slice index and briefs; create approved specifications in `docs/specs/<ID>/` and plans in `docs/plans/<ID>/`. Discussion context belongs in `docs/notes/`; `docs/archive/` is historical only.
+This React, TypeScript, Vite, and Tailwind CSS application uses `docs/project/` as the authority for requirements and architecture. `docs/blueprint/` tracks feature slices; records live in `docs/specs/<ID>/`, `docs/plans/<ID>/`, and `docs/verification/<ID>/`. `docs/archive/` is historical only.
 
-The planned application layout is feature-oriented: `src/app/` for routing and providers, `src/features/` for domain modules, `src/shared/` for genuinely cross-feature code, and `src/test/` for shared test infrastructure. Keep feature-specific schemas, mappers, queries, components, and tests within their feature.
+`src/app/` owns routing and providers. Domain code belongs in `src/features/<feature>/`; shared infrastructure belongs in `src/shared/`. MSW setup and fixtures live in `src/test/`; browser tests live in `e2e/`. Keep schemas, mappers, queries, components, and tests with their feature.
 
 ## Build, Test, and Development Commands
 
-- `npm install` — install the locked dependencies.
-- `npm run dev` — start the local Vite development server.
-- `npm run typecheck` — type-check application and tooling code.
-- `npm run lint` — run ESLint across the repository.
-- `npm run test` — run Vitest unit and component tests once.
-- `npm run test:watch` — run Vitest in watch mode.
-- `npm run build` — type-check and build the production bundle.
-- `npm run test:e2e` — run the Playwright browser suite after browser binaries are installed.
-- `npm run preview` — preview the production bundle locally.
+- `npm ci` — install locked dependencies.
+- `npm run dev` — start Vite locally.
+- `npm run typecheck` — run strict TypeScript checks.
+- `npm run lint` — run ESLint.
+- `npm run test` / `npm run test:watch` — run Vitest once or in watch mode.
+- `npm run build` / `npm run preview` — build or preview production output.
+- `npm run test:e2e` — run Playwright with a managed Vite server.
 
-For documentation-only changes, also run `git diff --check` and use `rg "<term>" docs` when checking terminology or cross-document consistency.
+Before a code PR, run typecheck, lint, tests, build, and relevant E2E tests. For docs-only changes, run `git diff --check` and use `rg "<term>" docs`.
 
 ## Coding Style & Naming Conventions
 
-Write project documentation in Chinese, while keeping file names, paths, API names, IDs, slugs, commands, and code identifiers in English. Use kebab-case for document slugs and the fixed `FS-NNN` format for slice IDs. Follow the architecture in `docs/project/frontend-architecture.md`: TypeScript/React, feature-local ownership, Zod-validated API responses, integer minor units for point calculations, and no unnecessary global state. Prefer small, reviewable changes over speculative abstractions.
+Write project documentation in Chinese; keep paths, APIs, IDs, slugs, commands, and identifiers in English. Use kebab-case files, PascalCase components, camelCase functions/variables, and `FS-NNN` slice IDs. Match two-space indentation, single quotes, and extension-free imports. ESLint is enforced; no formatter is configured. Keep TypeScript strict, validate API responses with Zod, and calculate points in integer minor units.
 
 ## Testing Guidelines
 
-Use Vitest for units, Testing Library plus MSW for components/integration, and Playwright for critical browser flows. Prioritize calculations, schemas, mappers, permissions, state transitions, and API failures. Each feature must cover loading, empty, error, success, and unauthorized states, plus keyboard use and 360px layouts. Never use real personal data in fixtures.
+Name colocated Vitest files `*.test.ts` or `*.test.tsx` and browser tests `e2e/*.spec.ts`. Use Testing Library for user-visible behavior and MSW for API states; reset handlers after each test. Cover calculations, schemas, permissions, state transitions, failures, keyboard use, and 360px layouts. Never use real personal data in fixtures.
 
 ## Commit & Pull Request Guidelines
 
-Use Conventional Commits, matching history: `docs(blueprint): define feature slices`, `feat: add ...`. Keep commits atomic and separate documentation, infrastructure, and feature work. PRs should identify the Feature Slice, summarize behavior and contract changes, link the approved Spec/Plan or issue, list verification performed, and include screenshots for visible UI changes. Update affected project documents when requirements or contracts change.
+Use scoped Conventional Commits, matching history: `feat(rules): ...`, `fix(rules): ...`, and `docs(FS-002): ...`. Keep commits atomic and separate docs, dependencies, and features. PRs must identify the Feature Slice, summarize behavior and contract changes, link its approved Spec/Plan or issue, list checks run, and include screenshots for UI changes.
 
 ## Security & Workflow
 
