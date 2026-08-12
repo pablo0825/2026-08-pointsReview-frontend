@@ -13,7 +13,7 @@
 讓學生依有效競賽規則完成單人或多人競賽申請。
 
 ## User-Visible Result
-申請人可完成五步表單、選老師、上傳附件、正確分配 `per_person` 或 `shared_total` 點數，預覽並取得送件成功資訊。
+申請人可完成五步表單、選老師、上傳附件、正確分配 `per_person` 或 `shared_total` 點數，預覽並在成功頁取得申請編號、目前狀態、送件時間與 Email 通知提醒。
 
 ## Source Reference
 - `docs/project/product-requirements.md`, sections 5–7, 10, 12
@@ -37,7 +37,7 @@
 - 自動驗證兩種分配、動態人數、日期、附件、步驟、錯誤定位及成功頁。
 
 ## Human Acceptance
-- 使用者完成 `per_person` 與多人 `shared_total` 真實送件並確認 Email 與成功資訊。
+- 使用者完成 `per_person` 與多人 `shared_total` 真實送件，並確認成功頁正確顯示申請編號、目前狀態、送件時間與 Email 通知提醒，且不顯示老師簽核期限。
 
 ## Template Rules
 
