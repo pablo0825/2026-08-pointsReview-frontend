@@ -28,13 +28,13 @@
 - `external_exhibition` 舊值、自由輸入點數、其他申請類型、補件與草稿。
 
 ## AI Responsibility
-- 完成垂直功能、最終欄位契約、日期／點數驗證、測試與文件；未登入正式送件不得索取 Session 或 CSRF Token，且須以必填 Idempotency Key 與不可變快照防止同一次操作重複建立案件。
+- 完成垂直功能、學號大寫正規化、最終欄位契約、日期／點數驗證、測試與文件；未登入正式送件不得索取 Session 或 CSRF Token，且須以必填 Idempotency Key 與不可變快照防止同一次操作重複建立案件。
 
 ## Human Integration
-- 後端需完成 B01、B02、B10 及公開規則／正式送件契約並提供資料。
+- 後端需完成 B01、B02、B10、B13 及公開規則／正式送件契約並提供資料。
 
 ## AI Acceptance
-- 自動驗證離散端點、日期順序、`other` 名稱、參與者、附件、步驟、Idempotent retry 與成功狀態。
+- 自動驗證學號正規化、離散端點、日期順序、`other` 名稱、參與者、附件、步驟、Idempotent retry 與成功狀態。
 
 ## Human Acceptance
 - 使用者完成兩種展覽類型與多人真實送件，確認欄位名稱、點數與成功資訊。

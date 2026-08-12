@@ -30,7 +30,7 @@
 
 ## Open Questions
 
-- `docs/project/backend-contract-changes.md` 的 B01–B12 尚未標示後端同步完成情況；各相關 Slice 可先依最終契約與 MSW 開發，但真實後端整合驗收需等待對應契約可用。
+- `docs/project/backend-contract-changes.md` 的 B01–B13 尚未標示後端同步完成情況；各相關 Slice 可先依最終契約與 MSW 開發，但真實後端整合驗收需等待對應契約可用。
 - 證照編號 trim／大小寫正規化及併發防止重複申請的後端策略尚未定案；會影響 `FS-006` 的 Integration Contract 與真實驗收資料。
 - 管理端 Users、Advisors、Rules、Instructions、Applications 與 Transactions 只定義功能群組，尚缺完整 endpoint、欄位、分頁、錯誤與權限契約；會影響 `FS-015` 至 `FS-019` 的 Spec 與 Plan。
 
@@ -41,11 +41,11 @@
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-002 | `published-instructions` | feature | none | none | none | accepted | 修訂後完整 AI Verification、真實後端 Human Integration 與使用者 Human Acceptance 均已通過；桌面排版觀感列為非阻斷後續優化。 | 2026-08-12 |
 | FS-003 | `application-entry` | feature | none | none | none | accepted | 完整 AI Verification 已通過，Human Integration 為 `not-applicable`，使用者已確認 Human Acceptance 通過。 | 2026-08-11 |
-| FS-004 | `competition-application` | feature | FS-003 | none | none | proposed | 已補充共用申請表架構、成功頁、未登入送件與 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
-| FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已補充未登入送件與 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
-| FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已補充未登入送件與 Idempotency 契約；證照正規化契約待確認。 | 2026-08-13 |
-| FS-007 | `exhibition-application` | feature | FS-003 | none | none | proposed | 已補充未登入送件與 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
-| FS-008 | `application-revision` | feature | FS-004, FS-005, FS-006, FS-007 | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
+| FS-004 | `competition-application` | feature | FS-003 | none | none | proposed | 已補充共用申請表架構、學號正規化、成功頁、未登入送件與 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
+| FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件與 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
+| FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件與 Idempotency 契約；證照正規化契約待確認。 | 2026-08-13 |
+| FS-007 | `exhibition-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件與 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
+| FS-008 | `application-revision` | feature | FS-004, FS-005, FS-006, FS-007 | none | none | proposed | 已補充學號正規化契約，尚未開始 Spec。 | 2026-08-13 |
 | FS-009 | `public-points-search` | feature | none | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
 | FS-010 | `advisor-application-workspace` | feature | FS-001, FS-004, FS-005, FS-006, FS-007 | none | none | proposed | 已補充老師工作區共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-011 | `advisor-application-decision` | feature | FS-010 | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |

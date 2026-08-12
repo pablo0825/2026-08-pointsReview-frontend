@@ -35,7 +35,7 @@
 
 - 申請人必須是參與者且只有一位。
 - 學年度複製到所有參與者。
-- 同一 request 學號不可重複。
+- 學號先 trim 再轉成大寫；小寫輸入輸出為大寫，且只差前後空白或大小寫的學號在同一 request 視為重複。
 - 四種 Form Model 正確轉為 Discriminated API Payload。
 - 附件 metadata 與 File 一一對應。
 - 補件保留附件 ID 與新增附件的組合。

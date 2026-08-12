@@ -1,7 +1,7 @@
 # 後端契約同步清單
 
 - 文件狀態：待後端專案逐項同步
-- 最後更新：2026-08-11
+- 最後更新：2026-08-13
 - 用途：記錄前端需求討論後，與既有後端文件或實作計畫不同的契約。
 - 相關文件：[申請規則](application-rules.md)、[流程與權限](workflows-and-permissions.md)、[API 整合](api-integration.md)
 
@@ -166,6 +166,23 @@ GET /reviewer/applications/review?status=needs_revision
 **後端影響**
 
 - Application Request Schema、Domain／Service 驗證、API 文件與四類申請測試。
+
+### B13 學號大寫正規化
+
+**決策**
+
+- 所有申請與補件輸入的 `studentNumber` 必須先 trim 再轉成大寫。
+- Request Schema、Service、重複檢查與資料庫寫入皆使用正規化後的學號；不得只依賴前端處理。
+- 同一 request 內只差前後空白或大小寫的學號視為重複。
+- 證照的 `studentNumber + certificateNumber` 重複判斷使用正規化後的 `studentNumber`。
+
+**Migration 前置檢查**
+
+- 既有學號資料轉成大寫前，必須先找出正規化後的碰撞並人工確認，不得直接覆蓋或合併可能屬於不同學生的資料。
+
+**後端影響**
+
+- Application／Revision Request Schema、Service、資料庫 Migration／Constraint、證照重複判斷、公開點數資料及相關 Contract／Integration Tests。
 
 ## 3. 已確認不需新增的第一版 API
 

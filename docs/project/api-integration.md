@@ -196,6 +196,8 @@ for (const attachment of attachments) {
 
 前端送出前驗證 Key 唯一、metadata 與檔案一一對應。後端仍重新驗證所有檔案與資料。
 
+所有申請 Mapper 在建立 Wire Payload 前，必須將每筆 `participants[].studentNumber` trim 後轉成大寫，再以正規化值檢查同一 request 內的重複學號。正式送件與補件後端必須再次執行相同正規化，不信任前端；欄位錯誤路徑維持 `participants.<index>.studentNumber`。
+
 ### 6.1 正式申請 Idempotency
 
 - `POST /public/applications` 必須帶入 UUID v4 `Idempotency-Key`；每次新的邏輯送件以 `crypto.randomUUID()` 產生新 Key。

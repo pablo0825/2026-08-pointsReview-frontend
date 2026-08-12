@@ -1,7 +1,7 @@
 # 點數審核系統－申請規則
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-11
+- 最後更新：2026-08-13
 - 相關文件：[產品需求](product-requirements.md)、[流程與權限](workflows-and-permissions.md)
 
 ## 1. 共用資料規則
@@ -31,7 +31,8 @@
 - 參與者至少一人，並遵守 1.1 的第一版固定人數限制。
 - 每份申請只能有一位 `isApplicant = true`。
 - 被指定者的 `studentName` 必須等於 `applicant.name`。
-- 同一 request 不得包含重複 `studentNumber`。
+- `studentNumber` 的正式值為 trim 後轉成大寫的字串；正式送件、補件、後端驗證與儲存皆使用相同正規化規則。
+- 同一 request 不得包含正規化後重複的 `studentNumber`。
 - `requestedPoints` 與 `approvedPoints` 使用兩位小數字串。
 - 所有核定點數必須大於 0 且符合類型規則。
 
@@ -96,7 +97,7 @@
 - 證照日期不得晚於台北時區的今天。
 - 每張證照點數由有效規則自動設定，申請人與承辦人不得自由修改。
 - 每位學生在學期間的證照累積上限由有效規則決定；超過時整筆不得核准，不做部分核准。
-- 同一學生不得重複申請相同證照，暫以 `studentNumber + certificateNumber` 判斷。
+- 同一學生不得重複申請相同證照，暫以正規化後的 `studentNumber + certificateNumber` 判斷。
 - 已有審核中、補件中或已核准申請時阻擋重複申請。
 - 先前申請已因申請人要求結束或最終不核准時允許重新申請；第一版以 `rejected` 的終止原因判斷，正式 `withdrawn` 狀態列入第二版。
 
