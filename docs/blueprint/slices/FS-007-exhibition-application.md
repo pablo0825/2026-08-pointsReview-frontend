@@ -28,7 +28,7 @@
 - `external_exhibition` 舊值、自由輸入點數、其他申請類型、補件與草稿。
 
 ## AI Responsibility
-- 完成垂直功能、最終欄位契約、日期／點數驗證、測試與文件。
+- 完成垂直功能、最終欄位契約、日期／點數驗證、測試與文件；未登入正式送件不得索取 Session 或 CSRF Token。
 
 ## Human Integration
 - 後端需完成 B01、B02、B10 及公開規則／正式送件契約並提供資料。

@@ -1,7 +1,7 @@
 # 點數審核系統－前端架構設計
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-11
+- 最後更新：2026-08-12
 - 相關文件：[路由與頁面](routes-and-pages.md)、[API 整合](api-integration.md)、[測試策略](testing-strategy.md)
 
 ## 1. 架構目標
@@ -107,8 +107,8 @@ Authentication Context 不複製使用者資料成另一份永久狀態，只包
 
 ## 9. API Client
 
-- 預設 `credentials: "include"`，Session Token 不進入 JavaScript。
-- State-changing request 自動加入 `X-CSRF-Token`。
+- 預設 `credentials: "include"`，Session Token 不進入 JavaScript；未登入公開送件 `POST /public/applications` 依端點契約使用 `credentials: "omit"`。
+- 依賴登入 Session Cookie 的 state-changing request 自動加入 `X-CSRF-Token`；未登入公開送件 `POST /public/applications` 不取得或攜帶 CSRF Token。
 - 支援 JSON 與 multipart，但不手動設定 multipart `Content-Type` Boundary。
 - 統一解析成功 envelope、API Error 與 Zod Response 錯誤。
 - 401 使 `/auth/me` Cache 失效並導向登入。

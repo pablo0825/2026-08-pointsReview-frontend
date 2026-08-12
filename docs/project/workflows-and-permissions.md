@@ -1,7 +1,7 @@
 # 點數審核系統－流程與權限規格
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-11
+- 最後更新：2026-08-12
 - 相關文件：[產品需求](product-requirements.md)、[申請規則](application-rules.md)
 
 ## 1. 申請狀態
@@ -153,7 +153,7 @@ needs_revision -> rejected        補件逾期、承辦人最終不核准或依�
 - 後台角色共用 `/login`，使用 Email 與密碼。
 - 成功後後端設定 HttpOnly Session Cookie。
 - 前端透過 `/auth/me` 取得角色與權限。
-- State-changing API 使用與 Session 綁定的 CSRF Token。
+- 依賴登入 Session Cookie 的 state-changing API 使用與 Session 綁定的 CSRF Token；未登入公開送件 `POST /public/applications` 不使用 Session Cookie 或 CSRF Token。
 - 401 清除登入快取並回到登入頁；403 顯示權限不足。
 - 待簽深連結登入後返回原申請。
 

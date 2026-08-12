@@ -1,7 +1,7 @@
 # 點數審核系統－API 整合設計
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-11
+- 最後更新：2026-08-12
 - 相關文件：[前端架構](frontend-architecture.md)、[後端契約異動](backend-contract-changes.md)
 
 ## 1. 契約策略
@@ -55,10 +55,10 @@
 ## 3. API Client 責任
 
 - Base URL 由環境設定提供。
-- 所有 request 使用 `credentials: "include"`。
+- 除另有端點契約外，request 使用 `credentials: "include"`；未登入公開送件 `POST /public/applications` 明確使用 `credentials: "omit"`，不依賴 Session Cookie。
 - JSON request 自動設定 `Content-Type: application/json`。
 - multipart request 交由瀏覽器設定 Boundary。
-- State-changing request 取得並帶入 `X-CSRF-Token`。
+- 依賴登入 Session Cookie 的 state-changing request 取得並帶入 `X-CSRF-Token`；未登入公開送件 `POST /public/applications` 不取得或攜帶 CSRF Token。
 - 解析非 2xx Error Body；無法解析時轉為安全的 `unexpected_response`。
 - 支援 `AbortSignal`，讓 Query 取消過期 request。
 - 不在 Log 輸出完整 Payload、Token、附件、簽名或個資。
@@ -93,6 +93,8 @@
 | GET | `/public/student-points` | 遮罩後公開點數 |
 
 第一版不提供公開參與人數規則 API。各申請類型使用 `application-rules.md` 定義的固定人數限制，正式送件與補件仍由後端驗證；動態人數規則 API 留待第二版另行定義。
+
+`POST /public/applications` 是未登入公開送件 API。前端直接送出 multipart request，不帶 Session Cookie 或 `X-CSRF-Token`；後端以 IP Rate Limit、Payload Schema、點數規則及附件驗證保護此端點。此例外不代表 Token 型補件 API 使用相同契約，`POST /public/applications/revisions/:token` 需於 `FS-008` 另行確認。
 
 ### 5.1 公開點數查詢
 
