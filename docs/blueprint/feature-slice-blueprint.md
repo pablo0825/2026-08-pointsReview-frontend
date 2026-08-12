@@ -41,10 +41,10 @@
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-002 | `published-instructions` | feature | none | none | none | accepted | 修訂後完整 AI Verification、真實後端 Human Integration 與使用者 Human Acceptance 均已通過；桌面排版觀感列為非阻斷後續優化。 | 2026-08-12 |
 | FS-003 | `application-entry` | feature | none | none | none | accepted | 完整 AI Verification 已通過，Human Integration 為 `not-applicable`，使用者已確認 Human Acceptance 通過。 | 2026-08-11 |
-| FS-004 | `competition-application` | feature | FS-003 | none | none | proposed | 已補充共用申請表架構、學號正規化、成功頁、未登入送件與 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
-| FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件與 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
-| FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件與 Idempotency 契約；證照正規化契約待確認。 | 2026-08-13 |
-| FS-007 | `exhibition-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件與 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
+| FS-004 | `competition-application` | feature | FS-003 | none | none | proposed | 已完成競賽申請需求討論並補齊規則、老師、確認頁、錯誤與 5xx Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
+| FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
+| FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約；證照正規化契約待確認。 | 2026-08-13 |
+| FS-007 | `exhibition-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
 | FS-008 | `application-revision` | feature | FS-004, FS-005, FS-006, FS-007 | none | none | proposed | 已補充學號正規化契約，尚未開始 Spec。 | 2026-08-13 |
 | FS-009 | `public-points-search` | feature | none | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
 | FS-010 | `advisor-application-workspace` | feature | FS-001, FS-004, FS-005, FS-006, FS-007 | none | none | proposed | 已補充老師工作區共用架構責任，尚未開始 Spec。 | 2026-08-10 |

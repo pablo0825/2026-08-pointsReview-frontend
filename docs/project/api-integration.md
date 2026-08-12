@@ -178,6 +178,63 @@ GET /public/application-instructions?applicationType=competition
 
 目前後端不使用 `effectiveTo` 排除內容，因此只能保證回傳內容「已發布、可見且已生效」，不能保證內容尚未超過失效日期。前端不依 `effectiveTo` 自行排除 API 已回傳的 section；即使 `effectiveTo` 早於今天，仍依 Response 呈現並安全清理 Markdown。
 
+### 5.3 競賽點數規則
+
+`GET /public/competition-point-options` 不接受任何 Query Parameter；帶入任意 Query Parameter 時回傳 `422 validation_failed`。成功固定回傳 `HTTP 200 OK`：
+
+```json
+{
+  "data": [
+    {
+      "competitionLevel": "national_integrated",
+      "award": "finalist",
+      "allocationMethod": "per_person",
+      "points": "3.00",
+      "minimumPointsPerParticipant": "0.50"
+    },
+    {
+      "competitionLevel": "national_integrated",
+      "award": "first_place",
+      "allocationMethod": "shared_total",
+      "points": "60.00",
+      "minimumPointsPerParticipant": "0.50"
+    }
+  ]
+}
+```
+
+- `competitionLevel`：`international_integrated`、`international_non_integrated`、`national_integrated`、`national_non_integrated`、`other`。
+- `award`：`participation`、`finalist`、`honorable_mention`、`third_place`、`second_place`、`first_place`。
+- `allocationMethod`：`per_person` 或 `shared_total`。
+- 同一組 `competitionLevel + award` 最多一筆，可用 `${competitionLevel}:${award}` 建立 Lookup；前端只顯示 Response 實際提供的等級與獎項組合。
+- `per_person` 的 `points` 是每人固定點數，不使用 `minimumPointsPerParticipant` 計算。
+- `shared_total` 的 `points` 是團隊總點數，`minimumPointsPerParticipant` 用於每人最低值；第一版另固定要求 0.5 倍數與總和精確相等。
+- 查無有效規則時仍回傳 `HTTP 200 OK` 與 `{ "data": [] }`。
+
+### 5.4 公開老師清單
+
+`GET /public/advisors` 不接受搜尋、系所篩選、分頁或其他 Query Parameter。成功回傳：
+
+```json
+{
+  "data": [
+    {
+      "id": 10,
+      "name": "陳老師",
+      "titleCode": 6,
+      "department": "多媒體設計系",
+      "isDirector": false
+    }
+  ]
+}
+```
+
+- `id` 是送件 payload 的 `advisorId`。
+- `titleCode` 1～7 依序對應專任講師、專任助理教授、專任助理教授級專業技術人員、專任副教授、專任副教授級專業技術人員、專任教授、特聘教授；前端仍以「未知職稱」處理異常值。
+- 只回傳老師資料、使用者帳號皆啟用且帳號已完成啟用者。
+- Response 已依系主任優先、姓名、`id` 排序；前端保留順序，`isDirector` 不顯示且不參與搜尋。
+- 查無可選老師時仍回傳 `HTTP 200 OK` 與 `{ "data": [] }`。
+
 ## 6. 正式申請 multipart
 
 `payload` 為 JSON 字串，檔案欄位使用 `attachments[{clientFileKey}]`。每個 metadata 必須剛好對應一個檔案。
@@ -207,6 +264,96 @@ for (const attachment of attachments) {
 - Key 缺少或不是 UUID v4 時，後端回傳 `422 validation_failed`，欄位路徑為 `headers.idempotency-key`。
 - 相同 Key 搭配不同 payload 或附件時，後端回傳 `409 idempotency_key_conflict`；前端停止使用該 Key，返回表單確認內容，下一次送件產生新 Key。
 - Idempotent retry 仍計入同一 IP 每小時 20 次的 Rate Limit；前端不自動重試。
+- 後端只記錄已成功 commit 的 `201 Created` 結果，不記錄或永久快取 5xx。相同 Key 與完全相同 request 重試時，第一次若已 commit 則重放原始 `201` 與相同 `publicId`；第一次若在 commit 前失敗則 Transaction rollback，重試時重新執行。
+- 因 gateway 可能在成功 commit 後將 Response 改為 5xx，前端將所有 5xx 與 Network Error、timeout、連線中斷同樣視為結果不確定，保留原 Key 與不可變快照供使用者手動重新確認。
+
+### 6.2 競賽申請 Payload 與成功 Response
+
+競賽 `payload` 必須符合：
+
+```typescript
+interface CompetitionApplicationPayload {
+  applicationType: "competition";
+  advisorId: number;
+  applicant: { name: string; email: string; phone: string };
+  participants: Array<{
+    academicYear: string;
+    grade: number;
+    classNumber: number;
+    studentNumber: string;
+    studentName: string;
+    requestedPoints: string;
+    isApplicant: boolean;
+  }>;
+  typeDetails: {
+    competitionLevel:
+      | "international_integrated"
+      | "international_non_integrated"
+      | "national_integrated"
+      | "national_non_integrated"
+      | "other";
+    competitionLevelOther: string | null;
+    award:
+      | "participation"
+      | "finalist"
+      | "honorable_mention"
+      | "third_place"
+      | "second_place"
+      | "first_place";
+    competitionName: string;
+    competitionCategory: string;
+    competitionDate: string;
+  };
+  attachments: Array<{
+    clientFileKey: string;
+    attachmentType:
+      | "competition_rules"
+      | "competition_poster"
+      | "official_website_screenshot"
+      | "official_document"
+      | "participation_proof"
+      | "finalist_or_award_certificate"
+      | "other";
+    attachmentTypeOther: string | null;
+    description: string | null;
+  }>;
+}
+```
+
+成功回傳 `HTTP 201 Created`：
+
+```json
+{
+  "data": {
+    "publicId": "550e8400-e29b-41d4-a716-446655440000",
+    "status": "pending_advisor",
+    "submittedAt": "2026-08-13T02:20:30.000Z"
+  }
+}
+```
+
+`publicId` 是公開 UUID，`status` 送件後固定為 `pending_advisor`，`submittedAt` 是 UTC ISO 8601。前端以 Asia/Taipei 顯示時間。
+
+競賽 Payload 欄位限制：
+
+- `applicant.email` 必填、trim、轉小寫、最長 320 並符合一般 Email 格式。
+- `applicant.phone` 必填、trim、最長 30，只接受數字、空格、`+`、`-`、`(`、`)`；可填手機、市話與國碼，不驗證台灣電話語意或實際位數。
+- `participants[].studentName` 必填、trim 後不可空、最長 100，不限制字元；申請人的姓名須與 `applicant.name` 完全相同。
+- `participants[].studentNumber` 必填、trim 後不可空、最長 50，正式值再轉大寫並以正規化值檢查重複。
+- `participants[].grade` 為 1～6，`classNumber` 為 1～5；`requestedPoints` 使用兩位小數字串。
+- `typeDetails.competitionLevelOther` 只在等級為 `other` 時必填，trim 後不可空、最長 100；其他等級固定傳 `null`。
+- `typeDetails.competitionName` 必填、trim 後不可空、最長 255；`competitionCategory` 必填、trim 後不可空、最長 100，兩者不限制一般字元。
+- `typeDetails.competitionDate` 使用 `YYYY-MM-DD`，不得晚於 Asia/Taipei 今天，不設定最早日期。
+- `attachments[].clientFileKey`、分類、其他名稱、說明及實際檔案限制依 `application-rules.md` section 7；同一 Idempotent retry 的 Key、檔案、檔名、MIME type 與 `clientFileKey` 必須完全相同。
+
+### 6.3 公開送件錯誤
+
+- `422 validation_failed` 使用 `{ code, message, fields?: [{ path, message }] }`；`path` 使用點號與數字索引，例如 `participants.0.studentNumber`、`typeDetails.competitionDate`、`attachments.0.attachmentType`，不得依賴錯誤陣列順序。
+- 缺少 multipart 檔案可使用 `attachments.<clientFileKey>`；最低附件錯誤使用 `attachments`；規則錯誤使用 `typeDetails` 或 `participants`。
+- `fields[].message` 可能是 `Required`；前端顯示「此欄位為必填」，其他不適合直接呈現的未知欄位訊息使用「此欄位的資料不正確，請重新確認」。沒有 `fields` 時顯示頂層 `message`。
+- 單檔超過 5,242,880 bytes 回傳 `400 file_too_large`；超過 10 個檔案回傳 `400 too_many_files`；副檔名、multipart MIME type 或實際內容不符 PDF、JPEG、PNG 時回傳 `400 file_type_not_allowed`。
+- 每 IP 每小時最多 20 次；超過時回傳 `429 rate_limited`，`Retry-After` 為至少 1 的整數秒。前端可讀時顯示等待時間並停用送件，讀不到時顯示通用稍後再試，不自動重試。
+- 未知 4xx 顯示可用的非空白後端 `message`，否則使用通用中文訊息；保留表單資料、廢棄原 Key，下一次送件產生新 Key。
 
 ## 7. 老師 API
 
@@ -273,14 +420,14 @@ for (const attachment of attachments) {
 
 | HTTP | 前端行為 |
 | --- | --- |
-| 400 | 顯示業務錯誤，能可靠定位時標示欄位 |
+| 400 | 已知 `code` 使用專屬流程；未知錯誤顯示可用的後端訊息或通用中文訊息，能可靠定位時標示欄位 |
 | 401 | 清除登入 Cache，導向登入並保留安全返回路徑 |
 | 403 | 顯示權限不足 |
 | 404 | 顯示不存在、不可揭露或 Token 失效 |
 | 409 | 依穩定 `code` 處理；`idempotency_key_conflict` 廢棄原 Key 並返回表單確認，後台併發衝突則關閉操作 Dialog 並重新載入最新狀態 |
 | 422 | 映射 `fields` 到表單並聚焦第一個錯誤 |
 | 429 | 保留資料，提示稍後重試 |
-| 5xx／Network | 保留資料，顯示重試 |
+| 5xx／Network | 公開正式送件視為結果不確定，以原 Key 與不可變快照手動重新確認；其他操作保留資料並依契約處理 |
 
 Mutation 不自動重試。公開正式送件結果不確定時，因第一版沒有學生進度查詢 API，僅允許使用者以相同 `Idempotency-Key` 與完全相同的不可變 request 快照重新確認同一次送件；簽名、核准及其他沒有已確認 Idempotency 契約的 Mutation 仍先重新查詢狀態，不直接重送。
 
