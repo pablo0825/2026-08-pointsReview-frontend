@@ -53,8 +53,8 @@ import {
 } from './model/competition-points'
 
 const steps = [
-  { label: '學生與參與者資料' },
-  { label: '申請內容與點數' },
+  { label: '競賽內容' },
+  { label: '參與者資料' },
   { label: '指導老師' },
   { label: '附件' },
   { label: '確認送出' },
@@ -152,6 +152,13 @@ export function CompetitionApplicationPage() {
   const participantLimit = selectedOption
     ? getCompetitionParticipantLimit(selectedOption)
     : 10
+  const sharedAllocation =
+    selectedOption?.allocationMethod === 'shared_total'
+      ? getSharedAllocation(
+          value.participants.map(({ requestedPoints }) => requestedPoints),
+          selectedOption,
+        )
+      : null
   const isRateLimited = rateLimitUntil > clock
   const rateLimitSeconds = isRateLimited
     ? Math.max(1, Math.ceil((rateLimitUntil - clock) / 1000))
@@ -188,10 +195,7 @@ export function CompetitionApplicationPage() {
     setDirty(true)
     setSnapshot(null)
     setUncertain(false)
-    form.reset(
-      { ...form.getValues(), [key]: next } as CompetitionApplicationForm,
-      { keepDirty: true },
-    )
+    form.setValue(key, next as never, { shouldDirty: true })
   }
 
   function setStep(step: number) {
@@ -204,6 +208,14 @@ export function CompetitionApplicationPage() {
   function validateStep(step: number) {
     const nextErrors: DisplayError[] = []
     if (step === 0) {
+      if (!selectedOption) nextErrors.push({ path: 'typeDetails', message: '請選擇目前有效的競賽等級與獎項' })
+      if (value.competitionLevel === 'other' && !value.competitionLevelOther?.trim()) nextErrors.push({ path: 'competitionLevelOther', message: '請輸入其他競賽等級' })
+      if (!value.competitionName.trim()) nextErrors.push({ path: 'competitionName', message: '請輸入競賽名稱' })
+      if (!value.competitionCategory.trim()) nextErrors.push({ path: 'competitionCategory', message: '請輸入競賽類別' })
+      if (!value.competitionDate) nextErrors.push({ path: 'competitionDate', message: '請選擇競賽日期' })
+      else if (value.competitionDate > getTaipeiDateString()) nextErrors.push({ path: 'competitionDate', message: '競賽日期不得晚於今天' })
+    }
+    if (step === 1) {
       if (value.participants.length < 1 || value.participants.length > participantLimit) {
         nextErrors.push({ path: 'participants', message: `參與者人數須為 1 至 ${participantLimit} 人` })
       }
@@ -223,14 +235,6 @@ export function CompetitionApplicationPage() {
       else if (email.length > 320 || !emailPattern.test(email)) nextErrors.push({ path: 'applicantEmail', message: '請輸入有效的 Email' })
       if (!phone) nextErrors.push({ path: 'applicantPhone', message: '請輸入申請人電話' })
       else if (phone.length > 30 || !phonePattern.test(phone)) nextErrors.push({ path: 'applicantPhone', message: '電話格式不正確' })
-    }
-    if (step === 1) {
-      if (!selectedOption) nextErrors.push({ path: 'typeDetails', message: '請選擇目前有效的競賽等級與獎項' })
-      if (value.competitionLevel === 'other' && !value.competitionLevelOther?.trim()) nextErrors.push({ path: 'competitionLevelOther', message: '請輸入其他競賽等級' })
-      if (!value.competitionName.trim()) nextErrors.push({ path: 'competitionName', message: '請輸入競賽名稱' })
-      if (!value.competitionCategory.trim()) nextErrors.push({ path: 'competitionCategory', message: '請輸入競賽類別' })
-      if (!value.competitionDate) nextErrors.push({ path: 'competitionDate', message: '請選擇競賽日期' })
-      else if (value.competitionDate > getTaipeiDateString()) nextErrors.push({ path: 'competitionDate', message: '競賽日期不得晚於今天' })
       if (selectedOption?.allocationMethod === 'shared_total') {
         const minimum = parsePoints(selectedOption.minimumPointsPerParticipant) ?? 50
         value.participants.forEach((participant, index) => {
@@ -352,8 +356,13 @@ export function CompetitionApplicationPage() {
     }
     if (error.status === 422 && error.fields.length > 0) {
       const normalized = normalizeApiFieldErrors(error.fields)
-      const ruleInvalid = normalized.some(({ path }) => path === 'typeDetails' || path === 'participants')
-      setStep(ruleInvalid ? 1 : normalized.some(({ path }) => path.startsWith('attachments')) ? 3 : normalized.some(({ path }) => path === 'advisorId') ? 2 : 0)
+      const ruleInvalid = normalized.some(({ path }) => path.startsWith('typeDetails'))
+      const participantInvalid = normalized.some(({ path }) =>
+        path === 'participants' ||
+        path.startsWith('participants.') ||
+        path.startsWith('applicant.'),
+      )
+      setStep(ruleInvalid ? 0 : participantInvalid ? 1 : normalized.some(({ path }) => path.startsWith('attachments')) ? 3 : normalized.some(({ path }) => path === 'advisorId') ? 2 : 0)
       setErrors(normalized)
       if (ruleInvalid) setMessage('競賽規則可能已更新，請重新載入後確認點數。')
       if (normalized[0]) requestAnimationFrame(() => focusField(normalized[0].path))
@@ -432,6 +441,11 @@ export function CompetitionApplicationPage() {
               pending={submission.isPending}
             />
           ) : currentStep === 0 ? (
+            <div className="space-y-5">
+              {message?.includes('重新載入') ? <button className="min-h-11 rounded-lg border border-blue-700 px-4 py-2 font-bold text-blue-800" onClick={() => void reloadRulesAfterInvalidation()} type="button">重新載入規則</button> : null}
+              <CompetitionDetailsStep onChange={updateCompetition} options={rulesQuery.data} selectedOption={selectedOption} value={value} />
+            </div>
+          ) : currentStep === 1 ? (
             <div className="space-y-6">
               <ParticipantsEditor
                 academicYear={value.academicYear}
@@ -441,16 +455,16 @@ export function CompetitionApplicationPage() {
                 participants={value.participants as ParticipantEditorValue[]}
                 pointsEditable={selectedOption?.allocationMethod === 'shared_total'}
               />
+              {sharedAllocation ? (
+                <p className="rounded-lg bg-blue-50 p-4 font-semibold text-blue-950" aria-live="polite">
+                  已分配 {sharedAllocation.allocated ?? '—'} 點；剩餘{' '}
+                  {sharedAllocation.remaining ?? '—'} 點。
+                </p>
+              ) : null}
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-1 font-semibold">申請人 Email<input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" data-field-path="applicantEmail" onChange={(event) => updateValue('applicantEmail', event.target.value)} type="email" value={value.applicantEmail} /></label>
                 <label className="space-y-1 font-semibold">申請人電話<input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" data-field-path="applicantPhone" onChange={(event) => updateValue('applicantPhone', event.target.value)} value={value.applicantPhone} /></label>
               </div>
-            </div>
-          ) : currentStep === 1 ? (
-            <div className="space-y-5">
-              {message?.includes('重新載入') ? <button className="min-h-11 rounded-lg border border-blue-700 px-4 py-2 font-bold text-blue-800" onClick={() => void reloadRulesAfterInvalidation()} type="button">重新載入規則</button> : null}
-              <CompetitionDetailsStep onChange={updateCompetition} options={rulesQuery.data} selectedOption={selectedOption} value={value} />
-              {selectedOption ? <ParticipantsEditor academicYear={value.academicYear} maximumParticipants={participantLimit} onChange={updateParticipants} onDirty={() => setDirty(true)} participants={value.participants as ParticipantEditorValue[]} pointsEditable={selectedOption.allocationMethod === 'shared_total'} /> : null}
             </div>
           ) : currentStep === 2 ? (
             advisorsQuery.isPending ? <p role="status">正在載入指導老師名單…</p> : advisorsQuery.isError ? <QueryState retry={() => void advisorsQuery.refetch()} title="暫時無法載入指導老師名單" /> : advisorsQuery.data.length === 0 ? <QueryState empty retry={() => void advisorsQuery.refetch()} title="目前沒有可選擇的指導老師" /> : <AdvisorSelector advisors={advisorsQuery.data} onSelect={(id) => updateValue('advisorId', id)} selectedId={value.advisorId} />

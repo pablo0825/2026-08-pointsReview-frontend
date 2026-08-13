@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 const applicationLinks = [
-  ['競賽申請', '/apply/competition', '學生與參與者資料'],
+  ['競賽申請', '/apply/competition', '競賽內容'],
   [
     '參與計畫申請',
     '/apply/project-participation',

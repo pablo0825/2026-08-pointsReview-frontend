@@ -63,7 +63,7 @@ describe('application router', () => {
     renderRouter(router)
 
     expect(
-      await screen.findByRole('heading', { name: '學生與參與者資料' }),
+      await screen.findByRole('heading', { name: '競賽內容' }),
     ).toBeInTheDocument()
   })
 })

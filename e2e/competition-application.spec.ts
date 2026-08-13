@@ -58,7 +58,7 @@ async function mockQueries(page: Page) {
   }
 }
 
-async function completeCommonFirstStep(page: Page, twoParticipants = false) {
+async function completeParticipantsStep(page: Page, twoParticipants = false) {
   await page.getByLabel('姓名').first().fill('王小明')
   await page.getByLabel('學號').first().fill('4a0x0001')
   if (twoParticipants) {
@@ -68,7 +68,6 @@ async function completeCommonFirstStep(page: Page, twoParticipants = false) {
   }
   await page.getByLabel('申請人 Email').fill(' STUDENT@EXAMPLE.COM ')
   await page.getByLabel('申請人電話').fill('0912-345-678')
-  await page.getByRole('button', { name: '下一步' }).click()
 }
 
 async function completeDetails(
@@ -106,8 +105,9 @@ test('submits a shared-total application and preserves normalized payload values
   })
 
   await page.goto('/apply/competition')
-  await completeCommonFirstStep(page, true)
   await completeDetails(page, 'first_place')
+  await page.getByRole('button', { name: '下一步' }).click()
+  await completeParticipantsStep(page, true)
 
   const points = page.getByLabel('申請點數')
   await expect(points).toHaveCount(2)
@@ -148,8 +148,9 @@ test('retries an uncertain submission with the same Idempotency-Key', async ({
   })
 
   await page.goto('/apply/competition')
-  await completeCommonFirstStep(page)
   await completeDetails(page, 'finalist')
+  await page.getByRole('button', { name: '下一步' }).click()
+  await completeParticipantsStep(page)
   await expect(page.getByLabel('申請點數')).toBeDisabled()
   await expect(page.getByLabel('申請點數')).toHaveValue('3.00')
   await completeAdvisorAndAttachment(page)
@@ -175,7 +176,9 @@ test('keeps the five-step form usable at 360px without horizontal overflow', asy
   await page.setViewportSize({ width: 360, height: 800 })
   await page.goto('/apply/competition')
 
-  await expect(page.getByRole('heading', { name: '學生與參與者資料' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '競賽內容' })).toBeVisible()
+  await expect(page.getByLabel('競賽名稱')).toBeVisible()
+  await expect(page.getByLabel('姓名')).toHaveCount(0)
   const nextButton = page.getByRole('button', { name: '下一步' })
   const box = await nextButton.boundingBox()
   expect(box?.height).toBeGreaterThanOrEqual(44)
@@ -192,7 +195,7 @@ test('keeps focus in the leave confirmation and supports Escape', async ({
 }) => {
   await mockQueries(page)
   await page.goto('/apply/competition')
-  await page.getByLabel('姓名').fill('尚未送件學生')
+  await page.getByLabel('競賽名稱').fill('尚未送件競賽')
   await page.getByRole('link', { name: '申請辦法' }).click()
 
   const stay = page.getByRole('button', { name: '繼續填寫' })

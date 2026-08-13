@@ -46,7 +46,18 @@ export function CompetitionConfirmationStep({
 }: CompetitionConfirmationStepProps) {
   return (
     <div className="space-y-4">
-      <SummarySection onEdit={onEdit} step={0} title="申請人與參與者">
+      <SummarySection onEdit={onEdit} step={0} title="競賽內容">
+        <p>
+          等級：{value.competitionLevel ? competitionLevelLabels[value.competitionLevel] : '—'}
+          {value.competitionLevelOther ? `（${value.competitionLevelOther}）` : ''}
+        </p>
+        <p>獎項：{value.award ? awardLabels[value.award] : '—'}</p>
+        <p>競賽名稱：{value.competitionName}</p>
+        <p>類別：{value.competitionCategory}</p>
+        <p>日期：{value.competitionDate}</p>
+        <p>分配方式：{allocationLabel}</p>
+      </SummarySection>
+      <SummarySection onEdit={onEdit} step={1} title="參與者資料">
         <p>學年度：{value.academicYear}</p>
         <p>Email：{value.applicantEmail}</p>
         <p>電話：{value.applicantPhone}</p>
@@ -59,17 +70,6 @@ export function CompetitionConfirmationStep({
             </li>
           ))}
         </ul>
-      </SummarySection>
-      <SummarySection onEdit={onEdit} step={1} title="競賽資料">
-        <p>
-          等級：{value.competitionLevel ? competitionLevelLabels[value.competitionLevel] : '—'}
-          {value.competitionLevelOther ? `（${value.competitionLevelOther}）` : ''}
-        </p>
-        <p>獎項：{value.award ? awardLabels[value.award] : '—'}</p>
-        <p>競賽名稱：{value.competitionName}</p>
-        <p>類別：{value.competitionCategory}</p>
-        <p>日期：{value.competitionDate}</p>
-        <p>分配方式：{allocationLabel}</p>
       </SummarySection>
       <SummarySection onEdit={onEdit} step={2} title="指導老師">
         <p>
