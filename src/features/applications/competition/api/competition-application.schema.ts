@@ -29,7 +29,7 @@ export const competitionPointOptionSchema = z
     allocationMethod: allocationMethodSchema,
     points: pointsSchema,
     minimumPointsPerParticipant: pointsSchema,
-    pointsIncrement: pointsSchema,
+    pointIncrement: pointsSchema,
   })
   .strict()
 

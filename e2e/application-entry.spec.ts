@@ -44,7 +44,7 @@ test('navigates to every public application boundary and the rules boundary', as
             allocationMethod: 'per_person',
             points: '3.00',
             minimumPointsPerParticipant: '0.50',
-            pointsIncrement: '0.50',
+            pointIncrement: '0.50',
           },
         ],
       },

@@ -11,7 +11,7 @@ export const competitionPointOptions = [
     allocationMethod: 'per_person',
     points: '3.00',
     minimumPointsPerParticipant: '0.50',
-    pointsIncrement: '0.50',
+    pointIncrement: '0.50',
   },
   {
     competitionLevel: 'national_integrated',
@@ -19,7 +19,7 @@ export const competitionPointOptions = [
     allocationMethod: 'shared_total',
     points: '60.00',
     minimumPointsPerParticipant: '0.50',
-    pointsIncrement: '0.50',
+    pointIncrement: '0.50',
   },
 ] as const satisfies readonly CompetitionPointOption[]
 

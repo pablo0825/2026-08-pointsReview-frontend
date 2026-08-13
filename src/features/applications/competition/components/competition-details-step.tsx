@@ -130,7 +130,7 @@ export function CompetitionDetailsStep({
           <p className="mt-1 text-blue-900">
             {selectedOption.allocationMethod === 'per_person'
               ? `每位參與者固定取得 ${selectedOption.points} 點，不可自行修改。`
-              : `團隊共 ${selectedOption.points} 點；每人至少 ${selectedOption.minimumPointsPerParticipant} 點，並以 ${selectedOption.pointsIncrement} 點為分配單位。`}
+              : `團隊共 ${selectedOption.points} 點；每人至少 ${selectedOption.minimumPointsPerParticipant} 點，並以 ${selectedOption.pointIncrement} 點為分配單位。`}
           </p>
           {allocation ? (
             <p className="mt-2 font-semibold text-blue-950">

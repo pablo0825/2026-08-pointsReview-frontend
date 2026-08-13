@@ -235,8 +235,8 @@ export function CompetitionApplicationPage() {
         const minimum = parsePoints(selectedOption.minimumPointsPerParticipant) ?? 50
         value.participants.forEach((participant, index) => {
           const points = parsePoints(participant.requestedPoints)
-          if (points === null || points < minimum || !isPointsIncrement(participant.requestedPoints, selectedOption.pointsIncrement)) {
-            nextErrors.push({ path: `participants.${index}.requestedPoints`, message: `參與者 ${index + 1} 點數須至少 ${selectedOption.minimumPointsPerParticipant}，且為 ${selectedOption.pointsIncrement} 的倍數` })
+          if (points === null || points < minimum || !isPointsIncrement(participant.requestedPoints, selectedOption.pointIncrement)) {
+            nextErrors.push({ path: `participants.${index}.requestedPoints`, message: `參與者 ${index + 1} 點數須至少 ${selectedOption.minimumPointsPerParticipant}，且為 ${selectedOption.pointIncrement} 的倍數` })
           }
         })
         if (!getSharedAllocation(value.participants.map(({ requestedPoints }) => requestedPoints), selectedOption).isBalanced) nextErrors.push({ path: 'participants', message: `參與者點數總和必須等於 ${selectedOption.points}` })

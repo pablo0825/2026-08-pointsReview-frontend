@@ -15,7 +15,7 @@ import {
 } from './competition-application.submit'
 
 describe('competition public API contract', () => {
-  it('loads strict point options including pointsIncrement without query params', async () => {
+  it('loads strict point options including pointIncrement without query params', async () => {
     let query = 'unseen'
     server.use(
       http.get('*/public/competition-point-options', ({ request }) => {
@@ -30,14 +30,14 @@ describe('competition public API contract', () => {
     expect(query).toBe('')
   })
 
-  it('rejects point options that omit pointsIncrement', async () => {
+  it('rejects point options that omit pointIncrement', async () => {
     server.use(
       http.get('*/public/competition-point-options', () =>
         HttpResponse.json({
           data: [
             {
               ...competitionPointOptions[0],
-              pointsIncrement: undefined,
+              pointIncrement: undefined,
             },
           ],
         }),
