@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 const applicationLinks = [
-  ['競賽申請', '/apply/competition', '競賽申請表單準備中'],
+  ['競賽申請', '/apply/competition', '學生與參與者資料'],
   [
     '參與計畫申請',
     '/apply/project-participation',
@@ -34,6 +34,23 @@ test('redirects to the application entry and exposes keyboard navigation', async
 test('navigates to every public application boundary and the rules boundary', async ({
   page,
 }) => {
+  await page.route('**/public/competition-point-options', (route) =>
+    route.fulfill({
+      json: {
+        data: [
+          {
+            competitionLevel: 'national_integrated',
+            award: 'finalist',
+            allocationMethod: 'per_person',
+            points: '3.00',
+            minimumPointsPerParticipant: '0.50',
+            pointsIncrement: '0.50',
+          },
+        ],
+      },
+    }),
+  )
+
   for (const [label, route, heading] of applicationLinks) {
     await page.goto('/apply')
     await page.getByRole('main').getByRole('link', { name: label }).click()
