@@ -36,6 +36,7 @@
 - 已完成並提交 R3：前端逐步驗證與後端 422 欄位錯誤統一寫入 React Hook Form errors；主要欄位訊息就地呈現並具有紅框、`aria-invalid` 與描述關聯。
 - 跨欄位／集合錯誤顯示於參與者或附件等相關區塊；無法定位、Rate Limit、Network、5xx 與結果不確定狀態維持頁面內提示，未使用瀏覽器原生 `alert()`。
 - R3 後 typecheck、lint、69 個 Vitest、production build 與 15 個 Chromium 流程均通過；但完整 Spec 核對發現 `participants.*.grade`、`participants.*.classNumber`、`attachments.*.attachmentType` 與 `attachments.*.description` 的 server 422 path 尚未就地顯示，因此 Target Behavior 尚未完全通過。
+- 使用者於 2026-08-14 核准新增 F2 fix batch；F2 將只補齊上述四類可定位 422 path 的就地錯誤、紅框、ARIA、清除行為與相關測試，目前尚未開始執行。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
 ## Approved Flow Revision
@@ -166,6 +167,9 @@
 | Field Error Approval | 重新核准錯誤呈現 Spec、Plan 與 Commit Plan | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve field error presentation` |
 | R3 | 以 React Hook Form 統一欄位錯誤並提供就地錯誤、紅框、區塊及系統提示 | 21 個 targeted Vitest、typecheck、lint、69 個 Vitest、build、6 個 targeted Chromium | passed | `fix(competition): localize form validation feedback` |
 | Field Error Reverification | 保存修訂後完整 AI Verification 與等待人工狀態 | 69 個 Vitest、15 個 Chromium、typecheck、lint、build、Spec 核對 | failed | `docs(FS-004): record field error verification` |
+| Field Error Fix Approval | 保存已核准的補強 batch 與進行中狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve field error fix plan` |
+| F2 | 補齊年級、班級、附件分類與附件說明的可定位 422 就地錯誤及測試 | targeted Vitest、typecheck、lint、完整 Vitest、build、targeted Chromium | not-run | `fix(competition): complete field error coverage` |
+| Field Error Fix Reverification | 保存 F2 後完整 AI Verification 與適當狀態 | 完整 AI Verification 證據、文件一致性、`git diff --check` | not-run | `docs(FS-004): record field error fix verification` |
 
 ## Human Integration
 
@@ -235,7 +239,7 @@
 - AI Verification: `failed；R3 後 typecheck、lint、69 個 Vitest、production build 與 15 個 Chromium 流程均通過，但 Spec 核對發現四類可定位 422 path 尚未就地呈現。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依上述步驟驗收。`
-- Remaining Issues: `需新增並核准小型 fix batch，補齊年級、班級、附件分類與附件說明的 422 就地錯誤及測試；之後重新執行完整 AI Verification。另有非阻擋 bundle size 警示。`
+- Remaining Issues: `F2 fix batch 已核准但尚未開始；需補齊年級、班級、附件分類與附件說明的 422 就地錯誤及測試，再重新執行完整 AI Verification。另有非阻擋 bundle size 警示。`
 - Final Feature Slice Status: `in-progress`
 
 ## Document Lineage Update

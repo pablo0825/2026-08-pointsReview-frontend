@@ -8,7 +8,7 @@
 - Based On Spec: `docs/specs/FS-004/FS-004-competition-application-spec.md`
 - Spec Last Updated: `2026-08-13`
 - Created: `2026-08-13`
-- Last Updated: `2026-08-13`
+- Last Updated: `2026-08-14`
 
 ## Goal
 
@@ -254,6 +254,7 @@
 - [x] 驗證初始未選申請人、聯絡資料卡片位置、未選錯誤焦點、改選清除與 payload 唯一申請人
 - [x] 回歸驗證 FS-002、FS-003 的公開辦法、入口、導覽、Router、Provider 與 GET API client
 - [ ] 驗證前端與後端欄位錯誤都在對應控制項下方顯示，具有紅框、`aria-invalid`、描述關聯及修正後清除；部分 select／附件 metadata path 待補
+- [ ] 補齊 `participants.*.grade`、`participants.*.classNumber`、`attachments.*.attachmentType` 與 `attachments.*.description` 的 422 就地錯誤及回歸測試
 - [x] 驗證跨欄位／集合錯誤位於相關區塊，無法定位與系統錯誤使用頁面內提示且不呼叫原生 `alert()`
 
 ## Human Integration
@@ -292,7 +293,7 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 
 - Commit Plan Approval: `approved`
 - Approved By: `使用者`
-- Approved At: `2026-08-13`
+- Approved At: `2026-08-14`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -317,10 +318,13 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 | Field Error Approval | 保存重新核准的 FS-004 Spec、Plan、Commit Plan 與狀態 | FS-004 Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): approve field error presentation` |
 | R3 | 以 React Hook Form 統一欄位錯誤並提供就地錯誤、紅框、區塊及系統提示 | `src/features/applications/competition/competition-application-page.tsx`、`src/features/applications/competition/components/competition-details-step.tsx`、`src/features/applications/common/components/participants-editor.tsx`、`src/features/applications/common/components/advisor-selector.tsx`、`src/features/applications/common/components/attachment-editor.tsx`、`src/features/applications/common/components/error-summary.tsx`、相關 component／page tests、`e2e/competition-application.spec.ts` | targeted Vitest、typecheck、lint、test、build、targeted Chromium Playwright | `fix(competition): localize form validation feedback` |
 | Field Error Reverification | 保存錯誤呈現修訂後完整 AI Verification 與等待人工狀態 | Spec、Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record field error verification` |
+| Field Error Fix Approval | 保存已核准的補強 batch、驗證範圍與 FS-004 進行中狀態 | Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): approve field error fix plan` |
+| F2 | 補齊年級、班級、附件分類與附件說明的可定位 422 就地錯誤及測試 | `src/features/applications/common/components/participants-editor.tsx`、`src/features/applications/common/components/attachment-editor.tsx`、`src/features/applications/common/components/application-controls.test.tsx`、`src/features/applications/competition/competition-application-page.test.tsx` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `fix(competition): complete field error coverage` |
+| Field Error Fix Reverification | 保存 F2 後完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record field error fix verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): record competition application acceptance` |
 
 ## Approval
 
 - Approved By: `使用者`
 - Approved At: `2026-08-13`
-- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；核准 R3 以 React Hook Form 統一欄位錯誤，提供欄位下方訊息、紅框、區塊錯誤與頁面內系統提示。`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；並於 2026-08-14 核准新增 F2，補齊年級、班級、附件分類與附件說明的 422 就地錯誤及測試。`
