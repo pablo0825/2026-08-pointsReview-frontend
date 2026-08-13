@@ -190,14 +190,16 @@ GET /public/application-instructions?applicationType=competition
       "award": "finalist",
       "allocationMethod": "per_person",
       "points": "3.00",
-      "minimumPointsPerParticipant": "0.50"
+      "minimumPointsPerParticipant": "0.50",
+      "pointsIncrement": "0.50"
     },
     {
       "competitionLevel": "national_integrated",
       "award": "first_place",
       "allocationMethod": "shared_total",
       "points": "60.00",
-      "minimumPointsPerParticipant": "0.50"
+      "minimumPointsPerParticipant": "0.50",
+      "pointsIncrement": "0.50"
     }
   ]
 }
