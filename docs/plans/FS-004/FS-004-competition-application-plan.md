@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Based On Spec: `docs/specs/FS-004/FS-004-competition-application-spec.md`
 - Spec Last Updated: `2026-08-13`
 - Created: `2026-08-13`
@@ -245,9 +245,9 @@
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-004): draft competition application specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `pending`
-- Approved By: `pending`
-- Approved At: `pending`
+- Commit Plan Approval: `approved`
+- Approved By: `使用者`
+- Approved At: `2026-08-13`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -267,6 +267,6 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `使用者已核准競賽步驟重排變更提案；修訂後 Spec、Plan 與新增 R1／Reverification Commit Plan 待重新核准。`
+- Approved By: `使用者`
+- Approved At: `2026-08-13`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；R1 與 Reverification 已獲執行授權規劃，但仍須另行明確要求開始實作。`
