@@ -13,7 +13,6 @@ import {
   type AttachmentEditorValue,
 } from './attachment-editor'
 import { validateAttachmentFile } from './attachment-validation'
-import { ErrorSummary } from './error-summary'
 import { LeaveConfirmationDialog } from './leave-confirmation-dialog'
 import {
   ParticipantsEditor,
@@ -266,27 +265,18 @@ describe('shared application controls', () => {
     ])
   })
 
-  it('focuses the leave dialog and exposes actionable errors', async () => {
+  it('focuses the leave dialog and supports Escape', async () => {
     const user = userEvent.setup()
     const onStay = vi.fn()
-    const onSelect = vi.fn()
     render(
-      <>
-        <ErrorSummary
-          errors={[{ path: 'applicantEmail', message: '請輸入 Email' }]}
-          onSelect={onSelect}
-        />
-        <LeaveConfirmationDialog
-          onLeave={vi.fn()}
-          onStay={onStay}
-          open
-        />
-      </>,
+      <LeaveConfirmationDialog
+        onLeave={vi.fn()}
+        onStay={onStay}
+        open
+      />,
     )
 
     expect(screen.getByRole('button', { name: '繼續填寫' })).toHaveFocus()
-    await user.click(screen.getByRole('button', { name: '請輸入 Email' }))
-    expect(onSelect).toHaveBeenCalledWith('applicantEmail')
     await user.keyboard('{Escape}')
     expect(onStay).toHaveBeenCalledOnce()
   })

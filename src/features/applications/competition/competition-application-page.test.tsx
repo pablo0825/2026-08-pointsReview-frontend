@@ -84,7 +84,7 @@ describe('competition application page', () => {
     await user.type(screen.getByLabelText('學號'), '4A0X0001')
     await user.click(screen.getByRole('button', { name: '下一步' }))
 
-    expect(screen.getAllByText('請先選擇一位參與者作為申請人。')).toHaveLength(2)
+    expect(screen.getAllByText('請先選擇一位參與者作為申請人。')).toHaveLength(1)
     await waitFor(() =>
       expect(screen.getByRole('button', { name: '設為申請人' })).toHaveFocus(),
     )
@@ -263,8 +263,35 @@ describe('competition application page', () => {
     await user.click(screen.getByRole('button', { name: '確認送出申請' }))
 
     await screen.findByRole('heading', { name: '參與者資料' })
-    await waitFor(() => expect(screen.getByLabelText('學號')).toHaveFocus())
-    expect(screen.getByRole('alert')).toHaveTextContent('學號資料不正確')
+    const studentNumber = screen.getByLabelText('學號')
+    await waitFor(() => expect(studentNumber).toHaveFocus())
+    expect(studentNumber).toHaveAttribute('aria-invalid', 'true')
+    expect(studentNumber).toHaveClass('border-red-600')
+    expect(studentNumber).toHaveAccessibleDescription('學號資料不正確。')
+    expect(screen.getAllByText('學號資料不正確。')).toHaveLength(1)
+
+    await user.clear(studentNumber)
+    await user.type(studentNumber, '4A0X0002')
+    expect(studentNumber).toHaveAttribute('aria-invalid', 'false')
+    expect(screen.queryByText('學號資料不正確。')).not.toBeInTheDocument()
+  })
+
+  it('renders client validation next to the invalid field without a top summary', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByRole('heading', { name: '競賽內容' })
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+
+    const level = screen.getByLabelText('競賽等級')
+    await waitFor(() => expect(level).toHaveFocus())
+    expect(level).toHaveAttribute('aria-invalid', 'true')
+    expect(level).toHaveClass('border-red-600')
+    expect(level).toHaveAccessibleDescription('請選擇競賽等級')
+    expect(screen.getAllByText('請選擇競賽等級')).toHaveLength(1)
+
+    await user.selectOptions(level, 'national_integrated')
+    expect(level).toHaveAttribute('aria-invalid', 'false')
+    expect(screen.queryByText('請選擇競賽等級')).not.toBeInTheDocument()
   })
 
   it('reloads an invalidated rule and resets points from the refreshed option', async () => {
@@ -354,6 +381,7 @@ describe('competition application page', () => {
 
   it('preserves a safe backend message for an unknown 4xx response', async () => {
     const user = userEvent.setup()
+    const alert = vi.spyOn(window, 'alert')
     server.use(
       http.post('*/public/applications', () =>
         HttpResponse.json(
@@ -368,6 +396,8 @@ describe('competition application page', () => {
     await user.click(screen.getByRole('button', { name: '確認送出申請' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('目前不在申請期間')
     expect(screen.getByRole('heading', { name: '確認送出' })).toBeInTheDocument()
+    expect(alert).not.toHaveBeenCalled()
+    alert.mockRestore()
   })
 
   it('treats a network failure as an uncertain result', async () => {

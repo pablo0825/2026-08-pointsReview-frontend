@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 
 import type { AttachmentType } from '../../competition/api/competition-application.schema'
 import { validateAttachmentFile } from './attachment-validation'
+import { FieldErrorMessage, invalidFieldClassName } from './error-summary'
 
 export type AttachmentEditorValue = {
   clientFileKey: string
@@ -15,6 +16,8 @@ type AttachmentEditorProps = {
   attachments: readonly AttachmentEditorValue[]
   onChange: (attachments: AttachmentEditorValue[]) => void
   onError: (message: string | null) => void
+  errors?: Readonly<Record<string, string | undefined>>
+  onFieldChange?: (path: string) => void
 }
 
 const attachmentTypes = [
@@ -60,6 +63,8 @@ export function AttachmentEditor({
   attachments,
   onChange,
   onError,
+  errors = {},
+  onFieldChange,
 }: AttachmentEditorProps) {
   const addInputRef = useRef<HTMLInputElement>(null)
 
@@ -99,6 +104,7 @@ export function AttachmentEditor({
     }
 
     onChange(next)
+    onFieldChange?.('attachments')
     if (next.length !== attachments.length) onError(null)
     if (addInputRef.current) addInputRef.current.value = ''
   }
@@ -107,6 +113,9 @@ export function AttachmentEditor({
     index: number,
     patch: Partial<AttachmentEditorValue>,
   ) {
+    Object.keys(patch).forEach((key) =>
+      onFieldChange?.(`attachments.${index}.${key}`),
+    )
     onChange(
       attachments.map((attachment, currentIndex) =>
         currentIndex === index ? { ...attachment, ...patch } : attachment,
@@ -122,7 +131,9 @@ export function AttachmentEditor({
         </label>
         <input
           accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-          className="block min-h-11 w-full rounded-lg border border-slate-300 p-2"
+          aria-describedby={errors.attachments ? 'attachments-error' : undefined}
+          aria-invalid={Boolean(errors.attachments)}
+          className={`block min-h-11 w-full rounded-lg border p-2 ${errors.attachments ? invalidFieldClassName : 'border-slate-300'}`}
           data-field-path="attachments"
           id="competition-attachments"
           multiple
@@ -130,6 +141,7 @@ export function AttachmentEditor({
           ref={addInputRef}
           type="file"
         />
+        <FieldErrorMessage id="attachments-error" message={errors.attachments} />
         <p className="text-sm text-slate-600">
           PDF、JPEG、PNG；每檔最多 5 MB，每份申請最多 10 檔。
         </p>
@@ -172,7 +184,10 @@ export function AttachmentEditor({
             <label className="block space-y-1 font-semibold">
               其他附件類型
               <input
-                className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                aria-label="其他附件類型"
+                aria-describedby={errors[`attachments.${index}.attachmentTypeOther`] ? `attachments-${index}-attachmentTypeOther-error` : undefined}
+                aria-invalid={Boolean(errors[`attachments.${index}.attachmentTypeOther`])}
+                className={`min-h-11 w-full rounded-lg border px-3 ${errors[`attachments.${index}.attachmentTypeOther`] ? invalidFieldClassName : 'border-slate-300'}`}
                 data-field-path={`attachments.${index}.attachmentTypeOther`}
                 maxLength={100}
                 onChange={(event) =>
@@ -182,6 +197,7 @@ export function AttachmentEditor({
                 }
                 value={attachment.attachmentTypeOther ?? ''}
               />
+              <FieldErrorMessage id={`attachments-${index}-attachmentTypeOther-error`} message={errors[`attachments.${index}.attachmentTypeOther`]} />
             </label>
           ) : null}
           <label className="block space-y-1 font-semibold">
@@ -220,9 +236,10 @@ export function AttachmentEditor({
           </label>
           <button
             className="min-h-11 rounded-lg border border-red-300 px-4 py-2 font-bold text-red-800"
-            onClick={() =>
+            onClick={() => {
+              onFieldChange?.('attachments.*')
               onChange(attachments.filter((_, current) => current !== index))
-            }
+            }}
             type="button"
           >
             移除附件

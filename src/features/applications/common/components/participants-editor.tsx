@@ -16,10 +16,12 @@ type ParticipantsEditorProps = {
   applicantEmail: string
   applicantPhone: string
   applicantSelectionError?: string
+  errors?: Readonly<Record<string, string | undefined>>
   onChange: (participants: ParticipantEditorValue[]) => void
   onApplicantEmailChange: (email: string) => void
   onApplicantPhoneChange: (phone: string) => void
   onDirty: () => void
+  onFieldChange?: (path: string) => void
 }
 
 const grades = [
@@ -47,10 +49,12 @@ export function ParticipantsEditor({
   applicantEmail,
   applicantPhone,
   applicantSelectionError,
+  errors = {},
   onChange,
   onApplicantEmailChange,
   onApplicantPhoneChange,
   onDirty,
+  onFieldChange,
 }: ParticipantsEditorProps) {
   const hasApplicant = participants.some(({ isApplicant }) => isApplicant)
 
@@ -59,6 +63,9 @@ export function ParticipantsEditor({
     patch: Partial<ParticipantEditorValue>,
   ) {
     onDirty()
+    Object.keys(patch).forEach((key) =>
+      onFieldChange?.(`participants.${index}.${key}`),
+    )
     onChange(
       participants.map((participant, participantIndex) =>
         participantIndex === index ? { ...participant, ...patch } : participant,
@@ -75,6 +82,7 @@ export function ParticipantsEditor({
       return
     }
     onDirty()
+    onFieldChange?.('participants.applicant')
     onChange(
       participants.map((participant, participantIndex) => ({
         ...participant,
@@ -93,6 +101,11 @@ export function ParticipantsEditor({
           {applicantSelectionError}
         </p>
       ) : null}
+      {errors.participants ? (
+        <p className="rounded-lg border border-red-300 bg-red-50 p-3 font-semibold text-red-950" role="alert">
+          {errors.participants}
+        </p>
+      ) : null}
       {participants.map((participant, index) => (
         <fieldset
           className="space-y-4 rounded-xl border border-slate-200 p-4"
@@ -103,19 +116,26 @@ export function ParticipantsEditor({
             <label className="space-y-1 font-semibold">
               姓名
               <input
-                className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                aria-label="姓名"
+                aria-describedby={errors[`participants.${index}.studentName`] ? `participants-${index}-studentName-error` : undefined}
+                aria-invalid={Boolean(errors[`participants.${index}.studentName`])}
+                className={`min-h-11 w-full rounded-lg border px-3 ${errors[`participants.${index}.studentName`] ? invalidFieldClassName : 'border-slate-300'}`}
                 data-field-path={`participants.${index}.studentName`}
                 onChange={(event) =>
                   updateParticipant(index, { studentName: event.target.value })
                 }
                 value={participant.studentName}
               />
+              <FieldErrorMessage id={`participants-${index}-studentName-error`} message={errors[`participants.${index}.studentName`]} />
             </label>
             <label className="space-y-1 font-semibold">
               學號
               <input
+                aria-label="學號"
                 autoCapitalize="characters"
-                className="min-h-11 w-full rounded-lg border border-slate-300 px-3 uppercase"
+                aria-describedby={errors[`participants.${index}.studentNumber`] ? `participants-${index}-studentNumber-error` : undefined}
+                aria-invalid={Boolean(errors[`participants.${index}.studentNumber`])}
+                className={`min-h-11 w-full rounded-lg border px-3 uppercase ${errors[`participants.${index}.studentNumber`] ? invalidFieldClassName : 'border-slate-300'}`}
                 data-field-path={`participants.${index}.studentNumber`}
                 onBlur={(event) =>
                   updateParticipant(index, {
@@ -127,6 +147,7 @@ export function ParticipantsEditor({
                 }
                 value={participant.studentNumber}
               />
+              <FieldErrorMessage id={`participants-${index}-studentNumber-error`} message={errors[`participants.${index}.studentNumber`]} />
             </label>
             <label className="space-y-1 font-semibold">
               年級
@@ -163,7 +184,10 @@ export function ParticipantsEditor({
             <label className="space-y-1 font-semibold">
               申請點數
               <input
-                className="min-h-11 w-full rounded-lg border border-slate-300 px-3 disabled:bg-slate-100"
+                aria-label="申請點數"
+                aria-describedby={errors[`participants.${index}.requestedPoints`] ? `participants-${index}-requestedPoints-error` : undefined}
+                aria-invalid={Boolean(errors[`participants.${index}.requestedPoints`])}
+                className={`min-h-11 w-full rounded-lg border px-3 disabled:bg-slate-100 ${errors[`participants.${index}.requestedPoints`] ? invalidFieldClassName : 'border-slate-300'}`}
                 data-field-path={`participants.${index}.requestedPoints`}
                 disabled={!pointsEditable}
                 inputMode="decimal"
@@ -174,6 +198,7 @@ export function ParticipantsEditor({
                 step="0.50"
                 value={participant.requestedPoints}
               />
+              <FieldErrorMessage id={`participants-${index}-requestedPoints-error`} message={errors[`participants.${index}.requestedPoints`]} />
             </label>
           </div>
           {participant.isApplicant ? (
@@ -188,21 +213,35 @@ export function ParticipantsEditor({
                 <label className="space-y-1 font-semibold">
                   申請人 Email
                   <input
-                    className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                    aria-label="申請人 Email"
+                    aria-describedby={errors.applicantEmail ? 'applicantEmail-error' : undefined}
+                    aria-invalid={Boolean(errors.applicantEmail)}
+                    className={`min-h-11 w-full rounded-lg border px-3 ${errors.applicantEmail ? invalidFieldClassName : 'border-slate-300'}`}
                     data-field-path="applicantEmail"
-                    onChange={(event) => onApplicantEmailChange(event.target.value)}
+                    onChange={(event) => {
+                      onFieldChange?.('applicantEmail')
+                      onApplicantEmailChange(event.target.value)
+                    }}
                     type="email"
                     value={applicantEmail}
                   />
+                  <FieldErrorMessage id="applicantEmail-error" message={errors.applicantEmail} />
                 </label>
                 <label className="space-y-1 font-semibold">
                   申請人電話
                   <input
-                    className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                    aria-label="申請人電話"
+                    aria-describedby={errors.applicantPhone ? 'applicantPhone-error' : undefined}
+                    aria-invalid={Boolean(errors.applicantPhone)}
+                    className={`min-h-11 w-full rounded-lg border px-3 ${errors.applicantPhone ? invalidFieldClassName : 'border-slate-300'}`}
                     data-field-path="applicantPhone"
-                    onChange={(event) => onApplicantPhoneChange(event.target.value)}
+                    onChange={(event) => {
+                      onFieldChange?.('applicantPhone')
+                      onApplicantPhoneChange(event.target.value)
+                    }}
                     value={applicantPhone}
                   />
+                  <FieldErrorMessage id="applicantPhone-error" message={errors.applicantPhone} />
                 </label>
               </div>
             </section>
@@ -222,6 +261,7 @@ export function ParticipantsEditor({
               disabled={participants.length === 1 || participant.isApplicant}
               onClick={() => {
                 onDirty()
+                onFieldChange?.('participants.*')
                 onChange(participants.filter((_, current) => current !== index))
               }}
               type="button"
@@ -236,6 +276,7 @@ export function ParticipantsEditor({
         disabled={participants.length >= maximumParticipants}
         onClick={() => {
           onDirty()
+          onFieldChange?.('participants.*')
           onChange([
             ...participants,
             {
@@ -256,3 +297,4 @@ export function ParticipantsEditor({
     </div>
   )
 }
+import { FieldErrorMessage, invalidFieldClassName } from './error-summary'

@@ -2,17 +2,20 @@ import { useMemo, useState } from 'react'
 
 import type { PublicAdvisor } from '../../competition/api/competition-application.schema'
 import { getAdvisorTitle } from './advisor-options'
+import { FieldErrorMessage, invalidFieldClassName } from './error-summary'
 
 type AdvisorSelectorProps = {
   advisors: readonly PublicAdvisor[]
   selectedId: number | null
   onSelect: (id: number) => void
+  error?: string
 }
 
 export function AdvisorSelector({
   advisors,
   selectedId,
   onSelect,
+  error,
 }: AdvisorSelectorProps) {
   const [search, setSearch] = useState('')
   const normalizedSearch = search.trim().toLocaleLowerCase('zh-TW')
@@ -42,7 +45,11 @@ export function AdvisorSelector({
       {filteredAdvisors.length === 0 ? (
         <p role="status">找不到符合搜尋條件的老師。</p>
       ) : (
-        <fieldset className="space-y-2">
+        <fieldset
+          aria-describedby={error ? 'advisorId-error' : undefined}
+          aria-invalid={Boolean(error)}
+          className={`space-y-2 rounded-lg ${error ? `border p-3 ${invalidFieldClassName}` : ''}`}
+        >
           <legend className="font-bold">選擇指導老師</legend>
           {filteredAdvisors.map((advisor) => (
             <label
@@ -64,6 +71,7 @@ export function AdvisorSelector({
           ))}
         </fieldset>
       )}
+      <FieldErrorMessage id="advisorId-error" message={error} />
     </div>
   )
 }

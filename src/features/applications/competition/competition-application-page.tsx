@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm, useWatch, type FieldErrors, type FieldPath } from 'react-hook-form'
 import { useBlocker } from 'react-router-dom'
 
 import { ApiClientError } from '../../../shared/api/api-client'
@@ -11,7 +11,6 @@ import {
   AttachmentEditor,
   type AttachmentEditorValue,
 } from '../common/components/attachment-editor'
-import { ErrorSummary } from '../common/components/error-summary'
 import { LeaveConfirmationDialog } from '../common/components/leave-confirmation-dialog'
 import {
   ParticipantsEditor,
@@ -61,6 +60,7 @@ const steps = [
 ] as const
 
 type DisplayError = { path: string; message: string }
+type FormErrorPath = FieldPath<CompetitionApplicationForm> | `root.${string}`
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const phonePattern = /^[0-9+()\- ]+$/
@@ -73,6 +73,45 @@ function focusField(path: string) {
     `[data-field-path^="${path}."]`,
   )
   ;(exact ?? group ?? document.getElementById('wizard-heading'))?.focus()
+}
+
+function errorPath(path: string): FormErrorPath {
+  if (path === 'participants.applicant') return 'root.applicantSelection'
+  if (path === 'participants') return 'root.participants'
+  if (path === 'attachments') return 'root.attachments'
+  if (path === 'typeDetails') return 'root.typeDetails'
+  if (path === 'form' || path === 'payload') return 'root.form'
+  if (path === 'applicant.email') return 'applicantEmail'
+  if (path === 'applicant.phone') return 'applicantPhone'
+  if (path.startsWith('typeDetails.')) {
+    return path.slice('typeDetails.'.length) as FieldPath<CompetitionApplicationForm>
+  }
+  return path as FieldPath<CompetitionApplicationForm>
+}
+
+function displayPath(path: FormErrorPath) {
+  if (path === 'root.applicantSelection') return 'participants.applicant'
+  if (path.startsWith('root.')) return path.slice('root.'.length)
+  return path
+}
+
+function collectErrorMessages(
+  errors: FieldErrors<CompetitionApplicationForm>,
+) {
+  const messages: Record<string, string> = {}
+  function visit(value: unknown, path: string) {
+    if (!value || typeof value !== 'object') return
+    const record = value as Record<string, unknown>
+    if (typeof record.message === 'string') {
+      messages[displayPath(path as FormErrorPath)] = record.message
+      return
+    }
+    Object.entries(record).forEach(([key, child]) =>
+      visit(child, path ? `${path}.${key}` : key),
+    )
+  }
+  visit(errors, '')
+  return messages
 }
 
 function QueryState({
@@ -108,7 +147,6 @@ export function CompetitionApplicationPage() {
   const value = useWatch({ control: form.control }) as CompetitionApplicationForm
   const [currentStep, setCurrentStep] = useState(0)
   const [dirty, setDirty] = useState(false)
-  const [errors, setErrors] = useState<DisplayError[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [snapshot, setSnapshot] = useState<CompetitionSubmissionSnapshot | null>(null)
   const [uncertain, setUncertain] = useState(false)
@@ -164,6 +202,7 @@ export function CompetitionApplicationPage() {
     ? Math.max(1, Math.ceil((rateLimitUntil - clock) / 1000))
     : 0
   const blocker = useBlocker(dirty && !result)
+  const fieldErrors = collectErrorMessages(form.formState.errors)
 
   useEffect(() => {
     if (!dirty || result) return
@@ -191,15 +230,19 @@ export function CompetitionApplicationPage() {
   function updateValue<K extends keyof CompetitionApplicationForm>(
     key: K,
     next: CompetitionApplicationForm[K],
+    clearError = true,
   ) {
     setDirty(true)
     setSnapshot(null)
     setUncertain(false)
     form.setValue(key, next as never, { shouldDirty: true })
+    if (clearError) {
+      form.clearErrors(key as FieldPath<CompetitionApplicationForm>)
+    }
   }
 
   function setStep(step: number) {
-    setErrors([])
+    form.clearErrors()
     setMessage(null)
     setCurrentStep(step)
     requestAnimationFrame(() => document.getElementById('wizard-heading')?.focus())
@@ -207,8 +250,10 @@ export function CompetitionApplicationPage() {
 
   function validateStep(step: number) {
     const nextErrors: DisplayError[] = []
+    form.clearErrors()
     if (step === 0) {
-      if (!selectedOption) nextErrors.push({ path: 'typeDetails', message: '請選擇目前有效的競賽等級與獎項' })
+      if (!value.competitionLevel) nextErrors.push({ path: 'competitionLevel', message: '請選擇競賽等級' })
+      else if (!selectedOption) nextErrors.push({ path: 'award', message: '請選擇目前有效的獎項' })
       if (value.competitionLevel === 'other' && !value.competitionLevelOther?.trim()) nextErrors.push({ path: 'competitionLevelOther', message: '請輸入其他競賽等級' })
       if (!value.competitionName.trim()) nextErrors.push({ path: 'competitionName', message: '請輸入競賽名稱' })
       if (!value.competitionCategory.trim()) nextErrors.push({ path: 'competitionCategory', message: '請輸入競賽類別' })
@@ -262,7 +307,9 @@ export function CompetitionApplicationPage() {
         if (attachment.attachmentType === 'other' && !attachment.attachmentTypeOther?.trim()) nextErrors.push({ path: `attachments.${index}.attachmentTypeOther`, message: `請輸入附件 ${index + 1} 的其他類型` })
       })
     }
-    setErrors(nextErrors)
+    nextErrors.forEach(({ path, message }) =>
+      form.setError(errorPath(path), { type: 'validate', message }),
+    )
     if (nextErrors[0]) requestAnimationFrame(() => focusField(nextErrors[0].path))
     return nextErrors.length === 0
   }
@@ -309,15 +356,13 @@ export function CompetitionApplicationPage() {
     if (selectedOption?.allocationMethod === 'per_person') {
       normalized = resetParticipantPoints(participants, selectedOption)
     }
-    updateValue('participants', normalized)
+    updateValue('participants', normalized, false)
     if (oldApplicant !== newApplicant) {
       form.setValue('applicantEmail', '')
       form.setValue('applicantPhone', '')
     }
     if (newApplicant) {
-      setErrors((current) =>
-        current.filter(({ path }) => path !== 'participants.applicant'),
-      )
+      form.clearErrors('root.applicantSelection')
     }
   }
 
@@ -330,6 +375,7 @@ export function CompetitionApplicationPage() {
       ),
     )
     if ('competitionLevel' in patch || 'award' in patch) {
+      form.clearErrors('root.typeDetails')
       const option =
         next.competitionLevel && next.award
           ? optionLookup.get(pointOptionKey({ competitionLevel: next.competitionLevel, award: next.award }))
@@ -377,7 +423,9 @@ export function CompetitionApplicationPage() {
         path.startsWith('applicant.'),
       )
       setStep(ruleInvalid ? 0 : participantInvalid ? 1 : normalized.some(({ path }) => path.startsWith('attachments')) ? 3 : normalized.some(({ path }) => path === 'advisorId') ? 2 : 0)
-      setErrors(normalized)
+      normalized.forEach(({ path, message }) =>
+        form.setError(errorPath(path), { type: 'server', message }),
+      )
       if (ruleInvalid) setMessage('競賽規則可能已更新，請重新載入後確認點數。')
       if (normalized[0]) requestAnimationFrame(() => focusField(normalized[0].path))
       return
@@ -418,7 +466,21 @@ export function CompetitionApplicationPage() {
     if (isRateLimited) return
     const parsed = createCompetitionApplicationFormSchema().safeParse(value)
     if (!parsed.success || !selectedOption || !selectedAdvisor) {
-      setErrors(parsed.success ? [{ path: 'form', message: '請確認所有步驟資料' }] : parsed.error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })))
+      const validationErrors = parsed.success
+        ? [{ path: 'form', message: '請確認所有步驟資料' }]
+        : parsed.error.issues.map((issue) => ({
+            path: issue.path.join('.'),
+            message: issue.message,
+          }))
+      validationErrors.forEach(({ path, message: validationMessage }) =>
+        form.setError(errorPath(path), {
+          type: 'validate',
+          message: validationMessage,
+        }),
+      )
+      if (validationErrors[0]) {
+        requestAnimationFrame(() => focusField(validationErrors[0].path))
+      }
       return
     }
     const nextSnapshot = createCompetitionSubmissionSnapshot(
@@ -447,7 +509,11 @@ export function CompetitionApplicationPage() {
       >
         <div className="space-y-5">
           {message ? <p className="rounded-lg bg-amber-50 p-3 text-amber-950" role="alert">{message}</p> : null}
-          <ErrorSummary errors={errors} onSelect={focusField} />
+          {fieldErrors.form ? (
+            <p className="rounded-lg border border-red-300 bg-red-50 p-3 font-semibold text-red-950" role="alert">
+              {fieldErrors.form}
+            </p>
+          ) : null}
           {uncertain && snapshot ? (
             <CompetitionUncertainState
               onEdit={() => { setSnapshot(null); setUncertain(false); setStep(4) }}
@@ -457,7 +523,12 @@ export function CompetitionApplicationPage() {
           ) : currentStep === 0 ? (
             <div className="space-y-5">
               {message?.includes('重新載入') ? <button className="min-h-11 rounded-lg border border-blue-700 px-4 py-2 font-bold text-blue-800" onClick={() => void reloadRulesAfterInvalidation()} type="button">重新載入規則</button> : null}
-              <CompetitionDetailsStep onChange={updateCompetition} options={rulesQuery.data} selectedOption={selectedOption} value={value} />
+              {fieldErrors.typeDetails ? (
+                <p className="rounded-lg border border-red-300 bg-red-50 p-3 font-semibold text-red-950" role="alert">
+                  {fieldErrors.typeDetails}
+                </p>
+              ) : null}
+              <CompetitionDetailsStep errors={fieldErrors} onChange={updateCompetition} options={rulesQuery.data} selectedOption={selectedOption} value={value} />
             </div>
           ) : currentStep === 1 ? (
             <div className="space-y-6">
@@ -465,12 +536,21 @@ export function CompetitionApplicationPage() {
                 academicYear={value.academicYear}
                 applicantEmail={value.applicantEmail}
                 applicantPhone={value.applicantPhone}
-                applicantSelectionError={errors.find(({ path }) => path === 'participants.applicant')?.message}
+                applicantSelectionError={fieldErrors['participants.applicant']}
+                errors={fieldErrors}
                 maximumParticipants={participantLimit}
                 onApplicantEmailChange={(email) => updateValue('applicantEmail', email)}
                 onApplicantPhoneChange={(phone) => updateValue('applicantPhone', phone)}
                 onChange={updateParticipants}
                 onDirty={() => setDirty(true)}
+                onFieldChange={(path) => {
+                  if (path === 'participants.*') {
+                    form.clearErrors('participants')
+                    form.clearErrors('root.participants')
+                    return
+                  }
+                  form.clearErrors(errorPath(path))
+                }}
                 participants={value.participants as ParticipantEditorValue[]}
                 pointsEditable={selectedOption?.allocationMethod === 'shared_total'}
               />
@@ -482,9 +562,16 @@ export function CompetitionApplicationPage() {
               ) : null}
             </div>
           ) : currentStep === 2 ? (
-            advisorsQuery.isPending ? <p role="status">正在載入指導老師名單…</p> : advisorsQuery.isError ? <QueryState retry={() => void advisorsQuery.refetch()} title="暫時無法載入指導老師名單" /> : advisorsQuery.data.length === 0 ? <QueryState empty retry={() => void advisorsQuery.refetch()} title="目前沒有可選擇的指導老師" /> : <AdvisorSelector advisors={advisorsQuery.data} onSelect={(id) => updateValue('advisorId', id)} selectedId={value.advisorId} />
+            advisorsQuery.isPending ? <p role="status">正在載入指導老師名單…</p> : advisorsQuery.isError ? <QueryState retry={() => void advisorsQuery.refetch()} title="暫時無法載入指導老師名單" /> : advisorsQuery.data.length === 0 ? <QueryState empty retry={() => void advisorsQuery.refetch()} title="目前沒有可選擇的指導老師" /> : <AdvisorSelector advisors={advisorsQuery.data} error={fieldErrors.advisorId} onSelect={(id) => updateValue('advisorId', id)} selectedId={value.advisorId} />
           ) : currentStep === 3 ? (
-            <AttachmentEditor attachments={value.attachments as AttachmentEditorValue[]} onChange={(attachments) => updateValue('attachments', attachments)} onError={setMessage} />
+            <AttachmentEditor attachments={value.attachments as AttachmentEditorValue[]} errors={fieldErrors} onChange={(attachments) => updateValue('attachments', attachments, false)} onError={setMessage} onFieldChange={(path) => {
+              if (path === 'attachments.*') {
+                form.clearErrors('attachments')
+                form.clearErrors('root.attachments')
+                return
+              }
+              form.clearErrors(errorPath(path))
+            }} />
           ) : selectedAdvisor && selectedOption ? (
             <div className="space-y-6">
               <CompetitionConfirmationStep advisor={selectedAdvisor} allocationLabel={selectedOption.allocationMethod === 'per_person' ? '每人固定點數' : '團隊總點數分配'} onEdit={setStep} value={value} />
