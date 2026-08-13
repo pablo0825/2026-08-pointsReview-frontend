@@ -4,9 +4,9 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `draft`
 - Based On Spec: `docs/specs/FS-004/FS-004-competition-application-spec.md`
-- Spec Last Updated: `2026-08-13`
+- Spec Last Updated: `2026-08-14`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-14`
 
@@ -34,6 +34,7 @@
 - 將競賽申請前兩步修訂為「競賽內容」後接「參與者資料」；第一步只確立規則與競賽資料，第二步才顯示參與者及可用的點數控制項。
 - 修訂競賽申請的申請人互動：初始不預選、選定前隱藏聯絡資料、選定後將聯絡資料置於該參與者卡片，並補齊未選與改選行為。
 - 將前端與後端欄位錯誤整合至 React Hook Form，在控制項下方顯示訊息及紅色錯誤框；跨欄位／集合錯誤留在相關區塊，只有無法定位與系統錯誤使用頁面內提示。
+- 修訂 `shared_total` 互動：所有參與者從 0.00 開始，摘要移至清單上方，提供每次 0.50 的自訂加減按鈕及手動輸入；競賽表單與確認頁隱藏學年度但 payload 保留系統值。
 - 建立單元、契約、元件／整合、MSW 與 Playwright 測試，覆蓋 Spec 的 AI Acceptance。
 
 ### Excluded
@@ -75,6 +76,13 @@
 - `participants` 點數總和、`participants.applicant` 與 `attachments` 必要附件等無法歸屬單一控制項的規則，顯示於相關區塊；Network、5xx、429、結果不確定及無法定位的錯誤維持頁面內提示。
 - 既有 API contract、Zod schema、payload、Idempotency、步驟順序、資料保留與焦點移動不變；不使用瀏覽器原生 `alert()` 呈現一般錯誤。
 
+### Shared Point Allocation Revision Assessment
+
+- F2 與完整 AI Verification 已完成，但驗證的是修訂前行為：單人 `shared_total` 自動取得全部點數、多人與新增參與者預設 0.50，摘要位於參與者清單下方，且競賽表單與確認頁顯示學年度。
+- 修訂後不論人數，每位 `shared_total` 參與者皆以 0.00 開始；新增參與者為 0.00，切換至 shared 規則時全員重設為 0.00，不預先分配。
+- 參與者清單上方顯示團隊總點數、已分配與剩餘點數；個別點數使用自訂「−」／「＋」按鈕每次調整 0.50，同時保留手動輸入並隱藏原生數字箭頭。
+- 競賽表單與確認頁不顯示學年度；`getCurrentAcademicYear()` 與 Mapper 保留，正式 payload 仍為每位參與者帶入系統學年度，API 契約不變。
+
 ### Reusable Components
 
 - `src/app/layouts/public-layout.tsx`：沿用公開導覽、skip link、寬度與頁面容器。
@@ -103,6 +111,7 @@
 - 缺少 multipart Mapper、`credentials: omit`、UUID v4 Idempotency、不可變快照與結果不確定手動重試。
 - 缺少 FS-004 的 fixture、MSW handler、單元、元件／整合與 browser tests。
 - 目前尚未符合修訂後的就地錯誤呈現：欄位錯誤未寫入 React Hook Form error、控制項沒有一致紅框／`aria-invalid`／描述關聯，且同一批欄位錯誤仍集中顯示於頁面上方。
+- 目前尚未符合 shared point allocation 修訂：shared 初始值與新增值不是 0.00、缺少自訂加減按鈕、摘要位置在清單下方，且競賽表單與確認頁仍顯示學年度。
 
 ### Preserved Behavior
 
@@ -121,6 +130,8 @@
 - React StrictMode 可能使不穩定的 effect 造成重複查詢；Query key、enabled 時機與測試必須驗證正常流程只發出一次規則／老師 request。
 - 申請人從預設值改為未選狀態後，Form schema、下一步驗證與確認摘要若仍假設 index 0 為申請人，可能造成無法聚焦、聯絡資料錯置或送出無申請人的 payload。
 - 將錯誤來源整合至 React Hook Form 時，動態陣列 index、條件式申請人欄位與後端 path 若未同步，可能讓訊息顯示在錯誤的參與者或無法聚焦。
+- 自訂加減按鈕、手動輸入與即時摘要若未共用整數點數 helper，可能產生浮點誤差、超額分配或按鈕狀態不同步。
+- 隱藏學年度時若誤刪 Mapper 的系統值，後端會收到缺少 `participants[].academicYear` 的 payload。
 
 ### Compatibility / Migration
 
@@ -187,6 +198,11 @@
 - `src/features/applications/common/components/participants-editor.tsx`：在動態參與者、申請人聯絡與點數欄位下方顯示錯誤，並保留參與者層級錯誤。
 - `src/features/applications/common/components/advisor-selector.tsx`、`attachment-editor.tsx`：加入老師欄位、附件 metadata 欄位與附件區塊錯誤呈現。
 - `src/features/applications/common/components/error-summary.tsx`：移除一般欄位錯誤摘要用途；若已無其他使用則刪除元件與對應測試，系統錯誤繼續由頁面內提示負責。
+- `src/features/applications/competition/model/competition-points.ts`、`competition-application.test.ts`：shared 初始化、新增與規則切換改為 0.00，保留整數點數驗證。
+- `src/features/applications/common/components/participants-editor.tsx`、`application-controls.test.tsx`：摘要移至清單上方，加入自訂 0.50 加減按鈕、手動輸入與邊界狀態，隱藏學年度及原生數字箭頭。
+- `src/features/applications/competition/competition-application-page.tsx`、`competition-application-page.test.tsx`：串接新分配互動並驗證 hidden academic year 仍存在 payload。
+- `src/features/applications/competition/components/competition-confirmation-step.tsx`：競賽確認摘要移除學年度顯示。
+- `e2e/competition-application.spec.ts`：覆蓋 shared 0.00 初始值、摘要位置、加減／手動輸入、按鈕邊界與學年度 payload。
 
 ### Tests
 
@@ -210,6 +226,7 @@
 7. 執行完整 typecheck、lint、Vitest、production build、targeted Chromium Playwright 與 Spec 行為核對，建立 Verification record 後交付 Human Integration／Acceptance。
 8. 將逐步驗證與後端 422 path 映射改寫為 React Hook Form field／root errors；由各欄位及相關區塊負責呈現、清除與 ARIA 關聯，頁面只保留非欄位提示。
 9. 補齊欄位紅框、欄位下方訊息、動態陣列、區塊錯誤、系統提示、焦點與 360px 的元件／整合／Playwright 回歸，再執行完整 AI Verification。
+10. 實作 R4：調整 shared point model 與參與者控制項、上移摘要、隱藏競賽學年度顯示但保留 Mapper payload，補齊 targeted／完整測試並重新執行 AI Verification。
 
 ## Risks / Open Issues
 
@@ -242,6 +259,8 @@
 - [x] 將前端逐步驗證與後端 422 欄位錯誤統一寫入 React Hook Form errors，移除獨立欄位錯誤 state。
 - [x] 為競賽、參與者、申請人、點數、老師與附件欄位加入就地文字、紅框、ARIA 關聯與修正後清除；F2 已補齊 `grade`、`classNumber`、附件分類與附件說明。
 - [x] 更新元件、整合與 Playwright 測試，驗證全部可定位 422 path、焦點、桌面／360px 與既有送件流程。
+- [ ] 將 `shared_total` 初始、新增及規則切換值改為 0.00，摘要移至清單上方，加入自訂 0.50 加減按鈕及手動輸入邊界。
+- [ ] 隱藏競賽表單與確認頁的學年度顯示，並以 Mapper／submission tests 保證 payload 仍包含系統學年度。
 
 ## AI Verification
 
@@ -256,6 +275,8 @@
 - [x] 驗證前端與後端欄位錯誤都在對應控制項下方顯示，具有紅框、`aria-invalid`、描述關聯及修正後清除
 - [x] 補齊 `participants.*.grade`、`participants.*.classNumber`、`attachments.*.attachmentType` 與 `attachments.*.description` 的 422 就地錯誤及回歸測試
 - [x] 驗證跨欄位／集合錯誤位於相關區塊，無法定位與系統錯誤使用頁面內提示且不呼叫原生 `alert()`
+- [ ] R4 後驗證 shared 0.00 初始值、摘要位置、加減／手動輸入、按鈕邊界與 360px 操作
+- [ ] R4 後驗證競賽畫面不顯示學年度且 multipart payload 的每位參與者仍包含系統學年度
 
 ## Human Integration
 
@@ -291,9 +312,9 @@
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-004): draft competition application specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `approved`
-- Approved By: `使用者`
-- Approved At: `2026-08-14`
+- Commit Plan Approval: `pending`
+- Approved By: `pending`
+- Approved At: `pending`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -321,10 +342,14 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 | Field Error Fix Approval | 保存已核准的補強 batch、驗證範圍與 FS-004 進行中狀態 | Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): approve field error fix plan` |
 | F2 | 補齊年級、班級、附件分類與附件說明的可定位 422 就地錯誤及測試 | `src/features/applications/common/components/participants-editor.tsx`、`src/features/applications/common/components/attachment-editor.tsx`、`src/features/applications/common/components/application-controls.test.tsx`、`src/features/applications/competition/competition-application-page.test.tsx` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `fix(competition): complete field error coverage` |
 | Field Error Fix Reverification | 保存 F2 後完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record field error fix verification` |
+| Shared Point Revision Draft | 保存已核准的 shared point allocation 與學年度顯示需求、draft Spec／Plan、changes-requested 與等待核准狀態 | `docs/project/` 相關文件、FS-004 Slice Brief、Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): revise shared point allocation flow` |
+| Shared Point Approval | 保存重新核准的 FS-004 Spec、Plan、Commit Plan 與狀態 | FS-004 Slice Brief、Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): approve shared point allocation revision` |
+| R4 | shared 全員 0.00 初始化、自訂 0.50 加減控制、摘要上移，並隱藏學年度顯示但保留 payload | `competition-points.ts` 與測試、`participants-editor.tsx` 與控制項測試、`competition-application-page.tsx` 與測試、`competition-confirmation-step.tsx`、`e2e/competition-application.spec.ts` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `fix(competition): improve shared point allocation controls` |
+| Shared Point Reverification | 保存 R4 後完整 AI Verification 與等待人工狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record shared point allocation verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): record competition application acceptance` |
 
 ## Approval
 
-- Approved By: `使用者`
-- Approved At: `2026-08-13`
-- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；並於 2026-08-14 核准新增 F2，補齊年級、班級、附件分類與附件說明的 422 就地錯誤及測試。`
+- Approved By: `pending`
+- Approved At: `pending`
+- Approval Note: `等待使用者重新核准 shared point allocation 與學年度顯示修訂後的 Spec、Plan 與 Commit Plan。`

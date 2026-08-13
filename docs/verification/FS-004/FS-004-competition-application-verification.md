@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `awaiting-human`
+- Verification Status: `in-progress`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-14`
 
@@ -38,7 +38,16 @@
 - R3 後 typecheck、lint、69 個 Vitest、production build 與 15 個 Chromium 流程均通過；但完整 Spec 核對發現 `participants.*.grade`、`participants.*.classNumber`、`attachments.*.attachmentType` 與 `attachments.*.description` 的 server 422 path 尚未就地顯示，因此 Target Behavior 尚未完全通過。
 - 使用者於 2026-08-14 核准新增 F2 fix batch；F2 已補齊上述四類可定位 422 path 的就地錯誤、紅框、ARIA、清除行為與相關測試。
 - F2 後完整 AI Verification 已通過：typecheck、lint、13 files／73 tests、production build 與 15 個 Chromium 流程均成功；靜態 path 核對確認四類 server 422 均有對應控制項。
+- 使用者於 2026-08-14 Human Acceptance 提出 shared point allocation 與學年度顯示修訂：shared 全員從 0.00 開始、以自訂 0.50 加減按鈕或手動輸入分配、摘要移至參與者清單上方，且競賽表單與確認頁隱藏學年度但 payload 保留系統值。
+- 現有程式仍採修訂前 shared 預設分配、摘要位置與學年度顯示，因此既有 F2 證據不代表新 Target Behavior；FS-004 已退回 `awaiting-approval`，等待重新核准後執行 R4。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
+
+## Requested Shared Point Allocation Revision
+
+- `shared_total` 不論一人或多人皆從 0.00 開始，新增參與者亦為 0.00，不進行預先分配。
+- 團隊總點數、已分配與剩餘點數摘要移至參與者清單上方；個別點數使用每次 0.50 的「−」／「＋」按鈕並保留手動輸入。
+- 競賽表單與確認頁不顯示學年度，但每位參與者的 payload 仍包含 Asia/Taipei 系統學年度。
+- 本次 Human Acceptance 結果為 `changes-requested`；完成文件重新核准、R4 與完整 AI Verification 後，才重新進入 Human Acceptance。
 
 ## Approved Flow Revision
 
@@ -101,7 +110,7 @@
 | Unit / Integration Tests | `npm run test` | passed | 13 files、73 tests passed | 覆蓋 transport、schemas、點數、全部可定位 422 錯誤、紅框、ARIA、修正清除、區塊／系統提示及既有五步流程。 |
 | Production Build | `npm run build` | passed | exit code 0；476 modules transformed | Bundle 成功產生；有超過 Vite 預設 500 kB 的非阻擋警示。 |
 | Browser / Responsive | `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium` | passed | 15 tests passed | 覆蓋欄位下方錯誤、紅框、修正清除、申請人未選錯誤與焦點、入口、公開辦法、desktop、360px、Dialog 與無水平溢位。 |
-| Target Behavior | Spec 與自動化逐項核對 | passed | 靜態 path／元件核對與新增 page integration tests | 年級、班級、附件分類與附件說明均能顯示 server 422 就地錯誤、紅框、ARIA 關聯並個別清除。 |
+| Target Behavior | 修訂後 Spec 與現有程式靜態核對 | failed | 現有 shared reset／新增邏輯、ParticipantsEditor、確認摘要 | 現有程式仍預先分配 shared 點數、摘要在清單下方、缺少自訂加減按鈕，且顯示學年度；須完成 R4 後重新驗證。 |
 | FS-002／FS-003 Regression | 完整 Vitest、入口與公開辦法 Chromium suites | passed | 既有 `/apply`、`/rules`、Router、Provider 與 GET client 均通過 | 未修改其他三類 placeholder。 |
 
 ## AI Acceptance Summary
@@ -114,6 +123,8 @@
 | 初始未選申請人、聯絡資料隱藏／卡片位置、未選錯誤焦點與改選清除 | passed | ParticipantsEditor、page integration 與 Chromium explicit-applicant flow。 |
 | 規則／老師各查詢一次，並區分 loading、empty、failure、reload | passed | Request counters、page state tests 與 Chromium shared flow。 |
 | `per_person` 與單人／多人 `shared_total` 使用整數點數驗證 | passed | points/model tests、page per-person flow 與 shared-total Chromium flow。 |
+| `shared_total` 全員 0.00、自訂加減／手動輸入及摘要上移 | failed | 修訂後 Spec 與現有程式靜態核對。 |
+| 競賽畫面隱藏學年度但 payload 保留系統值 | failed | 現有畫面與確認摘要仍顯示學年度；Mapper 保留值。 |
 | 附件格式、大小、數量、metadata、預覽與 URL 清理 | passed | attachment validation／component tests、multipart contract 與 browser upload。 |
 | HTTP 201、422、400、409、429、5xx 與不可變 retry | passed | API／page integration tests與 Chromium same-key retry。 |
 | 公開未登入 multipart 不帶 Cookie／CSRF，且 Key／檔案不持久化 | passed | API client、submit contract 與 static implementation inspection。 |
@@ -171,6 +182,10 @@
 | Field Error Fix Approval | 保存已核准的補強 batch 與進行中狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve field error fix plan` |
 | F2 | 補齊年級、班級、附件分類與附件說明的可定位 422 就地錯誤及測試 | 25 個 targeted Vitest、typecheck、lint、73 個 Vitest、build、6 個 targeted Chromium | passed | `fix(competition): complete field error coverage` |
 | Field Error Fix Reverification | 保存 F2 後完整 AI Verification 與適當狀態 | 73 個 Vitest、15 個 Chromium、typecheck、lint、build、Spec／path 核對 | passed | `docs(FS-004): record field error fix verification` |
+| Shared Point Revision Draft | 保存 shared point allocation 與學年度顯示修訂文件及等待核准狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): revise shared point allocation flow` |
+| Shared Point Approval | 重新核准修訂後 Spec、Plan 與 Commit Plan | 文件一致性、`git diff --check` | not-run | `docs(FS-004): approve shared point allocation revision` |
+| R4 | 實作 shared 0.00、加減控制、摘要上移與隱藏學年度顯示 | targeted／完整自動測試與 build | not-run | `fix(competition): improve shared point allocation controls` |
+| Shared Point Reverification | 保存 R4 後完整 AI Verification 與等待人工狀態 | 完整 AI Verification、文件一致性、`git diff --check` | not-run | `docs(FS-004): record shared point allocation verification` |
 
 ## Human Integration
 
@@ -211,10 +226,10 @@
 | Step | Action | Expected Result |
 |---|---|---|
 | 1 | 未登入開啟 `/apply/competition` 並觀察 Network。 | 第一個步驟為「競賽內容」，不顯示參與者欄位；只查詢一次規則且不帶 query。 |
-| 2 | 選定 `per_person` 規則並進入「參與者資料」，不選申請人便按下一步。 | 表單顯示目前臺灣學年度，初始沒有申請人且不顯示 Email、電話；參與者區域顯示「請先選擇一位參與者作為申請人。」，並聚焦第一個「設為申請人」按鈕。 |
+| 2 | 選定 `per_person` 規則並進入「參與者資料」，不選申請人便按下一步。 | 表單與後續確認頁不顯示學年度；初始沒有申請人且不顯示 Email、電話。參與者區域顯示「請先選擇一位參與者作為申請人。」，並聚焦第一個「設為申請人」按鈕；送件 payload 仍為每位參與者帶入系統學年度。 |
 | 3 | 將其中一位參與者設為申請人，再改選另一位。 | 選定後錯誤立即清除，該卡片顯示「目前申請人」與 Email、電話；改選前要求確認，確認後聯絡資料被清除並移至新卡片，且不可直接取消目前申請人。 |
 | 4 | 上傳合法附件、查看確認頁並送出。 | multipart 欄位與分類正確，payload 恰好一位 `isApplicant = true`，不帶 Cookie／CSRF；成功頁顯示申請編號、等待老師簽核、台北時間與 Email 提醒，不顯示簽核期限。 |
-| 5 | 完成一筆兩人 `shared_total` 流程。 | 每人至少 0.50、以 0.50 為單位且總和等於總點數後才能送件。 |
+| 5 | 完成一筆兩人 `shared_total` 流程。 | 摘要位於參與者清單上方；兩人皆從 0.00 開始，可用每次 0.50 的「−」／「＋」按鈕或手動輸入。按鈕不會產生負數或超額分配；完成時每人至少 0.50 且總和等於總點數後才能送件。 |
 | 6 | 測試錯誤格式、超過 5 MiB、第 11 檔及缺少必要分類。 | 前端阻擋或顯示對應附件訊息，既有資料保留。 |
 | 7 | 測試規則／老師 empty、failure 與規則失效。 | empty 與 failure 文案不同；重載可恢復；新規則會重設點數或清除失效組合。 |
 | 8 | 觸發 429 與一次 Response 不確定的 5xx／連線中斷後重新確認。 | 429 顯示等待提示；不確定狀態不宣告失敗，相同 Key 重試且只建立一筆案件。 |
@@ -230,18 +245,18 @@
 
 ## Human Acceptance Result
 
-- Status: `pending`
-- Confirmed By: `pending`
-- Confirmed At: `pending`
-- User Feedback: `pending`
+- Status: `changes-requested`
+- Confirmed By: `使用者`
+- Confirmed At: `2026-08-14`
+- User Feedback: `shared_total 不應預先分配；所有參與者從 0.00 開始，以自訂 0.50 加減按鈕或手動輸入調整，摘要移至清單上方。競賽表單與確認頁隱藏學年度，但 payload 仍須保留系統值。`
 
 ## Final Summary
 
-- AI Verification: `passed；F2 後 typecheck、lint、73 個 Vitest、production build、15 個 Chromium 流程及 Spec／path 核對均通過。`
+- AI Verification: `修訂前版本 passed；F2 後 typecheck、lint、73 個 Vitest、production build、15 個 Chromium 流程及 Spec／path 核對均通過。修訂後 Target Behavior 尚未實作，須於 R4 後完整重新驗證。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
-- Human Acceptance: `pending；等待使用者依上述步驟驗收。`
-- Remaining Issues: `產品行為無未解決 AI Verification 失敗；仍有非阻擋 bundle size 警示，並等待真實後端 Human Integration 與使用者驗收。`
-- Final Feature Slice Status: `awaiting-human`
+- Human Acceptance: `changes-requested；使用者已提出 shared point allocation、摘要位置與學年度顯示修訂。`
+- Remaining Issues: `等待重新核准 Spec、Plan 與 Commit Plan，完成 R4 及完整 AI Verification；另有非阻擋 bundle size 警示與待完成的 Human Integration。`
+- Final Feature Slice Status: `awaiting-approval`
 
 ## Document Lineage Update
 

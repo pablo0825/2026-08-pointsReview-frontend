@@ -5,7 +5,7 @@
 - Schema Version: `1`
 - Document Status: `active`
 - Requirements Root: `docs/project/`
-- Last Reconciled: `2026-08-13`
+- Last Reconciled: `2026-08-14`
 - Active Feature Slice: `FS-004`
 
 ## Purpose
@@ -41,7 +41,7 @@
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-002 | `published-instructions` | feature | none | none | none | accepted | 修訂後完整 AI Verification、真實後端 Human Integration 與使用者 Human Acceptance 均已通過；桌面排版觀感列為非阻斷後續優化。 | 2026-08-12 |
 | FS-003 | `application-entry` | feature | none | none | none | accepted | 完整 AI Verification 已通過，Human Integration 為 `not-applicable`，使用者已確認 Human Acceptance 通過。 | 2026-08-11 |
-| FS-004 | `competition-application` | feature | FS-003 | none | none | awaiting-human | F2 已補齊四類 422 就地錯誤；typecheck、lint、73 個 Vitest、build、15 個 Chromium 流程及 Spec／path 核對均通過，等待 Human Integration 與 Human Acceptance。 | 2026-08-14 |
+| FS-004 | `competition-application` | feature | FS-003 | none | none | awaiting-approval | Human Acceptance 提出 shared point allocation 修訂：全員從 0.00 開始、自訂 0.50 加減／手動輸入、摘要上移，且競賽畫面隱藏學年度但 payload 保留；Spec、Plan 與 Commit Plan 等待重新核准。 | 2026-08-14 |
 | FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
 | FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約；證照正規化契約待確認。 | 2026-08-13 |
 | FS-007 | `exhibition-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
