@@ -213,21 +213,21 @@
 - [x] 建立 fixtures、MSW、單元、元件／整合與 Playwright tests。
 - [x] 將前兩步改為「競賽內容」與「參與者資料」，移除競賽步驟中的參與者重複區塊。
 - [x] 同步更新逐步驗證、確認頁返回修改、422／規則失效定位及相關 Vitest／Playwright。
-- [ ] 將競賽參與者預設值改為沒有申請人，並在下一步與正式送件維持恰好一位申請人的驗證。
-- [ ] 將申請人聯絡資料移入被選參與者卡片，補齊選定、不可取消、改選確認、清除與移動行為。
-- [ ] 補齊未選申請人的錯誤摘要、區域訊息、捲動／焦點與選定後立即清除錯誤。
-- [ ] 更新相關 Form、ParticipantsEditor、page integration 與 Playwright 測試，並回歸其他申請控制項不受影響。
+- [x] 將競賽參與者預設值改為沒有申請人，並在下一步與正式送件維持恰好一位申請人的驗證。
+- [x] 將申請人聯絡資料移入被選參與者卡片，補齊選定、不可取消、改選確認、清除與移動行為。
+- [x] 補齊未選申請人的錯誤摘要、區域訊息、捲動／焦點與選定後立即清除錯誤。
+- [x] 更新相關 Form、ParticipantsEditor、page integration 與 Playwright 測試，並回歸其他申請控制項不受影響。
 
 ## AI Verification
 
-- [ ] 執行 `npm run typecheck`
-- [ ] 執行 `npm run lint`
-- [ ] 執行 `npm run test`
-- [ ] 執行 `npm run build`
-- [ ] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium`
-- [ ] 以 Playwright 驗證修訂後 desktop 與 360px、鍵盤、44 × 44px targets、Dialog 焦點及無水平溢位
-- [ ] 驗證初始未選申請人、聯絡資料卡片位置、未選錯誤焦點、改選清除與 payload 唯一申請人
-- [ ] 回歸驗證 FS-002、FS-003 的公開辦法、入口、導覽、Router、Provider 與 GET API client
+- [x] 執行 `npm run typecheck`
+- [x] 執行 `npm run lint`
+- [x] 執行 `npm run test`
+- [x] 執行 `npm run build`
+- [x] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium`
+- [x] 以 Playwright 驗證修訂後 desktop 與 360px、鍵盤、44 × 44px targets、Dialog 焦點及無水平溢位
+- [x] 驗證初始未選申請人、聯絡資料卡片位置、未選錯誤焦點、改選清除與 payload 唯一申請人
+- [x] 回歸驗證 FS-002、FS-003 的公開辦法、入口、導覽、Router、Provider 與 GET API client
 
 ## Human Integration
 

@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `in-progress`
+- Verification Status: `awaiting-human`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-13`
 
@@ -24,6 +24,9 @@
 - 已依真實後端契約將競賽規則增量欄位統一為 `pointIncrement`，並重新執行完整 AI Verification。
 - 已將前兩步重排為「競賽內容」與「參與者資料」；第一步只建立競賽與點數規則，第二步才顯示參與者、聯絡資料、固定或共同分配點數。
 - 已同步調整逐步驗證、後端欄位錯誤定位、規則失效重載、確認摘要修改連結及共用分配即時摘要。
+- 已完成 R2：競賽參與者初始不預選申請人，選定前隱藏聯絡資料，選定後將 Email 與電話顯示於該參與者卡片。
+- 未選申請人時同時顯示錯誤摘要與參與者區域訊息，並聚焦第一個「設為申請人」按鈕；選定後立即清除錯誤。
+- 改選申請人須確認，確認後聯絡資料被清除並移至新申請人卡片；正式 payload 仍恰好一位 `isApplicant = true`。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
 ## Approved Flow Revision
@@ -38,7 +41,7 @@
 - 選定前隱藏 Email 與電話；選定後在該參與者卡片內展開「申請人聯絡資料」，目前申請人不可直接取消或刪除。
 - 未選申請人便繼續時顯示錯誤摘要及區域訊息，捲動並聚焦第一個「設為申請人」按鈕；選定後立即清除錯誤。
 - 改選前須確認，確認後清除 Email、電話並將聯絡資料區塊移到新申請人卡片。
-- 此修訂尚未實作；既有 AI Verification 證據只證明舊的預設申請人行為，不能作為本修訂的通過證據。
+- R2 已完成並重新執行完整 AI Verification；下方表格已更新為申請人互動修訂後的實際結果。
 
 ## Changed Files
 
@@ -53,6 +56,8 @@
 | `src/features/applications/competition/model/**` | 建立表單、Mapper、點數分配、正規化及 submission state。 |
 | `src/features/applications/competition/components/**` | 建立競賽內容、確認、結果不確定與成功畫面；確認摘要依新步驟順序返回修改。 |
 | `src/features/applications/competition/competition-application-page.tsx` | 串接五步流程、單次查詢、錯誤恢復與 Idempotency；將競賽內容置於第一步、參與者與點數置於第二步。 |
+| `src/features/applications/common/components/participants-editor.tsx` | 加入明確選擇申請人、卡片內聯絡資料、未選區域錯誤及改選確認。 |
+| `src/features/applications/competition/model/competition-application.schema.ts` | 將初始參與者改為 `isApplicant = false`，保留正式送件唯一申請人驗證。 |
 | `src/test/**`、`src/features/applications/**/*.test.ts*` | 加入匿名 fixtures、MSW handlers 與單元／元件／整合覆蓋。 |
 | `src/app/router/router.tsx`、`router.test.tsx` | 以正式競賽表單取代 placeholder 並回歸公開 routes。 |
 | `e2e/application-entry.spec.ts`、`e2e/competition-application.spec.ts` | 覆蓋新步驟順序、第一步無參與者欄位、兩種點數、multipart、Idempotent retry、desktop 與 360px。 |
@@ -63,10 +68,10 @@
 |---|---|---|---|---|
 | Typecheck | `npm run typecheck` | passed | exit code 0 | TypeScript project references 通過。 |
 | Lint | `npm run lint` | passed | exit code 0 | ESLint 無 error 或 warning。 |
-| Unit / Integration Tests | `npm run test` | passed | 13 files、65 tests passed | 覆蓋 transport、schemas、點數、元件、修訂後五步流程及錯誤恢復。 |
+| Unit / Integration Tests | `npm run test` | passed | 13 files、68 tests passed | 覆蓋 transport、schemas、點數、初始未選申請人、卡片內聯絡資料、改選清除、修訂後五步流程及錯誤恢復。 |
 | Production Build | `npm run build` | passed | exit code 0；476 modules transformed | Bundle 成功產生；有超過 Vite 預設 500 kB 的非阻擋警示。 |
-| Browser / Responsive | `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium` | passed | 13 tests passed | 覆蓋新步驟順序、入口、公開辦法、desktop、360px、Dialog 焦點與無水平溢位。 |
-| Target Behavior | Spec 與自動化逐項核對 | passed | 65 Vitest assertions、13 Chromium flows | 驗證競賽內容先行、第二步點數、單次查詢、multipart、錯誤定位及 Idempotency。 |
+| Browser / Responsive | `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium` | passed | 14 tests passed | 覆蓋申請人未選錯誤與焦點、新步驟順序、入口、公開辦法、desktop、360px、Dialog 焦點與無水平溢位。 |
+| Target Behavior | Spec 與自動化逐項核對 | passed | 68 Vitest tests、14 Chromium flows | 驗證明確選擇申請人、聯絡資料卡片位置、改選清除、唯一申請人 payload、競賽內容先行、單次查詢、multipart、錯誤定位及 Idempotency。 |
 | FS-002／FS-003 Regression | 完整 Vitest、入口與公開辦法 Chromium suites | passed | 既有 `/apply`、`/rules`、Router、Provider 與 GET client 均通過 | 未修改其他三類 placeholder。 |
 
 ## AI Acceptance Summary
@@ -76,6 +81,7 @@
 | 「競賽內容」先於「參與者資料」，第一步不顯示參與者編輯器 | passed | Page integration、Router 與 360px Chromium flow。 |
 | 五步導覽、逐步驗證、返回修改、dirty-state 與離開警告 | passed | Page integration、確認摘要 step mapping、Wizard 與 Leave Dialog tests。 |
 | 學年度、參與者、申請人、學號與聯絡資料規則 | passed | academic-year、form schema、Mapper 與 ParticipantsEditor tests。 |
+| 初始未選申請人、聯絡資料隱藏／卡片位置、未選錯誤焦點與改選清除 | passed | ParticipantsEditor、page integration 與 Chromium explicit-applicant flow。 |
 | 規則／老師各查詢一次，並區分 loading、empty、failure、reload | passed | Request counters、page state tests 與 Chromium shared flow。 |
 | `per_person` 與單人／多人 `shared_total` 使用整數點數驗證 | passed | points/model tests、page per-person flow 與 shared-total Chromium flow。 |
 | 附件格式、大小、數量、metadata、預覽與 URL 清理 | passed | attachment validation／component tests、multipart contract 與 browser upload。 |
@@ -94,6 +100,7 @@
 | 不確定送件可安全重試，明確衝突則使用新 Key | passed | 5xx same-key、409 new-key tests。 |
 | 後端規則失效後可手動重載並重設點數 | passed | Rule invalidation integration test。 |
 | 規則錯誤返回第一步，參與者與點數錯誤返回第二步 | passed | 422 error routing、field focus 與 rule reload integration tests。 |
+| 競賽申請必須明確指定申請人，聯絡資料只出現在目前申請人卡片 | passed | Page integration、ParticipantsEditor 與 Chromium explicit-applicant flow。 |
 
 ### Preserved Behavior Regression
 
@@ -119,8 +126,8 @@
 | R1 | 將競賽內容移至第一步、參與者與點數移至第二步並同步錯誤／摘要落點 | targeted／完整 Vitest、typecheck、lint、build、指定 Chromium | passed | `fix(competition): reorder application details steps` |
 | Reverification | 保存步驟重排後完整 AI Verification 與等待人工狀態 | 65 Vitest、13 Chromium、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): update application flow verification` |
 | Applicant Revision Draft | 保存申請人互動修訂文件與等待核准狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): revise applicant selection flow` |
-| R2 | 明確選擇申請人、卡片內聯絡資料、未選與改選互動 | 尚未執行 | pending | `fix(competition): clarify applicant selection` |
-| Applicant Reverification | 保存 R2 後完整 AI Verification 與等待人工狀態 | 尚未執行 | pending | `docs(FS-004): update applicant selection verification` |
+| R2 | 明確選擇申請人、卡片內聯絡資料、未選與改選互動 | 25 個 targeted Vitest、typecheck、lint、build、5 個 Chromium 流程 | passed | `fix(competition): clarify applicant selection` |
+| Applicant Reverification | 保存 R2 後完整 AI Verification 與等待人工狀態 | 68 個 Vitest、14 個 Chromium 流程、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): update applicant selection verification` |
 
 ## Human Integration
 
@@ -185,11 +192,11 @@
 
 ## Final Summary
 
-- AI Verification: `in-progress；R1 的 typecheck、lint、65 個 Vitest、production build 與 13 個 Chromium 流程曾通過，但申請人互動 R2 尚未實作或重新驗證。`
+- AI Verification: `passed；R2 後 typecheck、lint、68 個 Vitest、production build 與 14 個 Chromium 流程均通過。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依上述步驟驗收。`
-- Remaining Issues: `修訂後的 Spec、Plan 與 Commit Plan 待核准；R2、完整 AI Reverification、真實後端整合與 Human Acceptance 尚未完成。另有非阻擋 bundle size 警示。`
-- Final Feature Slice Status: `awaiting-approval`
+- Remaining Issues: `真實後端整合與 Human Acceptance 待確認；另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `awaiting-human`
 
 ## Document Lineage Update
 

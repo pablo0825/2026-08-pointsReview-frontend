@@ -137,18 +137,18 @@
 
 ## AI Acceptance
 
-- [ ] 自動測試五步導覽、逐步驗證、返回修改、記憶體保留與 dirty-state 離開警告。
-- [ ] 自動測試「競賽內容」先於「參與者資料」，第一步不顯示參與者編輯區，第二步可依已選規則直接檢視或分配點數。
-- [ ] 自動測試學年度分界、1–10 人限制、初始未選申請人、聯絡資料顯示位置、未選錯誤與焦點、申請人切換／刪除、學號 trim／大寫／重複及學籍限制。
-- [ ] 自動測試規則只查詢一次、Response schema 含 `pointIncrement`、empty／failure／重載與只顯示後端組合。
-- [ ] 自動測試 `per_person`、單人與多人 `shared_total`、增減參與者、切換規則、最低值、0.50 倍數與整數點數加總。
-- [ ] 自動測試競賽欄位、`other` 清理、歷史日期接受與未來日期拒絕。
-- [ ] 自動測試老師首次進入只查詢一次、本機搜尋、職稱 fallback、empty／failure／重載及失效選擇清除。
-- [ ] 自動測試附件格式、單檔 5 MiB、10 檔、最低分類、`other`、說明、重複提示、替換、刪除、預覽與 URL 清理。
-- [ ] 自動測試確認摘要、payload／multipart 對應、公開 `credentials: omit`、不取 CSRF Token 與提交鎖定。
-- [ ] 自動測試 422 路徑定位、規則失效、已知／未知 4xx、429、409、所有 5xx／Network 的不可變 Idempotent retry 及成功頁。
-- [ ] `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` 與 FS-004 Playwright 流程通過。
-- [ ] 自動化無障礙與 360px 檢查涵蓋步驟、Dialog、錯誤、附件與成功頁主要操作。
+- [x] 自動測試五步導覽、逐步驗證、返回修改、記憶體保留與 dirty-state 離開警告。
+- [x] 自動測試「競賽內容」先於「參與者資料」，第一步不顯示參與者編輯區，第二步可依已選規則直接檢視或分配點數。
+- [x] 自動測試學年度分界、1–10 人限制、初始未選申請人、聯絡資料顯示位置、未選錯誤與焦點、申請人切換／刪除、學號 trim／大寫／重複及學籍限制。
+- [x] 自動測試規則只查詢一次、Response schema 含 `pointIncrement`、empty／failure／重載與只顯示後端組合。
+- [x] 自動測試 `per_person`、單人與多人 `shared_total`、增減參與者、切換規則、最低值、0.50 倍數與整數點數加總。
+- [x] 自動測試競賽欄位、`other` 清理、歷史日期接受與未來日期拒絕。
+- [x] 自動測試老師首次進入只查詢一次、本機搜尋、職稱 fallback、empty／failure／重載及失效選擇清除。
+- [x] 自動測試附件格式、單檔 5 MiB、10 檔、最低分類、`other`、說明、重複提示、替換、刪除、預覽與 URL 清理。
+- [x] 自動測試確認摘要、payload／multipart 對應、公開 `credentials: omit`、不取 CSRF Token 與提交鎖定。
+- [x] 自動測試 422 路徑定位、規則失效、已知／未知 4xx、429、409、所有 5xx／Network 的不可變 Idempotent retry 及成功頁。
+- [x] `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` 與 FS-004 Playwright 流程通過。
+- [x] 自動化無障礙與 360px 檢查涵蓋步驟、Dialog、錯誤、附件與成功頁主要操作。
 
 ## Human Acceptance
 
