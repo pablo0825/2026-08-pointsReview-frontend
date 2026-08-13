@@ -28,10 +28,7 @@ export function resetParticipantPoints<T extends PointParticipant>(
 
   return participants.map((participant) => ({
     ...participant,
-    requestedPoints:
-      participants.length === 1
-        ? option.points
-        : option.minimumPointsPerParticipant,
+    requestedPoints: '0.00',
   }))
 }
 

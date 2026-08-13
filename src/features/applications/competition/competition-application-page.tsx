@@ -532,8 +532,14 @@ export function CompetitionApplicationPage() {
             </div>
           ) : currentStep === 1 ? (
             <div className="space-y-6">
+              {sharedAllocation ? (
+                <p className="rounded-lg bg-blue-50 p-4 font-semibold text-blue-950" aria-live="polite">
+                  團隊總點數 {selectedOption?.points ?? '—'} 點；已分配{' '}
+                  {sharedAllocation.allocated ?? '—'} 點；剩餘{' '}
+                  {sharedAllocation.remaining ?? '—'} 點。
+                </p>
+              ) : null}
               <ParticipantsEditor
-                academicYear={value.academicYear}
                 applicantEmail={value.applicantEmail}
                 applicantPhone={value.applicantPhone}
                 applicantSelectionError={fieldErrors['participants.applicant']}
@@ -553,13 +559,8 @@ export function CompetitionApplicationPage() {
                 }}
                 participants={value.participants as ParticipantEditorValue[]}
                 pointsEditable={selectedOption?.allocationMethod === 'shared_total'}
+                sharedRemainingPoints={sharedAllocation?.remaining}
               />
-              {sharedAllocation ? (
-                <p className="rounded-lg bg-blue-50 p-4 font-semibold text-blue-950" aria-live="polite">
-                  已分配 {sharedAllocation.allocated ?? '—'} 點；剩餘{' '}
-                  {sharedAllocation.remaining ?? '—'} 點。
-                </p>
-              ) : null}
             </div>
           ) : currentStep === 2 ? (
             advisorsQuery.isPending ? <p role="status">正在載入指導老師名單…</p> : advisorsQuery.isError ? <QueryState retry={() => void advisorsQuery.refetch()} title="暫時無法載入指導老師名單" /> : advisorsQuery.data.length === 0 ? <QueryState empty retry={() => void advisorsQuery.refetch()} title="目前沒有可選擇的指導老師" /> : <AdvisorSelector advisors={advisorsQuery.data} error={fieldErrors.advisorId} onSelect={(id) => updateValue('advisorId', id)} selectedId={value.advisorId} />

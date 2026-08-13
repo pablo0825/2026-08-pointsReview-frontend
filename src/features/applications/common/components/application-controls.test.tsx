@@ -93,7 +93,6 @@ describe('shared application controls', () => {
 
     render(
       <ParticipantsEditor
-        academicYear="115"
         applicantEmail="student@example.com"
         applicantPhone="0912345678"
         maximumParticipants={10}
@@ -132,7 +131,6 @@ describe('shared application controls', () => {
 
     const { rerender } = render(
       <ParticipantsEditor
-        academicYear="115"
         applicantEmail=""
         applicantPhone=""
         applicantSelectionError="請先選擇一位參與者作為申請人。"
@@ -155,7 +153,6 @@ describe('shared application controls', () => {
 
     rerender(
       <ParticipantsEditor
-        academicYear="115"
         applicantEmail=""
         applicantPhone=""
         maximumParticipants={10}
@@ -170,6 +167,83 @@ describe('shared application controls', () => {
     expect(screen.getByRole('heading', { name: '申請人聯絡資料' })).toBeInTheDocument()
     expect(screen.getByLabelText('申請人 Email')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '目前申請人' })).toBeInTheDocument()
+  })
+
+  it('starts shared points at zero and adjusts them with explicit controls', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    const participant: ParticipantEditorValue = {
+      clientKey: 'one',
+      studentName: '甲',
+      studentNumber: 'A001',
+      grade: 1,
+      classNumber: 1,
+      requestedPoints: '0.00',
+      isApplicant: false,
+    }
+
+    const { rerender } = render(
+      <ParticipantsEditor
+        applicantEmail=""
+        applicantPhone=""
+        maximumParticipants={10}
+        onApplicantEmailChange={vi.fn()}
+        onApplicantPhoneChange={vi.fn()}
+        onChange={onChange}
+        onDirty={vi.fn()}
+        participants={[participant]}
+        pointsEditable
+        sharedRemainingPoints="60.00"
+      />,
+    )
+
+    const points = screen.getByLabelText('申請點數')
+    const decrease = screen.getByRole('button', {
+      name: '減少參與者 1 申請點數',
+    })
+    const increase = screen.getByRole('button', {
+      name: '增加參與者 1 申請點數',
+    })
+    expect(screen.queryByText(/學年度/)).not.toBeInTheDocument()
+    expect(points).toHaveAttribute('type', 'text')
+    expect(points).toHaveValue('0.00')
+    expect(decrease).toBeDisabled()
+    expect(increase).toBeEnabled()
+
+    await user.click(increase)
+    expect(onChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ requestedPoints: '0.50' }),
+    ])
+
+    await user.click(screen.getByRole('button', { name: '新增參與者' }))
+    expect(onChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ requestedPoints: '0.50' }),
+      expect.objectContaining({ requestedPoints: '0.00' }),
+    ])
+
+    rerender(
+      <ParticipantsEditor
+        applicantEmail=""
+        applicantPhone=""
+        maximumParticipants={10}
+        onApplicantEmailChange={vi.fn()}
+        onApplicantPhoneChange={vi.fn()}
+        onChange={onChange}
+        onDirty={vi.fn()}
+        participants={[{ ...participant, requestedPoints: '0.50' }]}
+        pointsEditable
+        sharedRemainingPoints="0.00"
+      />,
+    )
+    expect(
+      screen.getByRole('button', { name: '增加參與者 1 申請點數' }),
+    ).toBeDisabled()
+    await user.click(
+      screen.getByRole('button', { name: '減少參與者 1 申請點數' }),
+    )
+    expect(onChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ requestedPoints: '0.00' }),
+    ])
   })
 
   it('renders and clears indexed grade and class errors at their controls', async () => {
@@ -187,7 +261,6 @@ describe('shared application controls', () => {
 
     render(
       <ParticipantsEditor
-        academicYear="115"
         applicantEmail=""
         applicantPhone=""
         errors={{

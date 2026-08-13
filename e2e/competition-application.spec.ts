@@ -149,12 +149,41 @@ test('submits a shared-total application and preserves normalized payload values
   await page.getByRole('button', { name: '下一步' }).click()
   await completeParticipantsStep(page, true)
 
-  const points = page.getByLabel('申請點數')
+  const points = page.getByLabel('申請點數', { exact: true })
   await expect(points).toHaveCount(2)
+  await expect(points.nth(0)).toHaveValue('0.00')
+  await expect(points.nth(1)).toHaveValue('0.00')
+  await expect(page.getByText(/學年度/)).toHaveCount(0)
+  const summary = page.getByText(
+    '團隊總點數 60.00 點；已分配 0.00 點；剩餘 60.00 點。',
+  )
+  await expect(summary).toBeVisible()
+  expect(
+    await summary.evaluate((element) =>
+      Boolean(
+        element.compareDocumentPosition(
+          document.querySelector('fieldset') as Node,
+        ) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ),
+    ),
+  ).toBe(true)
+  await page
+    .getByRole('button', { name: '增加參與者 1 申請點數' })
+    .click()
+  await expect(points.nth(0)).toHaveValue('0.50')
+  await expect(page.getByText(/已分配 0.50 點；剩餘 59.50 點/)).toBeVisible()
   await points.nth(0).fill('20.00')
   await points.nth(1).fill('40.00')
-  await expect(page.getByText('已分配 60.00 點；剩餘 0.00 點。')).toBeVisible()
+  await expect(
+    page.getByText(
+      '團隊總點數 60.00 點；已分配 60.00 點；剩餘 0.00 點。',
+    ),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('button', { name: '增加參與者 1 申請點數' }),
+  ).toBeDisabled()
   await completeAdvisorAndAttachment(page)
+  await expect(page.getByText(/學年度/)).toHaveCount(0)
   await page.getByRole('button', { name: '確認送出申請' }).click()
 
   await expect(page.getByRole('heading', { name: '申請已成功送出' })).toBeVisible()
@@ -163,6 +192,7 @@ test('submits a shared-total application and preserves normalized payload values
   expect(requests.advisorRequests).toBe(1)
   expect(submittedBody).toContain('"studentNumber":"4A0X0001"')
   expect(submittedBody).toContain('"email":"student@example.com"')
+  expect(submittedBody).toContain('"academicYear":"115"')
   expect(submittedBody).toContain('"requestedPoints":"20.00"')
   expect(submittedBody).toContain('"requestedPoints":"40.00"')
   expect(submittedBody).toContain('attachments[')

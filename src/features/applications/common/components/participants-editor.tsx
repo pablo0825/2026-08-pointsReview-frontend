@@ -1,3 +1,7 @@
+import { useEffect, useRef } from 'react'
+
+import { formatPoints, parsePoints } from '../lib/points'
+
 export type ParticipantEditorValue = {
   clientKey: string
   studentName: string
@@ -10,8 +14,8 @@ export type ParticipantEditorValue = {
 
 type ParticipantsEditorProps = {
   participants: readonly ParticipantEditorValue[]
-  academicYear: string
   pointsEditable: boolean
+  sharedRemainingPoints?: string | null
   maximumParticipants: number
   applicantEmail: string
   applicantPhone: string
@@ -43,8 +47,8 @@ const classes = [
 
 export function ParticipantsEditor({
   participants,
-  academicYear,
   pointsEditable,
+  sharedRemainingPoints,
   maximumParticipants,
   applicantEmail,
   applicantPhone,
@@ -56,7 +60,12 @@ export function ParticipantsEditor({
   onDirty,
   onFieldChange,
 }: ParticipantsEditorProps) {
-  const hasApplicant = participants.some(({ isApplicant }) => isApplicant)
+  const participantsRef = useRef(participants)
+  const increment = parsePoints('0.50') ?? 50
+
+  useEffect(() => {
+    participantsRef.current = participants
+  }, [participants])
 
   function updateParticipant(
     index: number,
@@ -66,36 +75,43 @@ export function ParticipantsEditor({
     Object.keys(patch).forEach((key) =>
       onFieldChange?.(`participants.${index}.${key}`),
     )
-    onChange(
-      participants.map((participant, participantIndex) =>
+    const nextParticipants = participantsRef.current.map(
+      (participant, participantIndex) =>
         participantIndex === index ? { ...participant, ...patch } : participant,
-      ),
     )
+    participantsRef.current = nextParticipants
+    onChange(nextParticipants)
   }
 
   function selectApplicant(index: number) {
-    if (participants[index].isApplicant) return
+    const currentParticipants = participantsRef.current
+    if (currentParticipants[index].isApplicant) return
     if (
-      hasApplicant &&
+      currentParticipants.some(({ isApplicant }) => isApplicant) &&
       !window.confirm('更換申請人後，Email 與電話需要重新輸入。確定更換嗎？')
     ) {
       return
     }
     onDirty()
     onFieldChange?.('participants.applicant')
-    onChange(
-      participants.map((participant, participantIndex) => ({
+    const nextParticipants = currentParticipants.map((participant, participantIndex) => ({
         ...participant,
         isApplicant: participantIndex === index,
-      })),
-    )
+      }))
+    participantsRef.current = nextParticipants
+    onChange(nextParticipants)
+  }
+
+  function adjustPoints(index: number, direction: -1 | 1) {
+    const current = parsePoints(participantsRef.current[index].requestedPoints)
+    if (current === null) return
+    const next = current + direction * increment
+    if (next < 0) return
+    updateParticipant(index, { requestedPoints: formatPoints(next) })
   }
 
   return (
     <div className="space-y-5">
-      <p className="rounded-lg bg-slate-100 p-3 font-semibold">
-        學年度：{academicYear}（系統自動設定）
-      </p>
       {applicantSelectionError ? (
         <p className="rounded-lg border border-red-300 bg-red-50 p-3 font-semibold text-red-950" role="alert">
           {applicantSelectionError}
@@ -189,25 +205,56 @@ export function ParticipantsEditor({
               </select>
               <FieldErrorMessage id={`participants-${index}-classNumber-error`} message={errors[`participants.${index}.classNumber`]} />
             </label>
-            <label className="space-y-1 font-semibold">
-              申請點數
-              <input
-                aria-label="申請點數"
-                aria-describedby={errors[`participants.${index}.requestedPoints`] ? `participants-${index}-requestedPoints-error` : undefined}
-                aria-invalid={Boolean(errors[`participants.${index}.requestedPoints`])}
-                className={`min-h-11 w-full rounded-lg border px-3 disabled:bg-slate-100 ${errors[`participants.${index}.requestedPoints`] ? invalidFieldClassName : 'border-slate-300'}`}
-                data-field-path={`participants.${index}.requestedPoints`}
-                disabled={!pointsEditable}
-                inputMode="decimal"
-                min="0.50"
-                onChange={(event) =>
-                  updateParticipant(index, { requestedPoints: event.target.value })
-                }
-                step="0.50"
-                value={participant.requestedPoints}
-              />
+            <div className="space-y-1 font-semibold">
+              <label htmlFor={`participant-${participant.clientKey}-requestedPoints`}>
+                申請點數
+              </label>
+              <div className="flex items-center gap-2">
+                {pointsEditable ? (
+                  <button
+                    aria-label={`減少參與者 ${index + 1} 申請點數`}
+                    className="min-h-11 min-w-11 rounded-lg border border-slate-300 text-xl font-bold text-slate-800 disabled:bg-slate-100 disabled:text-slate-400"
+                    disabled={(parsePoints(participant.requestedPoints) ?? -1) <= 0}
+                    onClick={() => adjustPoints(index, -1)}
+                    type="button"
+                  >
+                    −
+                  </button>
+                ) : null}
+                <input
+                  aria-label="申請點數"
+                  aria-describedby={errors[`participants.${index}.requestedPoints`] ? `participants-${index}-requestedPoints-error` : undefined}
+                  aria-invalid={Boolean(errors[`participants.${index}.requestedPoints`])}
+                  className={`min-h-11 min-w-0 flex-1 rounded-lg border px-3 disabled:bg-slate-100 ${errors[`participants.${index}.requestedPoints`] ? invalidFieldClassName : 'border-slate-300'}`}
+                  data-field-path={`participants.${index}.requestedPoints`}
+                  disabled={!pointsEditable}
+                  id={`participant-${participant.clientKey}-requestedPoints`}
+                  inputMode="decimal"
+                  onChange={(event) =>
+                    updateParticipant(index, { requestedPoints: event.target.value })
+                  }
+                  type="text"
+                  value={participant.requestedPoints}
+                />
+                {pointsEditable ? (
+                  <button
+                    aria-label={`增加參與者 ${index + 1} 申請點數`}
+                    className="min-h-11 min-w-11 rounded-lg border border-slate-300 text-xl font-bold text-slate-800 disabled:bg-slate-100 disabled:text-slate-400"
+                    disabled={
+                      parsePoints(participant.requestedPoints) === null ||
+                      sharedRemainingPoints === null ||
+                      sharedRemainingPoints === undefined ||
+                      (parsePoints(sharedRemainingPoints) ?? -1) < increment
+                    }
+                    onClick={() => adjustPoints(index, 1)}
+                    type="button"
+                  >
+                    ＋
+                  </button>
+                ) : null}
+              </div>
               <FieldErrorMessage id={`participants-${index}-requestedPoints-error`} message={errors[`participants.${index}.requestedPoints`]} />
-            </label>
+            </div>
           </div>
           {participant.isApplicant ? (
             <section
@@ -270,7 +317,11 @@ export function ParticipantsEditor({
               onClick={() => {
                 onDirty()
                 onFieldChange?.('participants.*')
-                onChange(participants.filter((_, current) => current !== index))
+                const nextParticipants = participantsRef.current.filter(
+                  (_, current) => current !== index,
+                )
+                participantsRef.current = nextParticipants
+                onChange(nextParticipants)
               }}
               type="button"
             >
@@ -285,18 +336,20 @@ export function ParticipantsEditor({
         onClick={() => {
           onDirty()
           onFieldChange?.('participants.*')
-          onChange([
-            ...participants,
+          const nextParticipants = [
+            ...participantsRef.current,
             {
               clientKey: crypto.randomUUID(),
               studentName: '',
               studentNumber: '',
               grade: 1,
               classNumber: 1,
-              requestedPoints: '0.50',
+              requestedPoints: '0.00',
               isApplicant: false,
             },
-          ])
+          ]
+          participantsRef.current = nextParticipants
+          onChange(nextParticipants)
         }}
         type="button"
       >

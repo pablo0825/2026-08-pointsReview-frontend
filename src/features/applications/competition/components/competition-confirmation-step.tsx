@@ -58,7 +58,6 @@ export function CompetitionConfirmationStep({
         <p>分配方式：{allocationLabel}</p>
       </SummarySection>
       <SummarySection onEdit={onEdit} step={1} title="參與者資料">
-        <p>學年度：{value.academicYear}</p>
         <p>Email：{value.applicantEmail}</p>
         <p>電話：{value.applicantPhone}</p>
         <ul className="list-disc space-y-1 pl-5">

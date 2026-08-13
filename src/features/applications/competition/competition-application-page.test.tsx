@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
@@ -36,9 +36,15 @@ async function completeForm(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: '下一步' }))
 
   await screen.findByRole('heading', { name: '參與者資料' })
+  expect(screen.queryByText(/學年度/)).not.toBeInTheDocument()
   expect(screen.queryByLabelText('申請人 Email')).not.toBeInTheDocument()
-  await user.type(screen.getByLabelText('姓名'), '測試學生')
-  await user.type(screen.getByLabelText('學號'), '4a0x0001')
+  fireEvent.change(screen.getByLabelText('姓名'), {
+    target: { value: '測試學生' },
+  })
+  fireEvent.change(screen.getByLabelText('學號'), {
+    target: { value: '4a0x0001' },
+  })
+  fireEvent.blur(screen.getByLabelText('學號'))
   await user.click(screen.getByRole('button', { name: '設為申請人' }))
   expect(screen.getByRole('heading', { name: '申請人聯絡資料' })).toBeInTheDocument()
   await user.type(screen.getByLabelText('申請人 Email'), 'STUDENT@EXAMPLE.COM')
@@ -54,6 +60,7 @@ async function completeForm(user: ReturnType<typeof userEvent.setup>) {
   await user.upload(screen.getByLabelText('新增附件'), file)
   await user.click(screen.getByRole('button', { name: '下一步' }))
   await screen.findByRole('heading', { name: '確認送出' })
+  expect(screen.queryByText(/學年度/)).not.toBeInTheDocument()
 }
 
 beforeEach(() => {
@@ -80,8 +87,12 @@ describe('competition application page', () => {
     await user.click(screen.getByRole('button', { name: '下一步' }))
 
     await screen.findByRole('heading', { name: '參與者資料' })
-    await user.type(screen.getByLabelText('姓名'), '測試學生')
-    await user.type(screen.getByLabelText('學號'), '4A0X0001')
+    fireEvent.change(screen.getByLabelText('姓名'), {
+      target: { value: '測試學生' },
+    })
+    fireEvent.change(screen.getByLabelText('學號'), {
+      target: { value: '4A0X0001' },
+    })
     await user.click(screen.getByRole('button', { name: '下一步' }))
 
     expect(screen.getAllByText('請先選擇一位參與者作為申請人。')).toHaveLength(1)
@@ -163,8 +174,43 @@ describe('competition application page', () => {
     expect(credentials).toBe('omit')
     expect(submittedPayload).toMatchObject({
       applicant: { email: 'student@example.com' },
-      participants: [{ studentNumber: '4A0X0001', requestedPoints: '3.00', isApplicant: true }],
+      participants: [{ academicYear: '115', studentNumber: '4A0X0001', requestedPoints: '3.00', isApplicant: true }],
     })
+  })
+
+  it('shows shared allocation before participants and supports point controls', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByRole('heading', { name: '競賽內容' })
+    await user.selectOptions(screen.getByLabelText('競賽等級'), 'national_integrated')
+    await user.selectOptions(screen.getByLabelText('獎項'), 'first_place')
+    await user.type(screen.getByLabelText('競賽名稱'), '測試競賽')
+    await user.type(screen.getByLabelText('競賽類別'), '設計組')
+    await user.type(screen.getByLabelText('競賽日期'), '2026-08-01')
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+
+    const summary = screen.getByText(
+      '團隊總點數 60.00 點；已分配 0.00 點；剩餘 60.00 點。',
+    )
+    const firstParticipant = screen.getByRole('group', { name: '參與者 1' })
+    expect(
+      summary.compareDocumentPosition(firstParticipant) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(screen.getByLabelText('申請點數')).toHaveValue('0.00')
+    expect(
+      screen.getByRole('button', { name: '減少參與者 1 申請點數' }),
+    ).toBeDisabled()
+
+    await user.click(
+      screen.getByRole('button', { name: '增加參與者 1 申請點數' }),
+    )
+    expect(screen.getByLabelText('申請點數')).toHaveValue('0.50')
+    expect(screen.getByText(/已分配 0.50 點；剩餘 59.50 點/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: '新增參與者' }))
+    expect(screen.getAllByLabelText('申請點數')).toHaveLength(2)
+    expect(screen.getAllByLabelText('申請點數')[1]).toHaveValue('0.00')
   })
 
   it('reuses the exact Idempotency-Key after an uncertain 5xx result', async () => {

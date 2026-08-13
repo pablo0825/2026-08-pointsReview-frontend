@@ -54,7 +54,7 @@ describe('competition application model', () => {
         email: 'student@example.com',
         phone: '0912-345-678',
       },
-      participants: [{ studentNumber: '4A0X0001' }],
+      participants: [{ academicYear: '115', studentNumber: '4A0X0001' }],
       attachments: [{ description: null }],
     })
   })
@@ -112,8 +112,8 @@ describe('competition application model', () => {
       { requestedPoints: '3.00' },
     ])
     expect(resetParticipantPoints(participants, shared)).toEqual([
-      { requestedPoints: '0.50' },
-      { requestedPoints: '0.50' },
+      { requestedPoints: '0.00' },
+      { requestedPoints: '0.00' },
     ])
     expect(getSharedAllocation(['20.00', '40.00'], shared)).toEqual({
       allocated: '60.00',
@@ -122,7 +122,7 @@ describe('competition application model', () => {
     })
     expect(getCompetitionParticipantLimit(shared)).toBe(10)
     expect(resetParticipantPoints([{ requestedPoints: '0.50' }], shared)).toEqual([
-      { requestedPoints: '60.00' },
+      { requestedPoints: '0.00' },
     ])
   })
 
