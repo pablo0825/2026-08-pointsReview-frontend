@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `draft`
 - Based On Spec: `docs/specs/FS-004/FS-004-competition-application-spec.md`
 - Spec Last Updated: `2026-08-13`
 - Created: `2026-08-13`
@@ -32,6 +32,7 @@
 - 建立 FS-004 首次實際使用的共用 Application Wizard、參與者、老師、附件、錯誤摘要及離開確認元件。
 - 以競賽專屬步驟完成 `/apply/competition` 的資料輸入、點數分配、確認、Idempotent retry 與成功頁。
 - 將競賽申請前兩步修訂為「競賽內容」後接「參與者資料」；第一步只確立規則與競賽資料，第二步才顯示參與者及可用的點數控制項。
+- 修訂競賽申請的申請人互動：初始不預選、選定前隱藏聯絡資料、選定後將聯絡資料置於該參與者卡片，並補齊未選與改選行為。
 - 建立單元、契約、元件／整合、MSW 與 Playwright 測試，覆蓋 Spec 的 AI Acceptance。
 
 ### Excluded
@@ -57,6 +58,14 @@
 - 現行第一步為「學生與參與者資料」，點數欄位因競賽規則尚未選定而 disabled；第二步「申請內容與點數」選定規則後又重複顯示參與者編輯器。
 - 修訂後第一步改為「競賽內容」且不顯示參與者；第二步改為「參與者資料」，此時規則已確立，可直接顯示 `per_person` 固定點數或編輯 `shared_total` 分配。
 - 需同步交換步驟驗證、確認摘要修改索引、422 錯誤落點、規則失效落點及所有 component／browser tests；API、Form Model、payload、五步總數與其他申請類型不變。
+
+### Applicant Selection Revision Assessment
+
+- R1 與 Reverification 已完成；現行實作仍將第一位參與者預設為申請人，Email 與電話固定顯示於整個參與者編輯器底部。
+- 修訂後所有參與者初始皆為 `isApplicant = false`，必須明確選擇；選定前隱藏聯絡資料，選定後在該參與者卡片內展開。
+- 未選申請人時需建立可存取的錯誤摘要與區域錯誤，捲動並聚焦第一個「設為申請人」按鈕；選定後立即清除錯誤。
+- 改選申請人沿用確認機制，但確認後須清除 Email、電話並移動聯絡資料區塊；目前申請人不可直接取消或刪除。
+- API、payload 與後端驗證契約不變，正式送件仍保證恰好一位 `isApplicant = true`；FS-005～FS-007 的預設行為不在本修訂範圍。
 
 ### Reusable Components
 
@@ -100,6 +109,7 @@
 - 動態參與者 index 與後端 `fields[].path` 若映射錯誤，可能聚焦錯誤的人或錯誤步驟。
 - Blob URL、File 與 Idempotency snapshot 若生命週期不清楚，可能造成記憶體洩漏、內容變更後錯誤重試或敏感資料被持久化。
 - React StrictMode 可能使不穩定的 effect 造成重複查詢；Query key、enabled 時機與測試必須驗證正常流程只發出一次規則／老師 request。
+- 申請人從預設值改為未選狀態後，Form schema、下一步驗證與確認摘要若仍假設 index 0 為申請人，可能造成無法聚焦、聯絡資料錯置或送出無申請人的 payload。
 
 ### Compatibility / Migration
 
@@ -203,17 +213,21 @@
 - [x] 建立 fixtures、MSW、單元、元件／整合與 Playwright tests。
 - [x] 將前兩步改為「競賽內容」與「參與者資料」，移除競賽步驟中的參與者重複區塊。
 - [x] 同步更新逐步驗證、確認頁返回修改、422／規則失效定位及相關 Vitest／Playwright。
+- [ ] 將競賽參與者預設值改為沒有申請人，並在下一步與正式送件維持恰好一位申請人的驗證。
+- [ ] 將申請人聯絡資料移入被選參與者卡片，補齊選定、不可取消、改選確認、清除與移動行為。
+- [ ] 補齊未選申請人的錯誤摘要、區域訊息、捲動／焦點與選定後立即清除錯誤。
+- [ ] 更新相關 Form、ParticipantsEditor、page integration 與 Playwright 測試，並回歸其他申請控制項不受影響。
 
 ## AI Verification
 
-- [x] 執行 `npm run typecheck`
-- [x] 執行 `npm run lint`
-- [x] 執行 `npm run test`
-- [x] 執行 `npm run build`
-- [x] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium`
-- [x] 以 Playwright 驗證修訂後 desktop 與 360px、鍵盤、44 × 44px targets、Dialog 焦點及無水平溢位
-- [x] 驗證「競賽內容」先於「參與者資料」、API request 次數、Idempotency snapshot 與錯誤定位
-- [x] 回歸驗證 FS-002、FS-003 的公開辦法、入口、導覽、Router、Provider 與 GET API client
+- [ ] 執行 `npm run typecheck`
+- [ ] 執行 `npm run lint`
+- [ ] 執行 `npm run test`
+- [ ] 執行 `npm run build`
+- [ ] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium`
+- [ ] 以 Playwright 驗證修訂後 desktop 與 360px、鍵盤、44 × 44px targets、Dialog 焦點及無水平溢位
+- [ ] 驗證初始未選申請人、聯絡資料卡片位置、未選錯誤焦點、改選清除與 payload 唯一申請人
+- [ ] 回歸驗證 FS-002、FS-003 的公開辦法、入口、導覽、Router、Provider 與 GET API client
 
 ## Human Integration
 
@@ -245,9 +259,9 @@
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-004): draft competition application specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `approved`
-- Approved By: `使用者`
-- Approved At: `2026-08-13`
+- Commit Plan Approval: `pending`
+- Approved By: `pending`
+- Approved At: `pending`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -263,10 +277,13 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 | Verification | 保存完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、`git diff --check` | `docs(FS-004): record competition application verification` |
 | R1 | 將競賽內容移至第一步，參與者與點數移至第二步，並同步錯誤／摘要落點 | `src/features/applications/competition/competition-application-page.tsx`、`components/competition-confirmation-step.tsx`、相關 unit／page／router tests、`e2e/application-entry.spec.ts`、`e2e/competition-application.spec.ts` | targeted Vitest、typecheck、lint、test、build、targeted Chromium Playwright | `fix(competition): reorder application details steps` |
 | Reverification | 保存步驟重排後完整 AI Verification 與等待人工狀態 | Spec、Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): update application flow verification` |
+| Applicant Revision Draft | 保存已同意的申請人互動需求、draft Spec／Plan 與等待核准狀態 | `docs/project/product-requirements.md`、`docs/project/application-rules.md`、`docs/project/routes-and-pages.md`、`docs/project/testing-strategy.md`、FS-004 Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): revise applicant selection flow` |
+| R2 | 改為明確選擇申請人，將聯絡資料置於申請人卡片，並補齊未選與改選互動 | `src/features/applications/common/components/participants-editor.tsx`、相關 common component tests、`src/features/applications/competition/model/competition-application.schema.ts`、相關 model tests、`src/features/applications/competition/competition-application-page.tsx`、page tests、`e2e/competition-application.spec.ts` | targeted Vitest、typecheck、lint、test、build、targeted Chromium Playwright | `fix(competition): clarify applicant selection` |
+| Applicant Reverification | 保存申請人互動修訂後完整 AI Verification 與等待人工狀態 | Spec、Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): update applicant selection verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): record competition application acceptance` |
 
 ## Approval
 
-- Approved By: `使用者`
-- Approved At: `2026-08-13`
-- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan，並於 2026-08-13 明確要求開始實作；R1 與 Reverification 已完成。`
+- Approved By: `pending`
+- Approved At: `pending`
+- Approval Note: `申請人選擇流程變更提案已獲使用者同意；修訂後的 Spec、Plan 與 Commit Plan 待重新核准。`

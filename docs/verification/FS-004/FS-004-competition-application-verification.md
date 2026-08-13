@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `awaiting-human`
+- Verification Status: `in-progress`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-13`
 
@@ -31,6 +31,14 @@
 - 使用者於 2026-08-13 核准將競賽申請前兩步改為「競賽內容」後接「參與者資料」。
 - 第一個步驟不再顯示尚不可操作的參與者點數；第二個步驟在規則已選定後才顯示參與者、申請人聯絡資料與個別點數。
 - R1 已完成並重新執行完整 AI Verification；下方表格已更新為步驟重排後的實際結果。
+
+## Approved Applicant Selection Revision
+
+- 使用者於 2026-08-13 同意競賽申請初始不預選申請人，必須由使用者明確指定一位參與者。
+- 選定前隱藏 Email 與電話；選定後在該參與者卡片內展開「申請人聯絡資料」，目前申請人不可直接取消或刪除。
+- 未選申請人便繼續時顯示錯誤摘要及區域訊息，捲動並聚焦第一個「設為申請人」按鈕；選定後立即清除錯誤。
+- 改選前須確認，確認後清除 Email、電話並將聯絡資料區塊移到新申請人卡片。
+- 此修訂尚未實作；既有 AI Verification 證據只證明舊的預設申請人行為，不能作為本修訂的通過證據。
 
 ## Changed Files
 
@@ -110,6 +118,9 @@
 | Verification | 保存完整 AI Verification 與狀態 | 本文件、文件一致性、`git diff --check` | passed | `docs(FS-004): record competition application verification` |
 | R1 | 將競賽內容移至第一步、參與者與點數移至第二步並同步錯誤／摘要落點 | targeted／完整 Vitest、typecheck、lint、build、指定 Chromium | passed | `fix(competition): reorder application details steps` |
 | Reverification | 保存步驟重排後完整 AI Verification 與等待人工狀態 | 65 Vitest、13 Chromium、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): update application flow verification` |
+| Applicant Revision Draft | 保存申請人互動修訂文件與等待核准狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): revise applicant selection flow` |
+| R2 | 明確選擇申請人、卡片內聯絡資料、未選與改選互動 | 尚未執行 | pending | `fix(competition): clarify applicant selection` |
+| Applicant Reverification | 保存 R2 後完整 AI Verification 與等待人工狀態 | 尚未執行 | pending | `docs(FS-004): update applicant selection verification` |
 
 ## Human Integration
 
@@ -150,13 +161,14 @@
 | Step | Action | Expected Result |
 |---|---|---|
 | 1 | 未登入開啟 `/apply/competition` 並觀察 Network。 | 第一個步驟為「競賽內容」，不顯示參與者欄位；只查詢一次規則且不帶 query。 |
-| 2 | 選定 `per_person` 規則並進入「參與者資料」。 | 表單顯示目前臺灣學年度；點數已依第一步規則自動設定且唯讀；進入老師步驟才查詢一次老師，返回步驟不重查。 |
-| 3 | 上傳合法附件、查看確認頁並送出。 | multipart 欄位與分類正確，不帶 Cookie／CSRF；成功頁顯示申請編號、等待老師簽核、台北時間與 Email 提醒，不顯示簽核期限。 |
-| 4 | 完成一筆兩人 `shared_total` 流程。 | 每人至少 0.50、以 0.50 為單位且總和等於總點數後才能送件。 |
-| 5 | 測試錯誤格式、超過 5 MiB、第 11 檔及缺少必要分類。 | 前端阻擋或顯示對應附件訊息，既有資料保留。 |
-| 6 | 測試規則／老師 empty、failure 與規則失效。 | empty 與 failure 文案不同；重載可恢復；新規則會重設點數或清除失效組合。 |
-| 7 | 觸發 429 與一次 Response 不確定的 5xx／連線中斷後重新確認。 | 429 顯示等待提示；不確定狀態不宣告失敗，相同 Key 重試且只建立一筆案件。 |
-| 8 | 修改資料後離開頁面，並在 360px／鍵盤重複主要流程。 | 離開前警告；焦點、錯誤摘要、Dialog、附件與按鈕可操作，無非必要水平捲動。 |
+| 2 | 選定 `per_person` 規則並進入「參與者資料」，不選申請人便按下一步。 | 表單顯示目前臺灣學年度，初始沒有申請人且不顯示 Email、電話；錯誤摘要及參與者區域顯示「請先選擇一位參與者作為申請人。」，並聚焦第一個「設為申請人」按鈕。 |
+| 3 | 將其中一位參與者設為申請人，再改選另一位。 | 選定後錯誤立即清除，該卡片顯示「目前申請人」與 Email、電話；改選前要求確認，確認後聯絡資料被清除並移至新卡片，且不可直接取消目前申請人。 |
+| 4 | 上傳合法附件、查看確認頁並送出。 | multipart 欄位與分類正確，payload 恰好一位 `isApplicant = true`，不帶 Cookie／CSRF；成功頁顯示申請編號、等待老師簽核、台北時間與 Email 提醒，不顯示簽核期限。 |
+| 5 | 完成一筆兩人 `shared_total` 流程。 | 每人至少 0.50、以 0.50 為單位且總和等於總點數後才能送件。 |
+| 6 | 測試錯誤格式、超過 5 MiB、第 11 檔及缺少必要分類。 | 前端阻擋或顯示對應附件訊息，既有資料保留。 |
+| 7 | 測試規則／老師 empty、failure 與規則失效。 | empty 與 failure 文案不同；重載可恢復；新規則會重設點數或清除失效組合。 |
+| 8 | 觸發 429 與一次 Response 不確定的 5xx／連線中斷後重新確認。 | 429 顯示等待提示；不確定狀態不宣告失敗，相同 Key 重試且只建立一筆案件。 |
+| 9 | 修改資料後離開頁面，並在 360px／鍵盤重複主要流程。 | 離開前警告；焦點、錯誤摘要、Dialog、附件與按鈕可操作，無非必要水平捲動。 |
 
 ### Known Limitations
 
@@ -173,11 +185,11 @@
 
 ## Final Summary
 
-- AI Verification: `passed；修訂後 typecheck、lint、65 個 Vitest、production build 與 13 個 Chromium 流程均通過。`
+- AI Verification: `in-progress；R1 的 typecheck、lint、65 個 Vitest、production build 與 13 個 Chromium 流程曾通過，但申請人互動 R2 尚未實作或重新驗證。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依上述步驟驗收。`
-- Remaining Issues: `真實後端整合與 Human Acceptance 待確認；另有非阻擋 bundle size 警示。`
-- Final Feature Slice Status: `awaiting-human`
+- Remaining Issues: `修訂後的 Spec、Plan 與 Commit Plan 待核准；R2、完整 AI Reverification、真實後端整合與 Human Acceptance 尚未完成。另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `awaiting-approval`
 
 ## Document Lineage Update
 
