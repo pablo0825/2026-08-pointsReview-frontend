@@ -205,4 +205,88 @@ describe('competition application page', () => {
     await waitFor(() => expect(screen.getByLabelText('學號')).toHaveFocus())
     expect(screen.getByRole('alert')).toHaveTextContent('學號資料不正確')
   })
+
+  it('reloads an invalidated rule and resets points from the refreshed option', async () => {
+    const user = userEvent.setup()
+    let ruleRequests = 0
+    server.use(
+      http.get('*/public/competition-point-options', () => {
+        ruleRequests += 1
+        return HttpResponse.json({
+          data: competitionPointOptions.map((option) =>
+            ruleRequests === 1 || option.award !== 'finalist'
+              ? option
+              : { ...option, points: '5.00' },
+          ),
+        })
+      }),
+      http.post('*/public/applications', () =>
+        HttpResponse.json(
+          {
+            code: 'validation_failed',
+            message: '送件資料不符合規則。',
+            fields: [{ path: 'typeDetails', message: '目前規則已更新。' }],
+          },
+          { status: 422 },
+        ),
+      ),
+    )
+
+    renderPage()
+    await completeForm(user)
+    await user.click(screen.getByRole('button', { name: '確認送出申請' }))
+    await screen.findByRole('heading', { name: '申請內容與點數' })
+    await user.click(screen.getByRole('button', { name: '重新載入規則' }))
+
+    await waitFor(() => expect(screen.getByLabelText('申請點數')).toHaveValue('5.00'))
+    expect(ruleRequests).toBe(2)
+  })
+
+  it('uses a new key after an idempotency conflict', async () => {
+    const user = userEvent.setup()
+    const keys: string[] = []
+    server.use(
+      http.post('*/public/applications', ({ request }) => {
+        keys.push(request.headers.get('idempotency-key') ?? '')
+        return keys.length === 1
+          ? HttpResponse.json(
+              {
+                code: 'idempotency_key_conflict',
+                message: '送件識別已用於不同資料。',
+              },
+              { status: 409 },
+            )
+          : HttpResponse.json(competitionApplicationSuccess, { status: 201 })
+      }),
+    )
+
+    renderPage()
+    await completeForm(user)
+    await user.click(screen.getByRole('button', { name: '確認送出申請' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('送件識別已用於不同資料')
+    await user.click(screen.getByRole('button', { name: '確認送出申請' }))
+    await screen.findByRole('heading', { name: '申請已成功送出' })
+
+    expect(keys).toHaveLength(2)
+    expect(keys[1]).not.toBe(keys[0])
+  })
+
+  it('returns known backend file errors to the attachment step', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post('*/public/applications', () =>
+        HttpResponse.json(
+          { code: 'file_type_not_allowed', message: 'internal wording' },
+          { status: 400 },
+        ),
+      ),
+    )
+
+    renderPage()
+    await completeForm(user)
+    await user.click(screen.getByRole('button', { name: '確認送出申請' }))
+
+    await screen.findByRole('heading', { name: '附件' })
+    expect(screen.getByRole('alert')).toHaveTextContent('只接受 PDF、JPEG 或 PNG 檔案')
+  })
 })

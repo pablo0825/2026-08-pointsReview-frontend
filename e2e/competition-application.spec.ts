@@ -131,6 +131,7 @@ test('submits a shared-total application and preserves normalized payload values
 test('retries an uncertain submission with the same Idempotency-Key', async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 360, height: 800 })
   await mockQueries(page)
   const idempotencyKeys: string[] = []
   let attempts = 0
@@ -157,6 +158,11 @@ test('retries an uncertain submission with the same Idempotency-Key', async ({
   await page.getByRole('button', { name: '重新確認送件' }).click()
 
   await expect(page.getByRole('heading', { name: '申請已成功送出' })).toBeVisible()
+  const widths = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }))
+  expect(widths.scrollWidth).toBeLessThanOrEqual(widths.clientWidth)
   expect(idempotencyKeys).toHaveLength(2)
   expect(idempotencyKeys[0]).toMatch(/^[0-9a-f-]{36}$/)
   expect(idempotencyKeys[1]).toBe(idempotencyKeys[0])
