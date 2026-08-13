@@ -120,6 +120,49 @@ describe('competition application model', () => {
       isBalanced: true,
     })
     expect(getCompetitionParticipantLimit(shared)).toBe(10)
+    expect(resetParticipantPoints([{ requestedPoints: '0.50' }], shared)).toEqual([
+      { requestedPoints: '60.00' },
+    ])
+  })
+
+  it('normalizes conditional other values and accepts historical dates', () => {
+    const form = createDefaultCompetitionApplicationForm(
+      new Date('2026-08-13T00:00:00Z'),
+    )
+    Object.assign(form, {
+      applicantEmail: 'student@example.com',
+      applicantPhone: '+886 912-345-678',
+      competitionLevel: 'other',
+      competitionLevelOther: ' 校級競賽 ',
+      award: 'participation',
+      competitionName: ' 競賽 ',
+      competitionCategory: ' A 組 ',
+      competitionDate: '2005-01-01',
+      advisorId: 10,
+    })
+    Object.assign(form.participants[0], {
+      studentName: '王小明',
+      studentNumber: 'a001',
+      requestedPoints: '1.00',
+    })
+    form.attachments = [
+      {
+        clientFileKey: 'other-proof',
+        file: new File(['proof'], 'proof.png', { type: 'image/png' }),
+        attachmentType: 'participation_proof',
+        attachmentTypeOther: null,
+        description: ' 說明 ',
+      },
+    ]
+
+    expect(createCompetitionApplicationFormSchema().safeParse(form).success).toBe(true)
+    expect(mapCompetitionApplicationPayload(form)).toMatchObject({
+      typeDetails: {
+        competitionLevelOther: '校級競賽',
+        competitionDate: '2005-01-01',
+      },
+      attachments: [{ description: '說明' }],
+    })
   })
 
   it('provides the required Chinese field fallback', () => {

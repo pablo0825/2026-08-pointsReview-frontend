@@ -289,4 +289,69 @@ describe('competition application page', () => {
     await screen.findByRole('heading', { name: '附件' })
     expect(screen.getByRole('alert')).toHaveTextContent('只接受 PDF、JPEG 或 PNG 檔案')
   })
+
+  it('preserves a safe backend message for an unknown 4xx response', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post('*/public/applications', () =>
+        HttpResponse.json(
+          { code: 'application_closed', message: '目前不在申請期間。' },
+          { status: 418 },
+        ),
+      ),
+    )
+
+    renderPage()
+    await completeForm(user)
+    await user.click(screen.getByRole('button', { name: '確認送出申請' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('目前不在申請期間')
+    expect(screen.getByRole('heading', { name: '確認送出' })).toBeInTheDocument()
+  })
+
+  it('treats a network failure as an uncertain result', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post('*/public/applications', () => HttpResponse.error()),
+    )
+
+    renderPage()
+    await completeForm(user)
+    await user.click(screen.getByRole('button', { name: '確認送出申請' }))
+    expect(
+      await screen.findByRole('heading', { name: '無法確認是否送件成功' }),
+    ).toBeInTheDocument()
+  })
+
+  it('distinguishes advisor failure and empty states with manual reload', async () => {
+    const user = userEvent.setup()
+    let fails = true
+    server.use(
+      http.get('*/public/advisors', () =>
+        fails
+          ? HttpResponse.json({ code: 'unavailable' }, { status: 503 })
+          : HttpResponse.json({ data: [] }),
+      ),
+    )
+
+    renderPage()
+    await screen.findByRole('heading', { name: '學生與參與者資料' })
+    await user.type(screen.getByLabelText('姓名'), '測試學生')
+    await user.type(screen.getByLabelText('學號'), '4A0X0001')
+    await user.type(screen.getByLabelText('申請人 Email'), 'student@example.com')
+    await user.type(screen.getByLabelText('申請人電話'), '0912345678')
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+    await user.selectOptions(screen.getByLabelText('競賽等級'), 'national_integrated')
+    await user.selectOptions(screen.getByLabelText('獎項'), 'finalist')
+    await user.type(screen.getByLabelText('競賽名稱'), '測試競賽')
+    await user.type(screen.getByLabelText('競賽類別'), '設計組')
+    await user.type(screen.getByLabelText('競賽日期'), '2026-08-01')
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('暫時無法載入指導老師名單')
+    fails = false
+    await user.click(screen.getByRole('button', { name: '重新載入' }))
+    await waitFor(() =>
+      expect(screen.getByRole('status')).toHaveTextContent('目前沒有可選擇的指導老師'),
+    )
+  })
 })

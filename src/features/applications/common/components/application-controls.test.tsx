@@ -12,6 +12,7 @@ import {
   AttachmentEditor,
   type AttachmentEditorValue,
 } from './attachment-editor'
+import { validateAttachmentFile } from './attachment-validation'
 import { ErrorSummary } from './error-summary'
 import { LeaveConfirmationDialog } from './leave-confirmation-dialog'
 import {
@@ -149,6 +150,59 @@ describe('shared application controls', () => {
     )
     unmount()
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:preview')
+  })
+
+  it('enforces attachment type, size, duplicate, and other metadata rules', async () => {
+    const oversized = new File(
+      [new Uint8Array(5 * 1024 * 1024 + 1)],
+      'large.pdf',
+      { type: 'application/pdf' },
+    )
+    expect(
+      validateAttachmentFile(new File(['x'], 'proof.txt', { type: 'text/plain' })),
+    ).toMatch(/只接受/)
+    expect(
+      validateAttachmentFile(new File(['x'], 'proof.pdf', { type: 'text/plain' })),
+    ).toMatch(/格式/)
+    expect(validateAttachmentFile(oversized)).toMatch(/5 MB/)
+
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    const duplicate = new File(['same'], 'proof.pdf', {
+      type: 'application/pdf',
+      lastModified: 10,
+    })
+    const attachment: AttachmentEditorValue = {
+      clientFileKey: 'existing',
+      file: duplicate,
+      attachmentType: 'other',
+      attachmentTypeOther: '成績公告',
+      description: null,
+    }
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    confirm.mockClear()
+    render(
+      <AttachmentEditor
+        attachments={[attachment]}
+        onChange={onChange}
+        onError={vi.fn()}
+      />,
+    )
+
+    await user.upload(screen.getByLabelText('新增附件'), duplicate)
+    expect(window.confirm).toHaveBeenCalledOnce()
+    expect(onChange).toHaveBeenLastCalledWith([attachment])
+
+    await user.selectOptions(
+      screen.getByLabelText('附件分類'),
+      'participation_proof',
+    )
+    expect(onChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({
+        attachmentType: 'participation_proof',
+        attachmentTypeOther: null,
+      }),
+    ])
   })
 
   it('focuses the leave dialog and exposes actionable errors', async () => {
