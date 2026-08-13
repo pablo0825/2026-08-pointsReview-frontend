@@ -107,4 +107,27 @@ describe('competition public API contract', () => {
       expect(uploadedFile.size).toBeGreaterThan(0)
     }
   })
+
+  it('rejects a schema-valid success body unless the response is 201', async () => {
+    server.use(
+      http.post('*/public/applications', () =>
+        HttpResponse.json({
+          data: {
+            publicId: '550e8400-e29b-41d4-a716-446655440000',
+            status: 'pending_advisor',
+            submittedAt: '2026-08-13T02:20:30.000Z',
+          },
+        }),
+      ),
+    )
+    const snapshot = createCompetitionSubmissionSnapshot(
+      competitionApplicationPayloadFixture,
+      [],
+    )
+
+    await expect(submitCompetitionApplication(snapshot)).rejects.toMatchObject({
+      code: 'unexpected_response',
+      status: 200,
+    })
+  })
 })

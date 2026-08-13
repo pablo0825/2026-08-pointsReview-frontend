@@ -123,6 +123,7 @@ export function AttachmentEditor({
         <input
           accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
           className="block min-h-11 w-full rounded-lg border border-slate-300 p-2"
+          data-field-path="attachments"
           id="competition-attachments"
           multiple
           onChange={(event) => addFiles(event.target.files)}
@@ -149,6 +150,7 @@ export function AttachmentEditor({
             附件分類
             <select
               className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+              data-field-path={`attachments.${index}.attachmentType`}
               onChange={(event) => {
                 const attachmentType = event.target.value as AttachmentType
                 updateAttachment(index, {
@@ -171,6 +173,7 @@ export function AttachmentEditor({
               其他附件類型
               <input
                 className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                data-field-path={`attachments.${index}.attachmentTypeOther`}
                 maxLength={100}
                 onChange={(event) =>
                   updateAttachment(index, {

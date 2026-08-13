@@ -38,6 +38,7 @@ export function CompetitionDetailsStep({
           競賽等級
           <select
             className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+            data-field-path="competitionLevel"
             onChange={(event) =>
               onChange({
                 competitionLevel: event.target.value as CompetitionLevel,
@@ -57,6 +58,7 @@ export function CompetitionDetailsStep({
           獎項
           <select
             className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+            data-field-path="award"
             disabled={!value.competitionLevel}
             onChange={(event) =>
               onChange({ award: event.target.value as Award })
@@ -75,6 +77,7 @@ export function CompetitionDetailsStep({
           其他競賽等級
           <input
             className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+            data-field-path="competitionLevelOther"
             maxLength={100}
             onChange={(event) =>
               onChange({ competitionLevelOther: event.target.value })
@@ -88,6 +91,7 @@ export function CompetitionDetailsStep({
           競賽名稱
           <input
             className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+            data-field-path="competitionName"
             maxLength={255}
             onChange={(event) => onChange({ competitionName: event.target.value })}
             value={value.competitionName}
@@ -97,6 +101,7 @@ export function CompetitionDetailsStep({
           競賽類別
           <input
             className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+            data-field-path="competitionCategory"
             maxLength={100}
             onChange={(event) =>
               onChange({ competitionCategory: event.target.value })
@@ -108,6 +113,7 @@ export function CompetitionDetailsStep({
           競賽日期
           <input
             className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+            data-field-path="competitionDate"
             onChange={(event) => onChange({ competitionDate: event.target.value })}
             type="date"
             value={value.competitionDate}

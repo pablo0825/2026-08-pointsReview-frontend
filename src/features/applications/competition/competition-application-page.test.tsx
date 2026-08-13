@@ -156,4 +156,53 @@ describe('competition application page', () => {
       ),
     )
   })
+
+  it('shows the Retry-After countdown and prevents immediate resubmission', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post('*/public/applications', () =>
+        HttpResponse.json(
+          { code: 'rate_limited', message: '嘗試次數過多，請稍後再試。' },
+          { status: 429, headers: { 'Retry-After': '30' } },
+        ),
+      ),
+    )
+
+    renderPage()
+    await completeForm(user)
+    await user.click(screen.getByRole('button', { name: '確認送出申請' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('嘗試次數過多')
+    expect(screen.getByRole('status')).toHaveTextContent(/請等待 \d+ 秒後再試/)
+    expect(screen.getByRole('button', { name: '確認送出申請' })).toBeDisabled()
+  })
+
+  it('maps indexed API errors back to the field and focuses it', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post('*/public/applications', () =>
+        HttpResponse.json(
+          {
+            code: 'validation_failed',
+            message: '輸入資料格式不正確。',
+            fields: [
+              {
+                path: 'participants.0.studentNumber',
+                message: '學號資料不正確。',
+              },
+            ],
+          },
+          { status: 422 },
+        ),
+      ),
+    )
+
+    renderPage()
+    await completeForm(user)
+    await user.click(screen.getByRole('button', { name: '確認送出申請' }))
+
+    await screen.findByRole('heading', { name: '學生與參與者資料' })
+    await waitFor(() => expect(screen.getByLabelText('學號')).toHaveFocus())
+    expect(screen.getByRole('alert')).toHaveTextContent('學號資料不正確')
+  })
 })

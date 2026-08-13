@@ -51,6 +51,7 @@ export function AdvisorSelector({
             >
               <input
                 checked={selectedId === advisor.id}
+                data-field-path="advisorId"
                 name="advisor"
                 onChange={() => onSelect(advisor.id)}
                 type="radio"

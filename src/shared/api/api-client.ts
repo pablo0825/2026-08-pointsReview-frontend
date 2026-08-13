@@ -188,6 +188,7 @@ export async function postPublicMultipart<T>(
   schema: z.ZodType<T>,
   headers: HeadersInit,
   signal?: AbortSignal,
+  expectedStatus?: number,
 ): Promise<T> {
   const response = await executeRequest(
     path,
@@ -205,6 +206,10 @@ export async function postPublicMultipart<T>(
 
   if (!response.ok) {
     throw await createHttpError(response, true)
+  }
+
+  if (expectedStatus !== undefined && response.status !== expectedStatus) {
+    throw new ApiClientError('unexpected_response', response.status)
   }
 
   return parseJson(response, schema)

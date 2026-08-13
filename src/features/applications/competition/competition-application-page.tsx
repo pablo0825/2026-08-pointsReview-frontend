@@ -62,6 +62,19 @@ const steps = [
 
 type DisplayError = { path: string; message: string }
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const phonePattern = /^[0-9+()\- ]+$/
+
+function focusField(path: string) {
+  const exact = document.querySelector<HTMLElement>(
+    `[data-field-path="${path}"]`,
+  )
+  const group = document.querySelector<HTMLElement>(
+    `[data-field-path^="${path}."]`,
+  )
+  ;(exact ?? group ?? document.getElementById('wizard-heading'))?.focus()
+}
+
 function QueryState({
   title,
   empty,
@@ -140,6 +153,9 @@ export function CompetitionApplicationPage() {
     ? getCompetitionParticipantLimit(selectedOption)
     : 10
   const isRateLimited = rateLimitUntil > clock
+  const rateLimitSeconds = isRateLimited
+    ? Math.max(1, Math.ceil((rateLimitUntil - clock) / 1000))
+    : 0
   const blocker = useBlocker(dirty && !result)
 
   useEffect(() => {
@@ -194,13 +210,19 @@ export function CompetitionApplicationPage() {
       const seen = new Set<string>()
       value.participants.forEach((participant, index) => {
         if (!participant.studentName.trim()) nextErrors.push({ path: `participants.${index}.studentName`, message: `請輸入參與者 ${index + 1} 姓名` })
+        else if (participant.studentName.trim().length > 100) nextErrors.push({ path: `participants.${index}.studentName`, message: `參與者 ${index + 1} 姓名不可超過 100 字` })
         const studentNumber = participant.studentNumber.trim().toUpperCase()
         if (!studentNumber) nextErrors.push({ path: `participants.${index}.studentNumber`, message: `請輸入參與者 ${index + 1} 學號` })
+        else if (studentNumber.length > 50) nextErrors.push({ path: `participants.${index}.studentNumber`, message: `參與者 ${index + 1} 學號不可超過 50 字` })
         else if (seen.has(studentNumber)) nextErrors.push({ path: `participants.${index}.studentNumber`, message: '學號不可重複' })
         seen.add(studentNumber)
       })
-      if (!value.applicantEmail.trim()) nextErrors.push({ path: 'applicantEmail', message: '請輸入申請人 Email' })
-      if (!value.applicantPhone.trim()) nextErrors.push({ path: 'applicantPhone', message: '請輸入申請人電話' })
+      const email = value.applicantEmail.trim()
+      const phone = value.applicantPhone.trim()
+      if (!email) nextErrors.push({ path: 'applicantEmail', message: '請輸入申請人 Email' })
+      else if (email.length > 320 || !emailPattern.test(email)) nextErrors.push({ path: 'applicantEmail', message: '請輸入有效的 Email' })
+      if (!phone) nextErrors.push({ path: 'applicantPhone', message: '請輸入申請人電話' })
+      else if (phone.length > 30 || !phonePattern.test(phone)) nextErrors.push({ path: 'applicantPhone', message: '電話格式不正確' })
     }
     if (step === 1) {
       if (!selectedOption) nextErrors.push({ path: 'typeDetails', message: '請選擇目前有效的競賽等級與獎項' })
@@ -228,7 +250,38 @@ export function CompetitionApplicationPage() {
       })
     }
     setErrors(nextErrors)
+    if (nextErrors[0]) requestAnimationFrame(() => focusField(nextErrors[0].path))
     return nextErrors.length === 0
+  }
+
+  async function reloadRulesAfterInvalidation() {
+    const refreshed = await rulesQuery.refetch()
+    if (!refreshed.data) return
+    const lookup = buildPointOptionLookup(refreshed.data)
+    const option =
+      value.competitionLevel && value.award
+        ? lookup.get(
+            pointOptionKey({
+              competitionLevel: value.competitionLevel,
+              award: value.award,
+            }),
+          )
+        : null
+    if (option) {
+      updateValue('participants', resetParticipantPoints(value.participants, option))
+    } else {
+      updateValue('competitionLevel', null)
+      updateValue('competitionLevelOther', null)
+      updateValue('award', null)
+      updateValue(
+        'participants',
+        value.participants.map((participant) => ({
+          ...participant,
+          requestedPoints: '0.00',
+        })),
+      )
+    }
+    setMessage(null)
   }
 
   function next() {
@@ -303,6 +356,22 @@ export function CompetitionApplicationPage() {
       setStep(ruleInvalid ? 1 : normalized.some(({ path }) => path.startsWith('attachments')) ? 3 : normalized.some(({ path }) => path === 'advisorId') ? 2 : 0)
       setErrors(normalized)
       if (ruleInvalid) setMessage('競賽規則可能已更新，請重新載入後確認點數。')
+      if (normalized[0]) requestAnimationFrame(() => focusField(normalized[0].path))
+      return
+    }
+    if (
+      error.status === 400 &&
+      ['file_too_large', 'too_many_files', 'file_type_not_allowed'].includes(
+        error.apiCode ?? '',
+      )
+    ) {
+      const attachmentMessages: Record<string, string> = {
+        file_too_large: '每個附件不得超過 5 MB。',
+        too_many_files: '每份申請最多 10 個附件。',
+        file_type_not_allowed: '只接受 PDF、JPEG 或 PNG 檔案。',
+      }
+      setStep(3)
+      setMessage(attachmentMessages[error.apiCode ?? ''])
       return
     }
     setStep(4)
@@ -355,7 +424,7 @@ export function CompetitionApplicationPage() {
       >
         <div className="space-y-5">
           {message ? <p className="rounded-lg bg-amber-50 p-3 text-amber-950" role="alert">{message}</p> : null}
-          <ErrorSummary errors={errors} onSelect={() => document.getElementById('wizard-heading')?.focus()} />
+          <ErrorSummary errors={errors} onSelect={focusField} />
           {uncertain && snapshot ? (
             <CompetitionUncertainState
               onEdit={() => { setSnapshot(null); setUncertain(false); setStep(4) }}
@@ -373,13 +442,13 @@ export function CompetitionApplicationPage() {
                 pointsEditable={selectedOption?.allocationMethod === 'shared_total'}
               />
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="space-y-1 font-semibold">申請人 Email<input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" onChange={(event) => updateValue('applicantEmail', event.target.value)} type="email" value={value.applicantEmail} /></label>
-                <label className="space-y-1 font-semibold">申請人電話<input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" onChange={(event) => updateValue('applicantPhone', event.target.value)} value={value.applicantPhone} /></label>
+                <label className="space-y-1 font-semibold">申請人 Email<input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" data-field-path="applicantEmail" onChange={(event) => updateValue('applicantEmail', event.target.value)} type="email" value={value.applicantEmail} /></label>
+                <label className="space-y-1 font-semibold">申請人電話<input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" data-field-path="applicantPhone" onChange={(event) => updateValue('applicantPhone', event.target.value)} value={value.applicantPhone} /></label>
               </div>
             </div>
           ) : currentStep === 1 ? (
             <div className="space-y-5">
-              {message?.includes('重新載入') ? <button className="min-h-11 rounded-lg border border-blue-700 px-4 py-2 font-bold text-blue-800" onClick={() => void rulesQuery.refetch()} type="button">重新載入規則</button> : null}
+              {message?.includes('重新載入') ? <button className="min-h-11 rounded-lg border border-blue-700 px-4 py-2 font-bold text-blue-800" onClick={() => void reloadRulesAfterInvalidation()} type="button">重新載入規則</button> : null}
               <CompetitionDetailsStep onChange={updateCompetition} options={rulesQuery.data} selectedOption={selectedOption} value={value} />
               {selectedOption ? <ParticipantsEditor academicYear={value.academicYear} maximumParticipants={participantLimit} onChange={updateParticipants} onDirty={() => setDirty(true)} participants={value.participants as ParticipantEditorValue[]} pointsEditable={selectedOption.allocationMethod === 'shared_total'} /> : null}
             </div>
@@ -391,6 +460,7 @@ export function CompetitionApplicationPage() {
             <div className="space-y-6">
               <CompetitionConfirmationStep advisor={selectedAdvisor} allocationLabel={selectedOption.allocationMethod === 'per_person' ? '每人固定點數' : '團隊總點數分配'} onEdit={setStep} value={value} />
               <p className="rounded-lg bg-blue-50 p-4 font-semibold text-blue-950">資料與附件送出後，將交由所選指導老師簽核。</p>
+              {isRateLimited ? <p className="font-semibold text-amber-900" role="status">請等待 {rateLimitSeconds} 秒後再試。</p> : null}
             </div>
           ) : null}
         </div>

@@ -57,5 +57,6 @@ export function submitCompetitionApplication(
     competitionApplicationSuccessResponseSchema,
     { 'Idempotency-Key': snapshot.idempotencyKey },
     signal,
+    201,
   )
 }

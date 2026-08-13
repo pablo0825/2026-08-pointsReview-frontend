@@ -84,6 +84,7 @@ export function ParticipantsEditor({
               姓名
               <input
                 className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                data-field-path={`participants.${index}.studentName`}
                 onChange={(event) =>
                   updateParticipant(index, { studentName: event.target.value })
                 }
@@ -95,6 +96,7 @@ export function ParticipantsEditor({
               <input
                 autoCapitalize="characters"
                 className="min-h-11 w-full rounded-lg border border-slate-300 px-3 uppercase"
+                data-field-path={`participants.${index}.studentNumber`}
                 onBlur={(event) =>
                   updateParticipant(index, {
                     studentNumber: event.target.value.trim().toUpperCase(),
@@ -110,6 +112,7 @@ export function ParticipantsEditor({
               年級
               <select
                 className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                data-field-path={`participants.${index}.grade`}
                 onChange={(event) =>
                   updateParticipant(index, { grade: Number(event.target.value) })
                 }
@@ -124,6 +127,7 @@ export function ParticipantsEditor({
               班級
               <select
                 className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                data-field-path={`participants.${index}.classNumber`}
                 onChange={(event) =>
                   updateParticipant(index, {
                     classNumber: Number(event.target.value),
@@ -140,6 +144,7 @@ export function ParticipantsEditor({
               申請點數
               <input
                 className="min-h-11 w-full rounded-lg border border-slate-300 px-3 disabled:bg-slate-100"
+                data-field-path={`participants.${index}.requestedPoints`}
                 disabled={!pointsEditable}
                 inputMode="decimal"
                 min="0.50"
