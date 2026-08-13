@@ -4,9 +4,9 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `approved`
+- Verification Status: `in-progress`
 - Created: `2026-08-13`
-- Last Updated: `2026-08-13`
+- Last Updated: `2026-08-14`
 
 ## Change Context
 
@@ -31,8 +31,11 @@
 - 已新增獨立 E2E TypeScript project 並納入根 project references；`npm run typecheck` 現在會檢查全部 Playwright specs，VS Code 可正確識別 Node.js `Buffer` global。
 - F1 後已重新執行完整 AI Verification，產品行為、Vitest、build 與 14 個 Chromium 流程均保持通過。
 - 使用者於 Human Acceptance 前要求調整錯誤呈現：可定位欄位錯誤改在控制項下方顯示並加紅框，區塊錯誤留在相關區塊，只有無法定位與系統錯誤使用頁面內提示；一般錯誤不使用瀏覽器原生 `alert()`。
-- 此修訂尚未實作或重新驗證；既有 AI Verification 證據只代表修訂前版本，FS-004 在重新核准前曾返回 `awaiting-approval`。
-- 使用者已於 2026-08-13 核准修訂後的 Spec、Plan 與 Commit Plan；R3 尚未開始，修訂後 AI Verification 仍為 `not-run`。
+- 修訂提出後尚未實作時，既有 AI Verification 證據只代表修訂前版本，FS-004 曾返回 `awaiting-approval`。
+- 使用者於 2026-08-13 核准修訂後的 Spec、Plan 與 Commit Plan，授權後續 R3 實作與重新驗證。
+- 已完成並提交 R3：前端逐步驗證與後端 422 欄位錯誤統一寫入 React Hook Form errors；主要欄位訊息就地呈現並具有紅框、`aria-invalid` 與描述關聯。
+- 跨欄位／集合錯誤顯示於參與者或附件等相關區塊；無法定位、Rate Limit、Network、5xx 與結果不確定狀態維持頁面內提示，未使用瀏覽器原生 `alert()`。
+- R3 後 typecheck、lint、69 個 Vitest、production build 與 15 個 Chromium 流程均通過；但完整 Spec 核對發現 `participants.*.grade`、`participants.*.classNumber`、`attachments.*.attachmentType` 與 `attachments.*.description` 的 server 422 path 尚未就地顯示，因此 Target Behavior 尚未完全通過。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
 ## Approved Flow Revision
@@ -49,12 +52,19 @@
 - 改選前須確認，確認後清除 Email、電話並將聯絡資料區塊移到新申請人卡片。
 - R2 已完成並重新執行完整 AI Verification；下方表格已更新為申請人互動修訂後的實際結果。
 
-## Proposed Field Error Presentation Revision
+## Approved Field Error Presentation Revision
 
-- 前端驗證與後端 `422 fields[].path` 將統一寫入 React Hook Form errors。
-- 單一欄位錯誤將顯示於控制項下方，搭配紅色邊框、`aria-invalid`、錯誤描述關聯及第一個錯誤焦點。
+- 前端驗證與後端 `422 fields[].path` 統一寫入 React Hook Form errors。
+- 單一欄位錯誤顯示於控制項下方，搭配紅色邊框、`aria-invalid`、錯誤描述關聯及第一個錯誤焦點。
 - 點數總和、參與者集合及必要附件等錯誤顯示於相關區塊；Network、5xx、429、結果不確定與無法定位錯誤使用頁面內提示。
-- 修訂後 Spec、Plan 與 Commit Plan 尚待使用者重新核准；本節不代表 AI Verification 通過。
+- 修訂後 Spec、Plan 與 Commit Plan 已由使用者核准，並已完成 R3 與重新驗證。
+
+## Partially Completed Field Error Presentation Revision
+
+- 使用 React Hook Form `setError`／`clearErrors` 統一管理前端與 server field errors，移除頁面獨立欄位錯誤 state。
+- 競賽、參與者姓名／學號／點數、申請人、老師、必要附件及其他附件類型已能就地顯示錯誤，動態 index path 與後端契約一致。
+- 年級、班級、附件分類與附件說明的 422 path 尚缺就地紅框、訊息與測試；需要新增小型 fix batch，不能放入已提交的 R3 或文件 commit。
+- 欄位修正後只清除對應錯誤；第一個錯誤焦點、資料保留、步驟返回與 Idempotent retry 行為保持不變。
 
 ## Changed Files
 
@@ -75,6 +85,10 @@
 | `src/app/router/router.tsx`、`router.test.tsx` | 以正式競賽表單取代 placeholder 並回歸公開 routes。 |
 | `e2e/application-entry.spec.ts`、`e2e/competition-application.spec.ts` | 覆蓋新步驟順序、第一步無參與者欄位、兩種點數、multipart、Idempotent retry、desktop 與 360px。 |
 | `tsconfig.e2e.json`、`tsconfig.json` | 建立包含 Node 與 DOM types 的嚴格 E2E TypeScript project，並加入根 project references。 |
+| `src/features/applications/competition/competition-application-page.tsx` | 以 React Hook Form errors 統一逐步驗證、422 映射、欄位清除、步驟返回與焦點。 |
+| `src/features/applications/competition/components/competition-details-step.tsx` | 競賽欄位加入就地錯誤、紅框與 ARIA 關聯。 |
+| `src/features/applications/common/components/participants-editor.tsx`、`advisor-selector.tsx`、`attachment-editor.tsx`、`error-summary.tsx` | 參與者、聯絡、點數、老師與附件加入欄位／區塊錯誤呈現，將摘要元件改為欄位訊息 helper。 |
+| `src/features/applications/competition/competition-application-page.test.tsx`、`src/features/applications/common/components/application-controls.test.tsx`、`e2e/competition-application.spec.ts` | 覆蓋前端與 422 錯誤、紅框、ARIA、修正清除、非原生彈窗、焦點與 360px 回歸。 |
 
 ## AI Verification
 
@@ -82,10 +96,10 @@
 |---|---|---|---|---|
 | Typecheck | `npm run typecheck` | passed | exit code 0 | App、Node config 與全部 `e2e/**/*.ts` project references 均通過；`Buffer` 已由 Node types 正確解析。 |
 | Lint | `npm run lint` | passed | exit code 0 | ESLint 無 error 或 warning。 |
-| Unit / Integration Tests | `npm run test` | passed | 13 files、68 tests passed | 覆蓋 transport、schemas、點數、初始未選申請人、卡片內聯絡資料、改選清除、修訂後五步流程及錯誤恢復。 |
+| Unit / Integration Tests | `npm run test` | passed | 13 files、69 tests passed | 覆蓋 transport、schemas、點數、就地前端／422 錯誤、紅框、ARIA、修正清除、區塊／系統提示及既有五步流程。 |
 | Production Build | `npm run build` | passed | exit code 0；476 modules transformed | Bundle 成功產生；有超過 Vite 預設 500 kB 的非阻擋警示。 |
-| Browser / Responsive | `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium` | passed | 14 tests passed | 覆蓋申請人未選錯誤與焦點、新步驟順序、入口、公開辦法、desktop、360px、Dialog 焦點與無水平溢位。 |
-| Target Behavior | Spec 與自動化逐項核對 | passed | 68 Vitest tests、14 Chromium flows | 驗證明確選擇申請人、聯絡資料卡片位置、改選清除、唯一申請人 payload、競賽內容先行、單次查詢、multipart、錯誤定位及 Idempotency。 |
+| Browser / Responsive | `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium` | passed | 15 tests passed | 覆蓋欄位下方錯誤、紅框、修正清除、申請人未選錯誤與焦點、入口、公開辦法、desktop、360px、Dialog 與無水平溢位。 |
+| Target Behavior | Spec 與自動化逐項核對 | failed | 靜態 path／元件核對 | 主要欄位、區塊與系統提示已完成；年級、班級、附件分類與附件說明的 server 422 尚缺就地呈現。 |
 | FS-002／FS-003 Regression | 完整 Vitest、入口與公開辦法 Chromium suites | passed | 既有 `/apply`、`/rules`、Router、Provider 與 GET client 均通過 | 未修改其他三類 placeholder。 |
 
 ## AI Acceptance Summary
@@ -102,6 +116,8 @@
 | HTTP 201、422、400、409、429、5xx 與不可變 retry | passed | API／page integration tests與 Chromium same-key retry。 |
 | 公開未登入 multipart 不帶 Cookie／CSRF，且 Key／檔案不持久化 | passed | API client、submit contract 與 static implementation inspection。 |
 | 鍵盤、Dialog 焦點、錯誤定位、44px 與 360px | passed | Common component tests、application entry keyboard flow 與 mobile full flow。 |
+| 前端／422 欄位錯誤就地呈現、紅框、ARIA 與修正清除 | failed | Page integration 與 Chromium 已驗證主要欄位；年級、班級、附件分類與附件說明尚未覆蓋與呈現。 |
+| 區塊錯誤與頁面內系統提示分層，不使用原生 `alert()` | passed | Participants／Attachment integration 與未知 4xx system-message test。 |
 
 ## Behavior Verification
 
@@ -115,6 +131,8 @@
 | 後端規則失效後可手動重載並重設點數 | passed | Rule invalidation integration test。 |
 | 規則錯誤返回第一步，參與者與點數錯誤返回第二步 | passed | 422 error routing、field focus 與 rule reload integration tests。 |
 | 競賽申請必須明確指定申請人，聯絡資料只出現在目前申請人卡片 | passed | Page integration、ParticipantsEditor 與 Chromium explicit-applicant flow。 |
+| 前端與後端欄位錯誤顯示於對應控制項下方並可個別清除 | failed | 主要文字欄位通過；部分 select 與附件 metadata 的 422 path 尚缺呈現。 |
+| 跨欄位／集合錯誤與系統錯誤呈現在正確層級 | passed | Participants、attachments、429、unknown 4xx、5xx 與 Network tests。 |
 
 ### Preserved Behavior Regression
 
@@ -146,8 +164,8 @@
 | E2E Typecheck Reverification | 記錄 E2E typecheck 缺口修正與完整重新驗證 | 完整 AI Verification 證據、文件一致性、`git diff --check` | passed | `docs(FS-004): record e2e typecheck correction` |
 | Field Error Revision Draft | 保存錯誤呈現需求、draft Spec／Plan 與等待核准狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): revise competition application requirements` |
 | Field Error Approval | 重新核准錯誤呈現 Spec、Plan 與 Commit Plan | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve field error presentation` |
-| R3 | 以 React Hook Form 統一欄位錯誤並提供就地錯誤、紅框、區塊及系統提示 | targeted Vitest、typecheck、lint、test、build、targeted Chromium | not-run | `fix(competition): localize form validation feedback` |
-| Field Error Reverification | 保存修訂後完整 AI Verification 與等待人工狀態 | 完整 AI Verification 證據、文件一致性、`git diff --check` | not-run | `docs(FS-004): record field error verification` |
+| R3 | 以 React Hook Form 統一欄位錯誤並提供就地錯誤、紅框、區塊及系統提示 | 21 個 targeted Vitest、typecheck、lint、69 個 Vitest、build、6 個 targeted Chromium | passed | `fix(competition): localize form validation feedback` |
+| Field Error Reverification | 保存修訂後完整 AI Verification 與等待人工狀態 | 69 個 Vitest、15 個 Chromium、typecheck、lint、build、Spec 核對 | failed | `docs(FS-004): record field error verification` |
 
 ## Human Integration
 
@@ -214,11 +232,11 @@
 
 ## Final Summary
 
-- AI Verification: `修訂前版本 passed；E2E specs 已納入 typecheck，App、Node config、E2E TypeScript、lint、68 個 Vitest、production build 與 14 個 Chromium 流程均通過。欄位錯誤呈現修訂尚未實作或驗證。`
+- AI Verification: `failed；R3 後 typecheck、lint、69 個 Vitest、production build 與 15 個 Chromium 流程均通過，但 Spec 核對發現四類可定位 422 path 尚未就地呈現。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依上述步驟驗收。`
-- Remaining Issues: `欄位錯誤呈現尚未實作與重新驗證；真實後端整合與 Human Acceptance 待確認；另有非阻擋 bundle size 警示。`
-- Final Feature Slice Status: `approved`
+- Remaining Issues: `需新增並核准小型 fix batch，補齊年級、班級、附件分類與附件說明的 422 就地錯誤及測試；之後重新執行完整 AI Verification。另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `in-progress`
 
 ## Document Lineage Update
 
