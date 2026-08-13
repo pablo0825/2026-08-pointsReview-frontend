@@ -186,3 +186,17 @@ test('keeps the five-step form usable at 360px without horizontal overflow', asy
   }))
   expect(widths.scrollWidth).toBeLessThanOrEqual(widths.clientWidth)
 })
+
+test('keeps focus in the leave confirmation and supports Escape', async ({
+  page,
+}) => {
+  await mockQueries(page)
+  await page.goto('/apply/competition')
+  await page.getByLabel('姓名').fill('尚未送件學生')
+  await page.getByRole('link', { name: '申請辦法' }).click()
+
+  const stay = page.getByRole('button', { name: '繼續填寫' })
+  await expect(stay).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page).toHaveURL(/\/apply\/competition$/)
+})
