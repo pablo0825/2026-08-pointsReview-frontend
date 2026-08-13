@@ -201,19 +201,19 @@
 - [x] 建立競賽資料／點數、確認、提交狀態與成功頁。
 - [x] 串接 `/apply/competition`、規則、老師及公開 multipart 送件。
 - [x] 建立 fixtures、MSW、單元、元件／整合與 Playwright tests。
-- [ ] 將前兩步改為「競賽內容」與「參與者資料」，移除競賽步驟中的參與者重複區塊。
-- [ ] 同步更新逐步驗證、確認頁返回修改、422／規則失效定位及相關 Vitest／Playwright。
+- [x] 將前兩步改為「競賽內容」與「參與者資料」，移除競賽步驟中的參與者重複區塊。
+- [x] 同步更新逐步驗證、確認頁返回修改、422／規則失效定位及相關 Vitest／Playwright。
 
 ## AI Verification
 
-- [ ] 執行 `npm run typecheck`
-- [ ] 執行 `npm run lint`
-- [ ] 執行 `npm run test`
-- [ ] 執行 `npm run build`
-- [ ] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium`
-- [ ] 以 Playwright 驗證修訂後 desktop 與 360px、鍵盤、44 × 44px targets、Dialog 焦點及無水平溢位
-- [ ] 驗證「競賽內容」先於「參與者資料」、API request 次數、Idempotency snapshot 與錯誤定位
-- [ ] 回歸驗證 FS-002、FS-003 的公開辦法、入口、導覽、Router、Provider 與 GET API client
+- [x] 執行 `npm run typecheck`
+- [x] 執行 `npm run lint`
+- [x] 執行 `npm run test`
+- [x] 執行 `npm run build`
+- [x] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium`
+- [x] 以 Playwright 驗證修訂後 desktop 與 360px、鍵盤、44 × 44px targets、Dialog 焦點及無水平溢位
+- [x] 驗證「競賽內容」先於「參與者資料」、API request 次數、Idempotency snapshot 與錯誤定位
+- [x] 回歸驗證 FS-002、FS-003 的公開辦法、入口、導覽、Router、Provider 與 GET API client
 
 ## Human Integration
 
@@ -233,7 +233,7 @@
 
 ## Documentation Updates
 
-- [ ] 確認已核准的競賽步驟順序 `docs/project/` 變更已提交並反映於實作。
+- [x] 確認已核准的競賽步驟順序 `docs/project/` 變更已提交並反映於實作。
 - [x] 確認需求文件、Slice Brief、Spec 與 Plan 修訂內容一致。
 - [x] 更新 blueprint 的 FS-004 Status、Status Note 與 Last Updated。
 - [x] 更新 Spec 狀態。
@@ -269,4 +269,4 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 
 - Approved By: `使用者`
 - Approved At: `2026-08-13`
-- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；R1 與 Reverification 已獲執行授權規劃，但仍須另行明確要求開始實作。`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan，並於 2026-08-13 明確要求開始實作；R1 與 Reverification 已完成。`

@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `in-progress`
+- Verification Status: `awaiting-human`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-13`
 
@@ -22,13 +22,15 @@
 - 已建立不可變 Idempotency 快照；5xx／Network 結果不確定時沿用同一 Key，409 後改用新 Key，429 顯示可讀取的等待秒數。
 - React Strict Mode 重新掛載時沿用 Query Cache 中的 request，規則與老師正常流程各只查詢一次。
 - 已依真實後端契約將競賽規則增量欄位統一為 `pointIncrement`，並重新執行完整 AI Verification。
+- 已將前兩步重排為「競賽內容」與「參與者資料」；第一步只建立競賽與點數規則，第二步才顯示參與者、聯絡資料、固定或共同分配點數。
+- 已同步調整逐步驗證、後端欄位錯誤定位、規則失效重載、確認摘要修改連結及共用分配即時摘要。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
 ## Approved Flow Revision
 
 - 使用者於 2026-08-13 核准將競賽申請前兩步改為「競賽內容」後接「參與者資料」。
 - 第一個步驟不再顯示尚不可操作的參與者點數；第二個步驟在規則已選定後才顯示參與者、申請人聯絡資料與個別點數。
-- 下方既有 AI Verification 表格記錄修訂前實際執行的結果；不得視為步驟重排後已通過。修訂後完整 AI Verification 尚待 R1 實作與重新執行。
+- R1 已完成並重新執行完整 AI Verification；下方表格已更新為步驟重排後的實際結果。
 
 ## Changed Files
 
@@ -41,11 +43,11 @@
 | `src/features/applications/common/components/**` | 建立 Wizard、參與者、老師、附件、錯誤摘要及離開確認控制項。 |
 | `src/features/applications/competition/api/**` | 建立規則、老師、payload、成功 Response schemas、queries 與 multipart submit；規則增量欄位使用 `pointIncrement`。 |
 | `src/features/applications/competition/model/**` | 建立表單、Mapper、點數分配、正規化及 submission state。 |
-| `src/features/applications/competition/components/**` | 建立競賽內容、確認、結果不確定與成功畫面。 |
-| `src/features/applications/competition/competition-application-page.tsx` | 串接五步流程、單次查詢、錯誤恢復、Idempotency 與 route page。 |
+| `src/features/applications/competition/components/**` | 建立競賽內容、確認、結果不確定與成功畫面；確認摘要依新步驟順序返回修改。 |
+| `src/features/applications/competition/competition-application-page.tsx` | 串接五步流程、單次查詢、錯誤恢復與 Idempotency；將競賽內容置於第一步、參與者與點數置於第二步。 |
 | `src/test/**`、`src/features/applications/**/*.test.ts*` | 加入匿名 fixtures、MSW handlers 與單元／元件／整合覆蓋。 |
 | `src/app/router/router.tsx`、`router.test.tsx` | 以正式競賽表單取代 placeholder 並回歸公開 routes。 |
-| `e2e/application-entry.spec.ts`、`e2e/competition-application.spec.ts` | 覆蓋入口、兩種點數、multipart、Idempotent retry、desktop 與 360px。 |
+| `e2e/application-entry.spec.ts`、`e2e/competition-application.spec.ts` | 覆蓋新步驟順序、第一步無參與者欄位、兩種點數、multipart、Idempotent retry、desktop 與 360px。 |
 
 ## AI Verification
 
@@ -53,17 +55,18 @@
 |---|---|---|---|---|
 | Typecheck | `npm run typecheck` | passed | exit code 0 | TypeScript project references 通過。 |
 | Lint | `npm run lint` | passed | exit code 0 | ESLint 無 error 或 warning。 |
-| Unit / Integration Tests | `npm run test` | passed | 13 files、65 tests passed | 覆蓋 transport、schemas、點數、元件、五步流程及錯誤恢復。 |
+| Unit / Integration Tests | `npm run test` | passed | 13 files、65 tests passed | 覆蓋 transport、schemas、點數、元件、修訂後五步流程及錯誤恢復。 |
 | Production Build | `npm run build` | passed | exit code 0；476 modules transformed | Bundle 成功產生；有超過 Vite 預設 500 kB 的非阻擋警示。 |
-| Browser / Responsive | `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium` | passed | 13 tests passed | 覆蓋入口、公開辦法、競賽申請、desktop、360px、Dialog 焦點與無水平溢位。 |
-| Target Behavior | Spec 與自動化逐項核對 | passed | 65 Vitest assertions、13 Chromium flows | 驗證單次查詢、兩種點數、multipart、錯誤定位及 Idempotency。 |
+| Browser / Responsive | `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium` | passed | 13 tests passed | 覆蓋新步驟順序、入口、公開辦法、desktop、360px、Dialog 焦點與無水平溢位。 |
+| Target Behavior | Spec 與自動化逐項核對 | passed | 65 Vitest assertions、13 Chromium flows | 驗證競賽內容先行、第二步點數、單次查詢、multipart、錯誤定位及 Idempotency。 |
 | FS-002／FS-003 Regression | 完整 Vitest、入口與公開辦法 Chromium suites | passed | 既有 `/apply`、`/rules`、Router、Provider 與 GET client 均通過 | 未修改其他三類 placeholder。 |
 
 ## AI Acceptance Summary
 
 | Criterion | Result | Evidence |
 |---|---|---|
-| 五步導覽、逐步驗證、返回修改、dirty-state 與離開警告 | passed | Page integration、Wizard 與 Leave Dialog tests。 |
+| 「競賽內容」先於「參與者資料」，第一步不顯示參與者編輯器 | passed | Page integration、Router 與 360px Chromium flow。 |
+| 五步導覽、逐步驗證、返回修改、dirty-state 與離開警告 | passed | Page integration、確認摘要 step mapping、Wizard 與 Leave Dialog tests。 |
 | 學年度、參與者、申請人、學號與聯絡資料規則 | passed | academic-year、form schema、Mapper 與 ParticipantsEditor tests。 |
 | 規則／老師各查詢一次，並區分 loading、empty、failure、reload | passed | Request counters、page state tests 與 Chromium shared flow。 |
 | `per_person` 與單人／多人 `shared_total` 使用整數點數驗證 | passed | points/model tests、page per-person flow 與 shared-total Chromium flow。 |
@@ -82,6 +85,7 @@
 | 後端只提供的組合決定點數模式與有效選項 | passed | Strict schema、lookup tests 及 option-driven UI。 |
 | 不確定送件可安全重試，明確衝突則使用新 Key | passed | 5xx same-key、409 new-key tests。 |
 | 後端規則失效後可手動重載並重設點數 | passed | Rule invalidation integration test。 |
+| 規則錯誤返回第一步，參與者與點數錯誤返回第二步 | passed | 422 error routing、field focus 與 rule reload integration tests。 |
 
 ### Preserved Behavior Regression
 
@@ -104,6 +108,8 @@
 | Verification Fixes | 修正 Strict Mode 重複查詢及補齊送件邊界 | targeted／full Vitest、完整 Chromium、typecheck、lint、build | passed | `fix(competition): avoid duplicate initial queries`、`fix(competition): enforce submission boundaries`、`test(competition): cover submission error recovery` |
 | Contract Alignment Fix | 將前端規則增量欄位對齊後端 `pointIncrement` | contract／page tests、完整 Vitest、Chromium、typecheck、lint、build | passed | `fix(competition): align point increment field` |
 | Verification | 保存完整 AI Verification 與狀態 | 本文件、文件一致性、`git diff --check` | passed | `docs(FS-004): record competition application verification` |
+| R1 | 將競賽內容移至第一步、參與者與點數移至第二步並同步錯誤／摘要落點 | targeted／完整 Vitest、typecheck、lint、build、指定 Chromium | passed | `fix(competition): reorder application details steps` |
+| Reverification | 保存步驟重排後完整 AI Verification 與等待人工狀態 | 65 Vitest、13 Chromium、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): update application flow verification` |
 
 ## Human Integration
 
@@ -143,8 +149,8 @@
 
 | Step | Action | Expected Result |
 |---|---|---|
-| 1 | 未登入開啟 `/apply/competition` 並觀察 Network。 | 只查詢一次規則，不帶 query；表單顯示目前臺灣學年度。 |
-| 2 | 完成一筆 `per_person` 單人流程。 | 點數自動且唯讀；進入老師步驟才查詢一次老師，返回步驟不重查。 |
+| 1 | 未登入開啟 `/apply/competition` 並觀察 Network。 | 第一個步驟為「競賽內容」，不顯示參與者欄位；只查詢一次規則且不帶 query。 |
+| 2 | 選定 `per_person` 規則並進入「參與者資料」。 | 表單顯示目前臺灣學年度；點數已依第一步規則自動設定且唯讀；進入老師步驟才查詢一次老師，返回步驟不重查。 |
 | 3 | 上傳合法附件、查看確認頁並送出。 | multipart 欄位與分類正確，不帶 Cookie／CSRF；成功頁顯示申請編號、等待老師簽核、台北時間與 Email 提醒，不顯示簽核期限。 |
 | 4 | 完成一筆兩人 `shared_total` 流程。 | 每人至少 0.50、以 0.50 為單位且總和等於總點數後才能送件。 |
 | 5 | 測試錯誤格式、超過 5 MiB、第 11 檔及缺少必要分類。 | 前端阻擋或顯示對應附件訊息，既有資料保留。 |
@@ -167,11 +173,11 @@
 
 ## Final Summary
 
-- AI Verification: `in-progress；修訂前與 pointIncrement 契約修正後的檢查已通過，但競賽步驟重排尚未實作或重新驗證。`
+- AI Verification: `passed；修訂後 typecheck、lint、65 個 Vitest、production build 與 13 個 Chromium 流程均通過。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依上述步驟驗收。`
-- Remaining Issues: `競賽步驟重排待實作與重新驗證；真實後端整合待確認；另有非阻擋 bundle size 警示。`
-- Final Feature Slice Status: `awaiting-approval`
+- Remaining Issues: `真實後端整合與 Human Acceptance 待確認；另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `awaiting-human`
 
 ## Document Lineage Update
 
