@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `awaiting-human`
+- Verification Status: `in-progress`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-13`
 
@@ -23,6 +23,12 @@
 - React Strict Mode 重新掛載時沿用 Query Cache 中的 request，規則與老師正常流程各只查詢一次。
 - 已依真實後端契約將競賽規則增量欄位統一為 `pointIncrement`，並重新執行完整 AI Verification。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
+
+## Approved Flow Revision
+
+- 使用者於 2026-08-13 核准將競賽申請前兩步改為「競賽內容」後接「參與者資料」。
+- 第一個步驟不再顯示尚不可操作的參與者點數；第二個步驟在規則已選定後才顯示參與者、申請人聯絡資料與個別點數。
+- 下方既有 AI Verification 表格記錄修訂前實際執行的結果；不得視為步驟重排後已通過。修訂後完整 AI Verification 尚待 R1 實作與重新執行。
 
 ## Changed Files
 
@@ -161,11 +167,11 @@
 
 ## Final Summary
 
-- AI Verification: `passed；pointIncrement 契約修正後，所有核准檢查已於 2026-08-13 重新執行並通過。`
+- AI Verification: `in-progress；修訂前與 pointIncrement 契約修正後的檢查已通過，但競賽步驟重排尚未實作或重新驗證。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依上述步驟驗收。`
-- Remaining Issues: `真實後端整合待確認；另有非阻擋 bundle size 警示。`
-- Final Feature Slice Status: `awaiting-human`
+- Remaining Issues: `競賽步驟重排待實作與重新驗證；真實後端整合待確認；另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `awaiting-approval`
 
 ## Document Lineage Update
 

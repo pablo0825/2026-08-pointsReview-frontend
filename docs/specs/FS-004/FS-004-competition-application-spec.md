@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `draft`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-13`
@@ -68,7 +68,7 @@
 
 ## Rules
 
-1. 表單固定為學生與參與者、申請內容與點數、指導老師、附件、確認送出五步；下一步前驗證目前步驟，錯誤時聚焦第一個錯誤欄位，上一步與確認頁返回修改不得清除資料。
+1. 表單固定為「競賽內容」、「參與者資料」、「指導老師」、「附件」、「確認送出」五步；第一步先確立競賽規則，第二步才依規則填寫參與者與分配點數。下一步前驗證目前步驟，錯誤時聚焦第一個錯誤欄位，上一步與確認頁返回修改不得清除資料。
 2. 學年度依 Asia/Taipei 當日及 8 月 1 日分界自動計算目前民國學年度，只讀顯示並在送件時複製到每位參與者；第一版不提供歷史學年度選擇。
 3. 初始建立一位參與者並指定為申請人；每份競賽申請必須有 1–10 位參與者，且必須且只能有一位申請人。
 4. 每位參與者必填姓名、學號、年級與班級；姓名 trim 後為 1–100 字元，學號 trim 後為 1–50 字元並轉為大寫，正規化後的學號不得重複。
@@ -77,7 +77,7 @@
 7. 申請人 Email 必填、trim、轉小寫、最長 320 字元且符合一般 Email 格式；電話必填、trim 後不可空、最長 30 字元，只接受數字、空格、`+`、`-`、`(`、`)`。
 8. 進入頁面只呼叫一次不帶 Query Parameter 的 `GET /public/competition-point-options`；切換選項、步驟、參與者或點數時不得重複查詢。
 9. 規則 Response 必須包含 `competitionLevel`、`award`、`allocationMethod`、`points`、`minimumPointsPerParticipant` 與 `pointIncrement`；同一組 `competitionLevel + award` 唯一，前端只顯示 Response 實際提供的組合，不使用本機預設規則替代。
-10. 規則讀取失敗時顯示「暫時無法載入競賽點數規則」，空陣列時顯示「目前沒有可申請的競賽點數規則」；兩者都提供「重新載入」並禁止繼續與送件。
+10. 規則讀取失敗時顯示「暫時無法載入競賽點數規則」，空陣列時顯示「目前沒有可申請的競賽點數規則」；兩者都提供「重新載入」並禁止繼續與送件。「競賽內容」只顯示競賽等級、獎項、其他等級名稱、競賽名稱、類別、日期與規則分配摘要，不顯示參與者編輯區；選定有效等級與獎項後，才可進入「參與者資料」。
 11. 競賽等級顯示已定義的五種中文名稱，獎項顯示已定義的六種中文名稱；`competitionLevel = other` 時其他等級名稱必填、trim 後 1–100 字元，否則固定為 `null`。
 12. 競賽名稱必填、trim 後 1–255 字元；競賽類別必填、trim 後 1–100 字元；兩者不限制一般字元。
 13. 競賽日期必填且使用 `YYYY-MM-DD`，不得晚於 Asia/Taipei 今天，不設定最早日期。
@@ -104,7 +104,7 @@
 34. `409 idempotency_key_conflict` 廢棄原 Key、返回表單確認並在下次送件產生新 Key；`429 rate_limited` 保留資料且不自動重試，可讀到 `Retry-After` 時顯示等待時間並停用送件，否則顯示通用稍後再試。
 35. `422 validation_failed` 依 `fields[].path` 的點號與數字索引定位欄位與步驟，不依賴錯誤順序並聚焦第一個錯誤；`Required` 顯示「此欄位為必填」，未知欄位訊息使用通用中文 fallback，沒有 `fields` 時顯示頂層 `message`。
 36. 已知 `400 file_too_large`、`too_many_files` 與 `file_type_not_allowed` 顯示對應附件訊息；未知 4xx 顯示可用的非空白後端訊息或通用中文訊息，保留表單、返回確認頁、廢棄原 Key，且不自動重試。
-37. 後端回報規則已失效或點數不符合最新規則時，保留其他資料、返回申請內容與點數步驟並要求手動重載；組合仍存在時依新規則重設點數，不存在時清除等級與獎項選擇。
+37. 後端回報規則已失效時，保留其他資料、返回「競賽內容」並要求手動重載；組合仍存在時依新規則重設點數，不存在時清除等級與獎項選擇。個別點數或參與者總和錯誤返回「參與者資料」。
 38. 成功 Response 必須是 `201` 且包含 `publicId`、固定 `pending_advisor` 與 UTC ISO 8601 `submittedAt`；成功頁以 Asia/Taipei 顯示送件時間及 Email 通知提醒，不顯示老師簽核期限。
 
 ## Included
@@ -138,6 +138,7 @@
 ## AI Acceptance
 
 - [ ] 自動測試五步導覽、逐步驗證、返回修改、記憶體保留與 dirty-state 離開警告。
+- [ ] 自動測試「競賽內容」先於「參與者資料」，第一步不顯示參與者編輯區，第二步可依已選規則直接檢視或分配點數。
 - [ ] 自動測試學年度分界、1–10 人限制、申請人切換／刪除、學號 trim／大寫／重複及學籍限制。
 - [ ] 自動測試規則只查詢一次、Response schema 含 `pointIncrement`、empty／failure／重載與只顯示後端組合。
 - [ ] 自動測試 `per_person`、單人與多人 `shared_total`、增減參與者、切換規則、最低值、0.50 倍數與整數點數加總。
@@ -163,6 +164,6 @@
 
 ## Approval
 
-- Approved By: `使用者`
-- Approved At: `2026-08-13`
-- Approval Note: `使用者已明確核准 FS-004 Spec、Plan 與 Commit Plan；實作須等待下一次明確開始要求。`
+- Approved By: `pending`
+- Approved At: `pending`
+- Approval Note: `原 Spec、Plan 與 Commit Plan 曾獲核准；使用者於 2026-08-13 核准競賽內容與參與者資料步驟重排提案，修訂文件待重新核准。`

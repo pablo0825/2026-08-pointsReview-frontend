@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `draft`
 - Based On Spec: `docs/specs/FS-004/FS-004-competition-application-spec.md`
 - Spec Last Updated: `2026-08-13`
 - Created: `2026-08-13`
@@ -31,6 +31,7 @@
 - 建立競賽規則、老師、正式送件、成功與錯誤 Response 的 Zod schema、Query、Mapper、Form Model 與 request 快照。
 - 建立 FS-004 首次實際使用的共用 Application Wizard、參與者、老師、附件、錯誤摘要及離開確認元件。
 - 以競賽專屬步驟完成 `/apply/competition` 的資料輸入、點數分配、確認、Idempotent retry 與成功頁。
+- 將競賽申請前兩步修訂為「競賽內容」後接「參與者資料」；第一步只確立規則與競賽資料，第二步才顯示參與者及可用的點數控制項。
 - 建立單元、契約、元件／整合、MSW 與 Playwright 測試，覆蓋 Spec 的 AI Acceptance。
 
 ### Excluded
@@ -49,6 +50,13 @@
 - TanStack Query 已全域關閉 Query／Mutation 自動 retry，符合正式送件不得自動重試的要求。
 - FS-002 已建立可重試的公開 GET Query、Zod Response 驗證與 loading／empty／error 顯示模式。
 - 專案尚未安裝 React Hook Form 或 Zod Resolver，也沒有 application form、附件、multipart Mutation 或離開警告實作。
+
+### Approved Revision Assessment
+
+- FS-004 初版實作與完整 AI Verification 已完成，且真實後端 `pointIncrement` 契約已對齊；本次修訂前 blueprint 為 `awaiting-human`。
+- 現行第一步為「學生與參與者資料」，點數欄位因競賽規則尚未選定而 disabled；第二步「申請內容與點數」選定規則後又重複顯示參與者編輯器。
+- 修訂後第一步改為「競賽內容」且不顯示參與者；第二步改為「參與者資料」，此時規則已確立，可直接顯示 `per_person` 固定點數或編輯 `shared_total` 分配。
+- 需同步交換步驟驗證、確認摘要修改索引、422 錯誤落點、規則失效落點及所有 component／browser tests；API、Form Model、payload、五步總數與其他申請類型不變。
 
 ### Reusable Components
 
@@ -182,6 +190,7 @@
 | 瀏覽器跨來源時可能讀不到 `Retry-After` | 無法顯示精確等待秒數 | 有 header 時顯示秒數；否則使用已核准通用訊息。真實整合確認 CORS expose header |
 | File／Blob URL 與動態附件生命週期複雜 | 可能造成記憶體洩漏、預覽失效或 retry 內容不一致 | 集中 attachment model、明確 revoke 時機、不可變 snapshot 並以 unit／component tests 驗證 |
 | 真實後端契約或 B03／B10／B13 尚未同步 | MSW 通過不代表真實送件可用 | AI Verification 如實記錄；Human Integration 使用真實規則、老師與兩種點數資料完成驗收 |
+| 交換前兩步後仍沿用舊 index | 確認頁修改、422 或規則失效可能返回錯誤步驟 | 集中更新 step labels、render、validation 與 API error mapping，並以元件及 Playwright 流程覆蓋 |
 
 ## AI Implementation Tasks
 
@@ -192,17 +201,19 @@
 - [x] 建立競賽資料／點數、確認、提交狀態與成功頁。
 - [x] 串接 `/apply/competition`、規則、老師及公開 multipart 送件。
 - [x] 建立 fixtures、MSW、單元、元件／整合與 Playwright tests。
+- [ ] 將前兩步改為「競賽內容」與「參與者資料」，移除競賽步驟中的參與者重複區塊。
+- [ ] 同步更新逐步驗證、確認頁返回修改、422／規則失效定位及相關 Vitest／Playwright。
 
 ## AI Verification
 
-- [x] 執行 `npm run typecheck`
-- [x] 執行 `npm run lint`
-- [x] 執行 `npm run test`
-- [x] 執行 `npm run build`
-- [x] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium`
-- [x] 以 Playwright 驗證 desktop 與 360px、鍵盤、44 × 44px targets、Dialog 焦點及無水平溢位
-- [x] 驗證 Target Behavior、API request 次數、Idempotency snapshot 與錯誤定位
-- [x] 回歸驗證 FS-002、FS-003 的公開辦法、入口、導覽、Router、Provider 與 GET API client
+- [ ] 執行 `npm run typecheck`
+- [ ] 執行 `npm run lint`
+- [ ] 執行 `npm run test`
+- [ ] 執行 `npm run build`
+- [ ] 執行 `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium`
+- [ ] 以 Playwright 驗證修訂後 desktop 與 360px、鍵盤、44 × 44px targets、Dialog 焦點及無水平溢位
+- [ ] 驗證「競賽內容」先於「參與者資料」、API request 次數、Idempotency snapshot 與錯誤定位
+- [ ] 回歸驗證 FS-002、FS-003 的公開辦法、入口、導覽、Router、Provider 與 GET API client
 
 ## Human Integration
 
@@ -222,10 +233,10 @@
 
 ## Documentation Updates
 
-- [x] `not-applicable`：目前沒有尚未提交的 `docs/project/` 需求變更。
-- [x] 確認需求文件、Slice Brief、Spec 與 Plan 一致。
-- [x] 更新 blueprint 的 FS-004 文件連結、Status、Status Note 與 Last Updated。
-- [ ] 更新 Spec 狀態。
+- [ ] 確認已核准的競賽步驟順序 `docs/project/` 變更已提交並反映於實作。
+- [x] 確認需求文件、Slice Brief、Spec 與 Plan 修訂內容一致。
+- [x] 更新 blueprint 的 FS-004 Status、Status Note 與 Last Updated。
+- [x] 更新 Spec 狀態。
 - [x] 更新 Plan 狀態與 implementation／verification tasks。
 - [x] 建立並更新 verification record。
 - [x] `not-applicable`：本 Slice 不是 `change`，不需 supersession lineage。
@@ -234,13 +245,14 @@
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-004): draft competition application specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `approved`
-- Approved By: `使用者`
-- Approved At: `2026-08-13`
+- Commit Plan Approval: `pending`
+- Approved By: `pending`
+- Approved At: `pending`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
 |---|---|---|---|---|
+| Revision Draft | 保存已核准提案形成的流程需求、draft Spec／Plan 與狀態 | `docs/project/product-requirements.md`、`docs/project/routes-and-pages.md`、FS-004 Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): revise competition application flow` |
 | Approval | 保存已核准的 FS-004 Spec、Plan 與狀態 | FS-004 Slice Brief、Spec、Plan、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): approve competition application specification` |
 | I1 | 加入 FS-004 表單 runtime 依賴 | `package.json`、`package-lock.json` | `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` | `build(applications): add form workflow dependencies` |
 | I2 | 建立共用學年度、整數點數與公開 multipart transport | `src/shared/lib/academic-year.ts`、`src/shared/lib/academic-year.test.ts`、`src/features/rules/lib/academic-year.ts`、`src/features/rules/lib/academic-year.test.ts`、`src/features/rules/published-instructions-page.tsx`、`src/features/applications/common/lib/points.ts`、`src/features/applications/common/lib/points.test.ts`、`src/shared/api/api-client.ts`、`src/shared/api/api-client.test.ts` | shared/API unit tests、FS-002 tests、`npm run typecheck`、`npm run lint`、`npm run build` | `feat(applications): add shared application utilities` |
@@ -249,10 +261,12 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 | I5 | 完成競賽五步表單、送件狀態與 route 整合 | `src/features/applications/competition/components/**`、`competition-application-page*`、`src/app/router/router*`、`src/app/app.test.tsx` | competition page／router tests、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` | `feat(competition): add public competition application` |
 | I6 | 覆蓋完整瀏覽器流程與既有公開入口回歸 | `e2e/competition-application.spec.ts`、`e2e/application-entry.spec.ts` | targeted Chromium Playwright、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` | `test(competition): cover application workflow` |
 | Verification | 保存完整 AI Verification 與適當狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、`git diff --check` | `docs(FS-004): record competition application verification` |
+| R1 | 將競賽內容移至第一步，參與者與點數移至第二步，並同步錯誤／摘要落點 | `src/features/applications/competition/competition-application-page.tsx`、`components/competition-confirmation-step.tsx`、相關 unit／page／router tests、`e2e/application-entry.spec.ts`、`e2e/competition-application.spec.ts` | targeted Vitest、typecheck、lint、test、build、targeted Chromium Playwright | `fix(competition): reorder application details steps` |
+| Reverification | 保存步驟重排後完整 AI Verification 與等待人工狀態 | Spec、Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): update application flow verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): record competition application acceptance` |
 
 ## Approval
 
-- Approved By: `使用者`
-- Approved At: `2026-08-13`
-- Approval Note: `使用者已明確核准 FS-004 Spec、Plan 與 continuous Commit Plan；implementation 尚未開始。`
+- Approved By: `pending`
+- Approved At: `pending`
+- Approval Note: `使用者已核准競賽步驟重排變更提案；修訂後 Spec、Plan 與新增 R1／Reverification Commit Plan 待重新核准。`
