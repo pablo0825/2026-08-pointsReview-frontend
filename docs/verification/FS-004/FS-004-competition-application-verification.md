@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `awaiting-approval`
+- Verification Status: `approved`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-13`
 
@@ -31,7 +31,8 @@
 - 已新增獨立 E2E TypeScript project 並納入根 project references；`npm run typecheck` 現在會檢查全部 Playwright specs，VS Code 可正確識別 Node.js `Buffer` global。
 - F1 後已重新執行完整 AI Verification，產品行為、Vitest、build 與 14 個 Chromium 流程均保持通過。
 - 使用者於 Human Acceptance 前要求調整錯誤呈現：可定位欄位錯誤改在控制項下方顯示並加紅框，區塊錯誤留在相關區塊，只有無法定位與系統錯誤使用頁面內提示；一般錯誤不使用瀏覽器原生 `alert()`。
-- 此修訂尚未實作或重新驗證；既有 AI Verification 證據只代表修訂前版本，FS-004 已返回 `awaiting-approval`。
+- 此修訂尚未實作或重新驗證；既有 AI Verification 證據只代表修訂前版本，FS-004 在重新核准前曾返回 `awaiting-approval`。
+- 使用者已於 2026-08-13 核准修訂後的 Spec、Plan 與 Commit Plan；R3 尚未開始，修訂後 AI Verification 仍為 `not-run`。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
 ## Approved Flow Revision
@@ -144,7 +145,7 @@
 | F1 | 將 Playwright specs 納入獨立 TypeScript project 與根 project references | typecheck、lint、68 個 Vitest、build、14 個 Chromium 流程 | passed | `fix(testing): typecheck playwright specifications` |
 | E2E Typecheck Reverification | 記錄 E2E typecheck 缺口修正與完整重新驗證 | 完整 AI Verification 證據、文件一致性、`git diff --check` | passed | `docs(FS-004): record e2e typecheck correction` |
 | Field Error Revision Draft | 保存錯誤呈現需求、draft Spec／Plan 與等待核准狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): revise competition application requirements` |
-| Field Error Approval | 重新核准錯誤呈現 Spec、Plan 與 Commit Plan | 文件一致性、`git diff --check` | not-run | `docs(FS-004): approve field error presentation` |
+| Field Error Approval | 重新核准錯誤呈現 Spec、Plan 與 Commit Plan | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve field error presentation` |
 | R3 | 以 React Hook Form 統一欄位錯誤並提供就地錯誤、紅框、區塊及系統提示 | targeted Vitest、typecheck、lint、test、build、targeted Chromium | not-run | `fix(competition): localize form validation feedback` |
 | Field Error Reverification | 保存修訂後完整 AI Verification 與等待人工狀態 | 完整 AI Verification 證據、文件一致性、`git diff --check` | not-run | `docs(FS-004): record field error verification` |
 
@@ -216,8 +217,8 @@
 - AI Verification: `修訂前版本 passed；E2E specs 已納入 typecheck，App、Node config、E2E TypeScript、lint、68 個 Vitest、production build 與 14 個 Chromium 流程均通過。欄位錯誤呈現修訂尚未實作或驗證。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依上述步驟驗收。`
-- Remaining Issues: `修訂後 Spec、Plan 與 Commit Plan 等待核准；欄位錯誤呈現尚未實作與重新驗證；真實後端整合與 Human Acceptance 待確認；另有非阻擋 bundle size 警示。`
-- Final Feature Slice Status: `awaiting-approval`
+- Remaining Issues: `欄位錯誤呈現尚未實作與重新驗證；真實後端整合與 Human Acceptance 待確認；另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `approved`
 
 ## Document Lineage Update
 

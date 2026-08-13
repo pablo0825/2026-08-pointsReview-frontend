@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-13`
@@ -168,6 +168,6 @@
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `pending；欄位／區塊錯誤呈現與 React Hook Form 錯誤管理構成實質修訂，等待重新核准。`
+- Approved By: `使用者`
+- Approved At: `2026-08-13`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；欄位／區塊錯誤採就地呈現，系統錯誤採頁面內提示，並以 React Hook Form 統一管理欄位錯誤。`

@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Based On Spec: `docs/specs/FS-004/FS-004-competition-application-spec.md`
 - Spec Last Updated: `2026-08-13`
 - Created: `2026-08-13`
@@ -283,16 +283,16 @@
 - [x] 建立並更新 verification record。
 - [x] `not-applicable`：本 Slice 不是 `change`，不需 supersession lineage。
 - [x] 更新 `docs/project/` 的欄位、區塊與系統錯誤呈現規則。
-- [ ] 重新確認需求文件、Slice Brief、Spec 與 Plan 的錯誤呈現修訂一致。
-- [ ] 修訂完成後更新 Verification 與 blueprint 狀態。
+- [x] 重新確認需求文件、Slice Brief、Spec 與 Plan 的錯誤呈現修訂一致。
+- [x] 修訂完成後更新 Verification 與 blueprint 狀態。
 
 ## Commit Plan
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-004): draft competition application specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `pending`
-- Approved By: `pending`
-- Approved At: `pending`
+- Commit Plan Approval: `approved`
+- Approved By: `使用者`
+- Approved At: `2026-08-13`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -321,6 +321,6 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `pending；欄位／區塊錯誤呈現與 React Hook Form 錯誤管理構成實質修訂，等待重新核准。`
+- Approved By: `使用者`
+- Approved At: `2026-08-13`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；核准 R3 以 React Hook Form 統一欄位錯誤，提供欄位下方訊息、紅框、區塊錯誤與頁面內系統提示。`
