@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router-dom'
@@ -36,8 +36,11 @@ async function completeForm(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: '下一步' }))
 
   await screen.findByRole('heading', { name: '參與者資料' })
+  expect(screen.queryByLabelText('申請人 Email')).not.toBeInTheDocument()
   await user.type(screen.getByLabelText('姓名'), '測試學生')
   await user.type(screen.getByLabelText('學號'), '4a0x0001')
+  await user.click(screen.getByRole('button', { name: '設為申請人' }))
+  expect(screen.getByRole('heading', { name: '申請人聯絡資料' })).toBeInTheDocument()
   await user.type(screen.getByLabelText('申請人 Email'), 'STUDENT@EXAMPLE.COM')
   await user.type(screen.getByLabelText('申請人電話'), '0912-345-678')
   expect(screen.getByLabelText('申請點數')).toHaveValue('3.00')
@@ -65,6 +68,62 @@ beforeEach(() => {
 })
 
 describe('competition application page', () => {
+  it('requires an explicit applicant and focuses the first selection button', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByRole('heading', { name: '競賽內容' })
+    await user.selectOptions(screen.getByLabelText('競賽等級'), 'national_integrated')
+    await user.selectOptions(screen.getByLabelText('獎項'), 'finalist')
+    await user.type(screen.getByLabelText('競賽名稱'), '測試競賽')
+    await user.type(screen.getByLabelText('競賽類別'), '設計組')
+    await user.type(screen.getByLabelText('競賽日期'), '2026-08-01')
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+
+    await screen.findByRole('heading', { name: '參與者資料' })
+    await user.type(screen.getByLabelText('姓名'), '測試學生')
+    await user.type(screen.getByLabelText('學號'), '4A0X0001')
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+
+    expect(screen.getAllByText('請先選擇一位參與者作為申請人。')).toHaveLength(2)
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: '設為申請人' })).toHaveFocus(),
+    )
+    await user.click(screen.getByRole('button', { name: '設為申請人' }))
+    expect(screen.queryByText('請先選擇一位參與者作為申請人。')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('申請人 Email')).toBeInTheDocument()
+  })
+
+  it('moves cleared contact fields after confirming a different applicant', async () => {
+    const user = userEvent.setup()
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    renderPage()
+    await screen.findByRole('heading', { name: '競賽內容' })
+    await user.selectOptions(screen.getByLabelText('競賽等級'), 'national_integrated')
+    await user.selectOptions(screen.getByLabelText('獎項'), 'finalist')
+    await user.type(screen.getByLabelText('競賽名稱'), '測試競賽')
+    await user.type(screen.getByLabelText('競賽類別'), '設計組')
+    await user.type(screen.getByLabelText('競賽日期'), '2026-08-01')
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+
+    await screen.findByRole('heading', { name: '參與者資料' })
+    await user.type(screen.getByLabelText('姓名'), '甲同學')
+    await user.type(screen.getByLabelText('學號'), 'A001')
+    await user.click(screen.getByRole('button', { name: '設為申請人' }))
+    await user.type(screen.getByLabelText('申請人 Email'), 'first@example.com')
+    await user.type(screen.getByLabelText('申請人電話'), '0912345678')
+    await user.click(screen.getByRole('button', { name: '新增參與者' }))
+
+    const secondParticipant = screen.getByRole('group', { name: '參與者 2' })
+    await user.click(within(secondParticipant).getByRole('button', { name: '設為申請人' }))
+
+    expect(confirm).toHaveBeenCalledOnce()
+    expect(within(secondParticipant).getByRole('heading', { name: '申請人聯絡資料' })).toBeInTheDocument()
+    expect(within(secondParticipant).getByLabelText('申請人 Email')).toHaveValue('')
+    expect(within(secondParticipant).getByLabelText('申請人電話')).toHaveValue('')
+    expect(within(screen.getByRole('group', { name: '參與者 1' })).queryByLabelText('申請人 Email')).not.toBeInTheDocument()
+    confirm.mockRestore()
+  })
+
   it('loads rules and advisors once and submits a per-person application', async () => {
     const user = userEvent.setup()
     let ruleRequests = 0
@@ -104,7 +163,7 @@ describe('competition application page', () => {
     expect(credentials).toBe('omit')
     expect(submittedPayload).toMatchObject({
       applicant: { email: 'student@example.com' },
-      participants: [{ studentNumber: '4A0X0001', requestedPoints: '3.00' }],
+      participants: [{ studentNumber: '4A0X0001', requestedPoints: '3.00', isApplicant: true }],
     })
   })
 
@@ -347,6 +406,7 @@ describe('competition application page', () => {
     await screen.findByRole('heading', { name: '參與者資料' })
     await user.type(screen.getByLabelText('姓名'), '測試學生')
     await user.type(screen.getByLabelText('學號'), '4A0X0001')
+    await user.click(screen.getByRole('button', { name: '設為申請人' }))
     await user.type(screen.getByLabelText('申請人 Email'), 'student@example.com')
     await user.type(screen.getByLabelText('申請人電話'), '0912345678')
     await user.click(screen.getByRole('button', { name: '下一步' }))

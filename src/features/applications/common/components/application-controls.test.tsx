@@ -70,7 +70,7 @@ describe('shared application controls', () => {
   it('changes applicant only after confirmation and protects the current applicant', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
     const participants: ParticipantEditorValue[] = [
       {
         clientKey: 'one',
@@ -95,7 +95,11 @@ describe('shared application controls', () => {
     render(
       <ParticipantsEditor
         academicYear="115"
+        applicantEmail="student@example.com"
+        applicantPhone="0912345678"
         maximumParticipants={10}
+        onApplicantEmailChange={vi.fn()}
+        onApplicantPhoneChange={vi.fn()}
         onChange={onChange}
         onDirty={vi.fn()}
         participants={participants}
@@ -110,6 +114,63 @@ describe('shared application controls', () => {
       expect.objectContaining({ isApplicant: false }),
       expect.objectContaining({ isApplicant: true }),
     ])
+    confirm.mockRestore()
+  })
+
+  it('selects the first applicant without confirmation and reveals contact fields', async () => {
+    const user = userEvent.setup()
+    const confirm = vi.spyOn(window, 'confirm')
+    const onChange = vi.fn()
+    const participant: ParticipantEditorValue = {
+      clientKey: 'one',
+      studentName: '甲',
+      studentNumber: 'a001',
+      grade: 1,
+      classNumber: 1,
+      requestedPoints: '0.50',
+      isApplicant: false,
+    }
+
+    const { rerender } = render(
+      <ParticipantsEditor
+        academicYear="115"
+        applicantEmail=""
+        applicantPhone=""
+        applicantSelectionError="請先選擇一位參與者作為申請人。"
+        maximumParticipants={10}
+        onApplicantEmailChange={vi.fn()}
+        onApplicantPhoneChange={vi.fn()}
+        onChange={onChange}
+        onDirty={vi.fn()}
+        participants={[participant]}
+        pointsEditable
+      />,
+    )
+
+    expect(screen.queryByLabelText('申請人 Email')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '設為申請人' }))
+    expect(confirm).not.toHaveBeenCalled()
+    expect(onChange).toHaveBeenCalledWith([
+      expect.objectContaining({ isApplicant: true }),
+    ])
+
+    rerender(
+      <ParticipantsEditor
+        academicYear="115"
+        applicantEmail=""
+        applicantPhone=""
+        maximumParticipants={10}
+        onApplicantEmailChange={vi.fn()}
+        onApplicantPhoneChange={vi.fn()}
+        onChange={onChange}
+        onDirty={vi.fn()}
+        participants={[{ ...participant, isApplicant: true }]}
+        pointsEditable
+      />,
+    )
+    expect(screen.getByRole('heading', { name: '申請人聯絡資料' })).toBeInTheDocument()
+    expect(screen.getByLabelText('申請人 Email')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '目前申請人' })).toBeInTheDocument()
   })
 
   it('validates, adds, and removes attachment files', async () => {

@@ -151,7 +151,7 @@ export function createDefaultCompetitionApplicationForm(
         grade: 1,
         classNumber: 1,
         requestedPoints: '0.00',
-        isApplicant: true,
+        isApplicant: false,
       },
     ],
     applicantEmail: '',

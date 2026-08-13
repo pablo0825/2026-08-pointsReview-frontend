@@ -216,6 +216,13 @@ export function CompetitionApplicationPage() {
       else if (value.competitionDate > getTaipeiDateString()) nextErrors.push({ path: 'competitionDate', message: '競賽日期不得晚於今天' })
     }
     if (step === 1) {
+      const applicant = value.participants.find(({ isApplicant }) => isApplicant)
+      if (!applicant) {
+        nextErrors.push({
+          path: 'participants.applicant',
+          message: '請先選擇一位參與者作為申請人。',
+        })
+      }
       if (value.participants.length < 1 || value.participants.length > participantLimit) {
         nextErrors.push({ path: 'participants', message: `參與者人數須為 1 至 ${participantLimit} 人` })
       }
@@ -229,12 +236,14 @@ export function CompetitionApplicationPage() {
         else if (seen.has(studentNumber)) nextErrors.push({ path: `participants.${index}.studentNumber`, message: '學號不可重複' })
         seen.add(studentNumber)
       })
-      const email = value.applicantEmail.trim()
-      const phone = value.applicantPhone.trim()
-      if (!email) nextErrors.push({ path: 'applicantEmail', message: '請輸入申請人 Email' })
-      else if (email.length > 320 || !emailPattern.test(email)) nextErrors.push({ path: 'applicantEmail', message: '請輸入有效的 Email' })
-      if (!phone) nextErrors.push({ path: 'applicantPhone', message: '請輸入申請人電話' })
-      else if (phone.length > 30 || !phonePattern.test(phone)) nextErrors.push({ path: 'applicantPhone', message: '電話格式不正確' })
+      if (applicant) {
+        const email = value.applicantEmail.trim()
+        const phone = value.applicantPhone.trim()
+        if (!email) nextErrors.push({ path: 'applicantEmail', message: '請輸入申請人 Email' })
+        else if (email.length > 320 || !emailPattern.test(email)) nextErrors.push({ path: 'applicantEmail', message: '請輸入有效的 Email' })
+        if (!phone) nextErrors.push({ path: 'applicantPhone', message: '請輸入申請人電話' })
+        else if (phone.length > 30 || !phonePattern.test(phone)) nextErrors.push({ path: 'applicantPhone', message: '電話格式不正確' })
+      }
       if (selectedOption?.allocationMethod === 'shared_total') {
         const minimum = parsePoints(selectedOption.minimumPointsPerParticipant) ?? 50
         value.participants.forEach((participant, index) => {
@@ -304,6 +313,11 @@ export function CompetitionApplicationPage() {
     if (oldApplicant !== newApplicant) {
       form.setValue('applicantEmail', '')
       form.setValue('applicantPhone', '')
+    }
+    if (newApplicant) {
+      setErrors((current) =>
+        current.filter(({ path }) => path !== 'participants.applicant'),
+      )
     }
   }
 
@@ -449,7 +463,12 @@ export function CompetitionApplicationPage() {
             <div className="space-y-6">
               <ParticipantsEditor
                 academicYear={value.academicYear}
+                applicantEmail={value.applicantEmail}
+                applicantPhone={value.applicantPhone}
+                applicantSelectionError={errors.find(({ path }) => path === 'participants.applicant')?.message}
                 maximumParticipants={participantLimit}
+                onApplicantEmailChange={(email) => updateValue('applicantEmail', email)}
+                onApplicantPhoneChange={(phone) => updateValue('applicantPhone', phone)}
                 onChange={updateParticipants}
                 onDirty={() => setDirty(true)}
                 participants={value.participants as ParticipantEditorValue[]}
@@ -461,10 +480,6 @@ export function CompetitionApplicationPage() {
                   {sharedAllocation.remaining ?? '—'} 點。
                 </p>
               ) : null}
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="space-y-1 font-semibold">申請人 Email<input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" data-field-path="applicantEmail" onChange={(event) => updateValue('applicantEmail', event.target.value)} type="email" value={value.applicantEmail} /></label>
-                <label className="space-y-1 font-semibold">申請人電話<input className="min-h-11 w-full rounded-lg border border-slate-300 px-3" data-field-path="applicantPhone" onChange={(event) => updateValue('applicantPhone', event.target.value)} value={value.applicantPhone} /></label>
-              </div>
             </div>
           ) : currentStep === 2 ? (
             advisorsQuery.isPending ? <p role="status">正在載入指導老師名單…</p> : advisorsQuery.isError ? <QueryState retry={() => void advisorsQuery.refetch()} title="暫時無法載入指導老師名單" /> : advisorsQuery.data.length === 0 ? <QueryState empty retry={() => void advisorsQuery.refetch()} title="目前沒有可選擇的指導老師" /> : <AdvisorSelector advisors={advisorsQuery.data} onSelect={(id) => updateValue('advisorId', id)} selectedId={value.advisorId} />

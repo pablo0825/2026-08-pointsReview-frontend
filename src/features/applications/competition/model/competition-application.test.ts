@@ -36,6 +36,7 @@ describe('competition application model', () => {
       studentName: ' 測試學生 ',
       studentNumber: ' 4a0x0001 ',
       requestedPoints: '3.00',
+      isApplicant: true,
     })
     form.attachments = [
       {
@@ -144,6 +145,7 @@ describe('competition application model', () => {
       studentName: '王小明',
       studentNumber: 'a001',
       requestedPoints: '1.00',
+      isApplicant: true,
     })
     form.attachments = [
       {

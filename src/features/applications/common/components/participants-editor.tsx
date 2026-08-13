@@ -13,7 +13,12 @@ type ParticipantsEditorProps = {
   academicYear: string
   pointsEditable: boolean
   maximumParticipants: number
+  applicantEmail: string
+  applicantPhone: string
+  applicantSelectionError?: string
   onChange: (participants: ParticipantEditorValue[]) => void
+  onApplicantEmailChange: (email: string) => void
+  onApplicantPhoneChange: (phone: string) => void
   onDirty: () => void
 }
 
@@ -39,9 +44,16 @@ export function ParticipantsEditor({
   academicYear,
   pointsEditable,
   maximumParticipants,
+  applicantEmail,
+  applicantPhone,
+  applicantSelectionError,
   onChange,
+  onApplicantEmailChange,
+  onApplicantPhoneChange,
   onDirty,
 }: ParticipantsEditorProps) {
+  const hasApplicant = participants.some(({ isApplicant }) => isApplicant)
+
   function updateParticipant(
     index: number,
     patch: Partial<ParticipantEditorValue>,
@@ -56,7 +68,10 @@ export function ParticipantsEditor({
 
   function selectApplicant(index: number) {
     if (participants[index].isApplicant) return
-    if (!window.confirm('更換申請人後，Email 與電話需要重新輸入。確定更換嗎？')) {
+    if (
+      hasApplicant &&
+      !window.confirm('更換申請人後，Email 與電話需要重新輸入。確定更換嗎？')
+    ) {
       return
     }
     onDirty()
@@ -73,6 +88,11 @@ export function ParticipantsEditor({
       <p className="rounded-lg bg-slate-100 p-3 font-semibold">
         學年度：{academicYear}（系統自動設定）
       </p>
+      {applicantSelectionError ? (
+        <p className="rounded-lg border border-red-300 bg-red-50 p-3 font-semibold text-red-950" role="alert">
+          {applicantSelectionError}
+        </p>
+      ) : null}
       {participants.map((participant, index) => (
         <fieldset
           className="space-y-4 rounded-xl border border-slate-200 p-4"
@@ -156,10 +176,42 @@ export function ParticipantsEditor({
               />
             </label>
           </div>
+          {participant.isApplicant ? (
+            <section
+              aria-labelledby={`applicant-contact-${participant.clientKey}`}
+              className="space-y-4 rounded-xl bg-blue-50 p-4"
+            >
+              <h3 className="font-bold text-blue-950" id={`applicant-contact-${participant.clientKey}`}>
+                申請人聯絡資料
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="space-y-1 font-semibold">
+                  申請人 Email
+                  <input
+                    className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                    data-field-path="applicantEmail"
+                    onChange={(event) => onApplicantEmailChange(event.target.value)}
+                    type="email"
+                    value={applicantEmail}
+                  />
+                </label>
+                <label className="space-y-1 font-semibold">
+                  申請人電話
+                  <input
+                    className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                    data-field-path="applicantPhone"
+                    onChange={(event) => onApplicantPhoneChange(event.target.value)}
+                    value={applicantPhone}
+                  />
+                </label>
+              </div>
+            </section>
+          ) : null}
           <div className="flex flex-wrap gap-3">
             <button
               aria-pressed={participant.isApplicant}
               className="min-h-11 rounded-lg border border-blue-700 px-4 py-2 font-bold text-blue-800"
+              data-field-path={participant.isApplicant ? undefined : 'participants.applicant'}
               onClick={() => selectApplicant(index)}
               type="button"
             >

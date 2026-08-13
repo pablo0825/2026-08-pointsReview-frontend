@@ -66,6 +66,7 @@ async function completeParticipantsStep(page: Page, twoParticipants = false) {
     await page.getByLabel('姓名').nth(1).fill('陳小華')
     await page.getByLabel('學號').nth(1).fill('4a0x0002')
   }
+  await page.getByRole('button', { name: '設為申請人' }).first().click()
   await page.getByLabel('申請人 Email').fill(' STUDENT@EXAMPLE.COM ')
   await page.getByLabel('申請人電話').fill('0912-345-678')
 }
@@ -93,6 +94,27 @@ async function completeAdvisorAndAttachment(page: Page) {
   await page.getByRole('button', { name: '下一步' }).click()
   await expect(page.getByRole('heading', { name: '確認送出' })).toBeVisible()
 }
+
+test('requires an explicit applicant before revealing contact fields', async ({
+  page,
+}) => {
+  await mockQueries(page)
+  await page.goto('/apply/competition')
+  await completeDetails(page, 'finalist')
+  await page.getByRole('button', { name: '下一步' }).click()
+
+  await expect(page.getByLabel('申請人 Email')).toHaveCount(0)
+  await page.getByLabel('姓名').fill('王小明')
+  await page.getByLabel('學號').fill('4A0X0001')
+  await page.getByRole('button', { name: '下一步' }).click()
+
+  await expect(page.getByText('請先選擇一位參與者作為申請人。')).toHaveCount(2)
+  await expect(page.getByRole('button', { name: '設為申請人' })).toBeFocused()
+  await page.getByRole('button', { name: '設為申請人' }).click()
+  await expect(page.getByText('請先選擇一位參與者作為申請人。')).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: '申請人聯絡資料' })).toBeVisible()
+  await expect(page.getByLabel('申請人 Email')).toBeVisible()
+})
 
 test('submits a shared-total application and preserves normalized payload values', async ({
   page,
