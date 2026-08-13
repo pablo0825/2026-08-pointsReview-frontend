@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-13`
@@ -165,6 +165,6 @@
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `申請人選擇流程變更提案已獲使用者同意；修訂後的 Spec、Plan 與 Commit Plan 待重新核准。`
+- Approved By: `使用者`
+- Approved At: `2026-08-13`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；競賽申請採明確選擇申請人、卡片內聯絡資料及未選錯誤焦點流程。`
