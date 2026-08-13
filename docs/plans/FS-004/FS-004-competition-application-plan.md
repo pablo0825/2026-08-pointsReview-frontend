@@ -280,10 +280,12 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 | Applicant Revision Draft | 保存已同意的申請人互動需求、draft Spec／Plan 與等待核准狀態 | `docs/project/product-requirements.md`、`docs/project/application-rules.md`、`docs/project/routes-and-pages.md`、`docs/project/testing-strategy.md`、FS-004 Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): revise applicant selection flow` |
 | R2 | 改為明確選擇申請人，將聯絡資料置於申請人卡片，並補齊未選與改選互動 | `src/features/applications/common/components/participants-editor.tsx`、相關 common component tests、`src/features/applications/competition/model/competition-application.schema.ts`、相關 model tests、`src/features/applications/competition/competition-application-page.tsx`、page tests、`e2e/competition-application.spec.ts` | targeted Vitest、typecheck、lint、test、build、targeted Chromium Playwright | `fix(competition): clarify applicant selection` |
 | Applicant Reverification | 保存申請人互動修訂後完整 AI Verification 與等待人工狀態 | Spec、Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): update applicant selection verification` |
+| F1 | 將 Playwright specs 納入獨立 TypeScript project 與根 project references | `tsconfig.json`、`tsconfig.e2e.json` | `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、完整 Chromium Playwright | `fix(testing): typecheck playwright specifications` |
+| E2E Typecheck Reverification | 記錄 E2E typecheck 缺口修正與完整重新驗證 | Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record e2e typecheck correction` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): record competition application acceptance` |
 
 ## Approval
 
 - Approved By: `使用者`
 - Approved At: `2026-08-13`
-- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；R2 將依核准內容修訂申請人選擇流程，尚未開始實作。`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；並於 2026-08-13 核准新增 F1 與 E2E Typecheck Reverification，修正 Playwright specs 未納入 typecheck 的缺口。`

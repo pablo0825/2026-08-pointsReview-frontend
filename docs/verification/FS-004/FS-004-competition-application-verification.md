@@ -27,6 +27,9 @@
 - 已完成 R2：競賽參與者初始不預選申請人，選定前隱藏聯絡資料，選定後將 Email 與電話顯示於該參與者卡片。
 - 未選申請人時同時顯示錯誤摘要與參與者區域訊息，並聚焦第一個「設為申請人」按鈕；選定後立即清除錯誤。
 - 改選申請人須確認，確認後聯絡資料被清除並移至新申請人卡片；正式 payload 仍恰好一位 `isApplicant = true`。
+- Human Acceptance 檢查發現 `e2e/**` 未被既有 TypeScript project references 納入；Playwright 可執行，但 `npm run typecheck` 無法涵蓋 E2E specs，VS Code 因此無法識別 Node.js `Buffer` global。
+- 已新增獨立 E2E TypeScript project 並納入根 project references；`npm run typecheck` 現在會檢查全部 Playwright specs，VS Code 可正確識別 Node.js `Buffer` global。
+- F1 後已重新執行完整 AI Verification，產品行為、Vitest、build 與 14 個 Chromium 流程均保持通過。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
 ## Approved Flow Revision
@@ -61,12 +64,13 @@
 | `src/test/**`、`src/features/applications/**/*.test.ts*` | 加入匿名 fixtures、MSW handlers 與單元／元件／整合覆蓋。 |
 | `src/app/router/router.tsx`、`router.test.tsx` | 以正式競賽表單取代 placeholder 並回歸公開 routes。 |
 | `e2e/application-entry.spec.ts`、`e2e/competition-application.spec.ts` | 覆蓋新步驟順序、第一步無參與者欄位、兩種點數、multipart、Idempotent retry、desktop 與 360px。 |
+| `tsconfig.e2e.json`、`tsconfig.json` | 建立包含 Node 與 DOM types 的嚴格 E2E TypeScript project，並加入根 project references。 |
 
 ## AI Verification
 
 | Check | Command / Method | Result | Evidence | Notes |
 |---|---|---|---|---|
-| Typecheck | `npm run typecheck` | passed | exit code 0 | TypeScript project references 通過。 |
+| Typecheck | `npm run typecheck` | passed | exit code 0 | App、Node config 與全部 `e2e/**/*.ts` project references 均通過；`Buffer` 已由 Node types 正確解析。 |
 | Lint | `npm run lint` | passed | exit code 0 | ESLint 無 error 或 warning。 |
 | Unit / Integration Tests | `npm run test` | passed | 13 files、68 tests passed | 覆蓋 transport、schemas、點數、初始未選申請人、卡片內聯絡資料、改選清除、修訂後五步流程及錯誤恢復。 |
 | Production Build | `npm run build` | passed | exit code 0；476 modules transformed | Bundle 成功產生；有超過 Vite 預設 500 kB 的非阻擋警示。 |
@@ -128,6 +132,8 @@
 | Applicant Revision Draft | 保存申請人互動修訂文件與等待核准狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): revise applicant selection flow` |
 | R2 | 明確選擇申請人、卡片內聯絡資料、未選與改選互動 | 25 個 targeted Vitest、typecheck、lint、build、5 個 Chromium 流程 | passed | `fix(competition): clarify applicant selection` |
 | Applicant Reverification | 保存 R2 後完整 AI Verification 與等待人工狀態 | 68 個 Vitest、14 個 Chromium 流程、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): update applicant selection verification` |
+| F1 | 將 Playwright specs 納入獨立 TypeScript project 與根 project references | typecheck、lint、68 個 Vitest、build、14 個 Chromium 流程 | passed | `fix(testing): typecheck playwright specifications` |
+| E2E Typecheck Reverification | 記錄 E2E typecheck 缺口修正與完整重新驗證 | 完整 AI Verification 證據、文件一致性、`git diff --check` | passed | `docs(FS-004): record e2e typecheck correction` |
 
 ## Human Integration
 
@@ -192,7 +198,7 @@
 
 ## Final Summary
 
-- AI Verification: `passed；R2 後 typecheck、lint、68 個 Vitest、production build 與 14 個 Chromium 流程均通過。`
+- AI Verification: `passed；E2E specs 已納入 typecheck；App、Node config、E2E TypeScript、lint、68 個 Vitest、production build 與 14 個 Chromium 流程均通過。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依上述步驟驗收。`
 - Remaining Issues: `真實後端整合與 Human Acceptance 待確認；另有非阻擋 bundle size 警示。`
