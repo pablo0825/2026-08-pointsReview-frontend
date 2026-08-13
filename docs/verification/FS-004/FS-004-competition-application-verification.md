@@ -146,7 +146,7 @@
 
 ### Known Limitations
 
-- `pointsIncrement` 已納入 API contract，但核准的第一版分配規則固定使用 0.50。
+- `pointIncrement` 已納入 API contract，但核准的第一版分配規則固定使用 0.50。
 - 跨來源開發環境若未 expose `Retry-After`，只能顯示通用 Rate Limit 提示。
 - Production bundle 超過 Vite 預設 500 kB 警示；本 Slice 未核准 bundle budget 或 code-splitting 工作。
 

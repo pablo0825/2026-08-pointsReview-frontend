@@ -191,7 +191,7 @@ GET /public/application-instructions?applicationType=competition
       "allocationMethod": "per_person",
       "points": "3.00",
       "minimumPointsPerParticipant": "0.50",
-      "pointsIncrement": "0.50"
+      "pointIncrement": "0.50"
     },
     {
       "competitionLevel": "national_integrated",
@@ -199,7 +199,7 @@ GET /public/application-instructions?applicationType=competition
       "allocationMethod": "shared_total",
       "points": "60.00",
       "minimumPointsPerParticipant": "0.50",
-      "pointsIncrement": "0.50"
+      "pointIncrement": "0.50"
     }
   ]
 }

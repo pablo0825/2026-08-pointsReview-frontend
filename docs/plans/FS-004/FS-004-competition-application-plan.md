@@ -177,7 +177,7 @@
 
 | Risk / Issue | Impact | Mitigation / Decision Needed |
 |---|---|---|
-| `pointsIncrement` 已加入規則 Response，但第一版產品規則仍固定 0.50 | 若後端未來回傳其他值，UI 可能顯示契約資料卻仍須遵守第一版固定限制 | Zod 驗證並保存欄位；FS-004 依已核准的第一版 0.50 行為實作。若要改為動態增量，先走需求文件修訂 |
+| `pointIncrement` 已加入規則 Response，但第一版產品規則仍固定 0.50 | 若後端未來回傳其他值，UI 可能顯示契約資料卻仍須遵守第一版固定限制 | Zod 驗證並保存欄位；FS-004 依已核准的第一版 0.50 行為實作。若要改為動態增量，先走需求文件修訂 |
 | 公開送件 Response 可能在後端已 commit 後遺失或成為 5xx | 一般重送可能建立重複案件或錯誤宣告失敗 | 凍結 Key 與完整 request，所有 5xx／Network 只提供相同快照的手動重新確認 |
 | 瀏覽器跨來源時可能讀不到 `Retry-After` | 無法顯示精確等待秒數 | 有 header 時顯示秒數；否則使用已核准通用訊息。真實整合確認 CORS expose header |
 | File／Blob URL 與動態附件生命週期複雜 | 可能造成記憶體洩漏、預覽失效或 retry 內容不一致 | 集中 attachment model、明確 revoke 時機、不可變 snapshot 並以 unit／component tests 驗證 |

@@ -76,7 +76,7 @@
 6. `applicant.name` 直接使用申請參與者 trim 後的姓名。更換申請人前須確認，更換後清除 Email 與電話並要求重新輸入；目前申請人不可直接刪除，僅剩一人時維持其申請人身分。
 7. 申請人 Email 必填、trim、轉小寫、最長 320 字元且符合一般 Email 格式；電話必填、trim 後不可空、最長 30 字元，只接受數字、空格、`+`、`-`、`(`、`)`。
 8. 進入頁面只呼叫一次不帶 Query Parameter 的 `GET /public/competition-point-options`；切換選項、步驟、參與者或點數時不得重複查詢。
-9. 規則 Response 必須包含 `competitionLevel`、`award`、`allocationMethod`、`points`、`minimumPointsPerParticipant` 與 `pointsIncrement`；同一組 `competitionLevel + award` 唯一，前端只顯示 Response 實際提供的組合，不使用本機預設規則替代。
+9. 規則 Response 必須包含 `competitionLevel`、`award`、`allocationMethod`、`points`、`minimumPointsPerParticipant` 與 `pointIncrement`；同一組 `competitionLevel + award` 唯一，前端只顯示 Response 實際提供的組合，不使用本機預設規則替代。
 10. 規則讀取失敗時顯示「暫時無法載入競賽點數規則」，空陣列時顯示「目前沒有可申請的競賽點數規則」；兩者都提供「重新載入」並禁止繼續與送件。
 11. 競賽等級顯示已定義的五種中文名稱，獎項顯示已定義的六種中文名稱；`competitionLevel = other` 時其他等級名稱必填、trim 後 1–100 字元，否則固定為 `null`。
 12. 競賽名稱必填、trim 後 1–255 字元；競賽類別必填、trim 後 1–100 字元；兩者不限制一般字元。
@@ -127,7 +127,7 @@
 
 ## Preliminary Integration Contract
 
-- `GET /public/competition-point-options`：不帶 Query Parameter，成功為 `HTTP 200` 與 `{ data: CompetitionPointOption[] }`，空資料仍為 `200`。每筆包含唯一的 `competitionLevel + award`、`allocationMethod`、兩位小數字串 `points`、`minimumPointsPerParticipant` 與 `pointsIncrement`。頁面進入時查詢一次，只有 empty、failure 或後端規則失效流程提供手動重載。
+- `GET /public/competition-point-options`：不帶 Query Parameter，成功為 `HTTP 200` 與 `{ data: CompetitionPointOption[] }`，空資料仍為 `200`。每筆包含唯一的 `competitionLevel + award`、`allocationMethod`、兩位小數字串 `points`、`minimumPointsPerParticipant` 與 `pointIncrement`。頁面進入時查詢一次，只有 empty、failure 或後端規則失效流程提供手動重載。
 - `GET /public/advisors`：不帶 Query Parameter，成功為 `HTTP 200` 與 `{ data: PublicAdvisor[] }`，空資料仍為 `200`。每筆包含 `id`、`name`、`titleCode`、`department`、`isDirector`；首次進入老師步驟時查詢一次並在記憶體快取。
 - `POST /public/applications`：未登入公開 multipart 送件，使用 `credentials: omit`，不帶 CSRF Token。Header 必須包含 UUID v4 `Idempotency-Key`；`payload` 符合 `CompetitionApplicationPayload`，附件欄位使用 `attachments[{clientFileKey}]`。
 - 成功為 `HTTP 201` 與 `{ data: { publicId, status: "pending_advisor", submittedAt } }`。後端只記錄已 commit 的 `201` Idempotency 結果；相同 Key 與完全相同內容重試時，已 commit 案件重放相同 Response，commit 前失敗則重新執行。
@@ -139,7 +139,7 @@
 
 - [ ] 自動測試五步導覽、逐步驗證、返回修改、記憶體保留與 dirty-state 離開警告。
 - [ ] 自動測試學年度分界、1–10 人限制、申請人切換／刪除、學號 trim／大寫／重複及學籍限制。
-- [ ] 自動測試規則只查詢一次、Response schema 含 `pointsIncrement`、empty／failure／重載與只顯示後端組合。
+- [ ] 自動測試規則只查詢一次、Response schema 含 `pointIncrement`、empty／failure／重載與只顯示後端組合。
 - [ ] 自動測試 `per_person`、單人與多人 `shared_total`、增減參與者、切換規則、最低值、0.50 倍數與整數點數加總。
 - [ ] 自動測試競賽欄位、`other` 清理、歷史日期接受與未來日期拒絕。
 - [ ] 自動測試老師首次進入只查詢一次、本機搜尋、職稱 fallback、empty／failure／重載及失效選擇清除。
