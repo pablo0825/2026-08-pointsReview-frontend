@@ -105,14 +105,14 @@ export function CompetitionApplicationPage() {
 
   const rulesQuery = useQuery({
     queryKey: competitionPointOptionsQueryKey,
-    queryFn: ({ signal }) => fetchCompetitionPointOptions(signal),
+    queryFn: () => fetchCompetitionPointOptions(),
     staleTime: Infinity,
     refetchOnMount: false,
   })
   const advisorsQuery = useQuery({
     enabled: currentStep >= 2,
     queryKey: publicAdvisorsQueryKey,
-    queryFn: ({ signal }) => fetchPublicAdvisors(signal),
+    queryFn: () => fetchPublicAdvisors(),
     staleTime: Infinity,
     refetchOnMount: false,
   })
