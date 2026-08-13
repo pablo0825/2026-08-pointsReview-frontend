@@ -276,6 +276,74 @@ describe('competition application page', () => {
     expect(screen.queryByText('學號資料不正確。')).not.toBeInTheDocument()
   })
 
+  it('maps indexed grade and class API errors to their selects', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post('*/public/applications', () =>
+        HttpResponse.json(
+          {
+            code: 'validation_failed',
+            message: '輸入資料格式不正確。',
+            fields: [
+              { path: 'participants.0.grade', message: '年級資料不正確。' },
+              { path: 'participants.0.classNumber', message: '班級資料不正確。' },
+            ],
+          },
+          { status: 422 },
+        ),
+      ),
+    )
+
+    renderPage()
+    await completeForm(user)
+    await user.click(screen.getByRole('button', { name: '確認送出申請' }))
+
+    await screen.findByRole('heading', { name: '參與者資料' })
+    const grade = screen.getByLabelText('年級')
+    const classNumber = screen.getByLabelText('班級')
+    await waitFor(() => expect(grade).toHaveFocus())
+    expect(grade).toHaveAccessibleDescription('年級資料不正確。')
+    expect(classNumber).toHaveAccessibleDescription('班級資料不正確。')
+
+    await user.selectOptions(grade, '2')
+    expect(screen.queryByText('年級資料不正確。')).not.toBeInTheDocument()
+    expect(screen.getByText('班級資料不正確。')).toBeInTheDocument()
+  })
+
+  it('maps indexed attachment metadata API errors to their controls', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post('*/public/applications', () =>
+        HttpResponse.json(
+          {
+            code: 'validation_failed',
+            message: '輸入資料格式不正確。',
+            fields: [
+              { path: 'attachments.0.attachmentType', message: '附件分類不正確。' },
+              { path: 'attachments.0.description', message: '附件說明不正確。' },
+            ],
+          },
+          { status: 422 },
+        ),
+      ),
+    )
+
+    renderPage()
+    await completeForm(user)
+    await user.click(screen.getByRole('button', { name: '確認送出申請' }))
+
+    await screen.findByRole('heading', { name: '附件' })
+    const attachmentType = screen.getByLabelText('附件分類')
+    const description = screen.getByLabelText('說明（選填）')
+    await waitFor(() => expect(attachmentType).toHaveFocus())
+    expect(attachmentType).toHaveAccessibleDescription('附件分類不正確。')
+    expect(description).toHaveAccessibleDescription('附件說明不正確。')
+
+    await user.type(description, '補充說明')
+    expect(screen.queryByText('附件說明不正確。')).not.toBeInTheDocument()
+    expect(screen.getByText('附件分類不正確。')).toBeInTheDocument()
+  })
+
   it('renders client validation next to the invalid field without a top summary', async () => {
     const user = userEvent.setup()
     renderPage()

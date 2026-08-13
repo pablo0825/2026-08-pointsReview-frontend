@@ -172,6 +172,52 @@ describe('shared application controls', () => {
     expect(screen.getByRole('button', { name: '目前申請人' })).toBeInTheDocument()
   })
 
+  it('renders and clears indexed grade and class errors at their controls', async () => {
+    const user = userEvent.setup()
+    const onFieldChange = vi.fn()
+    const participant: ParticipantEditorValue = {
+      clientKey: 'one',
+      studentName: '甲',
+      studentNumber: 'A001',
+      grade: 1,
+      classNumber: 1,
+      requestedPoints: '0.50',
+      isApplicant: false,
+    }
+
+    render(
+      <ParticipantsEditor
+        academicYear="115"
+        applicantEmail=""
+        applicantPhone=""
+        errors={{
+          'participants.0.grade': '年級資料不正確。',
+          'participants.0.classNumber': '班級資料不正確。',
+        }}
+        maximumParticipants={10}
+        onApplicantEmailChange={vi.fn()}
+        onApplicantPhoneChange={vi.fn()}
+        onChange={vi.fn()}
+        onDirty={vi.fn()}
+        onFieldChange={onFieldChange}
+        participants={[participant]}
+        pointsEditable
+      />,
+    )
+
+    const grade = screen.getByLabelText('年級')
+    const classNumber = screen.getByLabelText('班級')
+    expect(grade).toHaveClass('border-red-600')
+    expect(grade).toHaveAccessibleDescription('年級資料不正確。')
+    expect(classNumber).toHaveClass('border-red-600')
+    expect(classNumber).toHaveAccessibleDescription('班級資料不正確。')
+
+    await user.selectOptions(grade, '2')
+    await user.selectOptions(classNumber, '2')
+    expect(onFieldChange).toHaveBeenCalledWith('participants.0.grade')
+    expect(onFieldChange).toHaveBeenCalledWith('participants.0.classNumber')
+  })
+
   it('validates, adds, and removes attachment files', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
@@ -263,6 +309,51 @@ describe('shared application controls', () => {
         attachmentTypeOther: null,
       }),
     ])
+  })
+
+  it('renders and clears indexed attachment type and description errors', async () => {
+    const user = userEvent.setup()
+    const onFieldChange = vi.fn()
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: vi.fn(() => 'blob:preview'),
+    })
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: vi.fn(),
+    })
+    const attachment: AttachmentEditorValue = {
+      clientFileKey: 'existing',
+      file: new File(['proof'], 'proof.pdf', { type: 'application/pdf' }),
+      attachmentType: 'participation_proof',
+      attachmentTypeOther: null,
+      description: null,
+    }
+
+    render(
+      <AttachmentEditor
+        attachments={[attachment]}
+        errors={{
+          'attachments.0.attachmentType': '附件分類不正確。',
+          'attachments.0.description': '附件說明不正確。',
+        }}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onFieldChange={onFieldChange}
+      />,
+    )
+
+    const attachmentType = screen.getByLabelText('附件分類')
+    const description = screen.getByLabelText('說明（選填）')
+    expect(attachmentType).toHaveClass('border-red-600')
+    expect(attachmentType).toHaveAccessibleDescription('附件分類不正確。')
+    expect(description).toHaveClass('border-red-600')
+    expect(description).toHaveAccessibleDescription('附件說明不正確。')
+
+    await user.selectOptions(attachmentType, 'official_document')
+    await user.type(description, '公文附件')
+    expect(onFieldChange).toHaveBeenCalledWith('attachments.0.attachmentType')
+    expect(onFieldChange).toHaveBeenCalledWith('attachments.0.description')
   })
 
   it('focuses the leave dialog and supports Escape', async () => {

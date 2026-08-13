@@ -152,7 +152,10 @@ export function ParticipantsEditor({
             <label className="space-y-1 font-semibold">
               年級
               <select
-                className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                aria-label="年級"
+                aria-describedby={errors[`participants.${index}.grade`] ? `participants-${index}-grade-error` : undefined}
+                aria-invalid={Boolean(errors[`participants.${index}.grade`])}
+                className={`min-h-11 w-full rounded-lg border px-3 ${errors[`participants.${index}.grade`] ? invalidFieldClassName : 'border-slate-300'}`}
                 data-field-path={`participants.${index}.grade`}
                 onChange={(event) =>
                   updateParticipant(index, { grade: Number(event.target.value) })
@@ -163,11 +166,15 @@ export function ParticipantsEditor({
                   <option key={value} value={value}>{label}</option>
                 ))}
               </select>
+              <FieldErrorMessage id={`participants-${index}-grade-error`} message={errors[`participants.${index}.grade`]} />
             </label>
             <label className="space-y-1 font-semibold">
               班級
               <select
-                className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+                aria-label="班級"
+                aria-describedby={errors[`participants.${index}.classNumber`] ? `participants-${index}-classNumber-error` : undefined}
+                aria-invalid={Boolean(errors[`participants.${index}.classNumber`])}
+                className={`min-h-11 w-full rounded-lg border px-3 ${errors[`participants.${index}.classNumber`] ? invalidFieldClassName : 'border-slate-300'}`}
                 data-field-path={`participants.${index}.classNumber`}
                 onChange={(event) =>
                   updateParticipant(index, {
@@ -180,6 +187,7 @@ export function ParticipantsEditor({
                   <option key={value} value={value}>{label}</option>
                 ))}
               </select>
+              <FieldErrorMessage id={`participants-${index}-classNumber-error`} message={errors[`participants.${index}.classNumber`]} />
             </label>
             <label className="space-y-1 font-semibold">
               申請點數

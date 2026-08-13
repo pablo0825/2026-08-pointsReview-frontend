@@ -161,7 +161,10 @@ export function AttachmentEditor({
           <label className="block space-y-1 font-semibold">
             附件分類
             <select
-              className="min-h-11 w-full rounded-lg border border-slate-300 px-3"
+              aria-label="附件分類"
+              aria-describedby={errors[`attachments.${index}.attachmentType`] ? `attachments-${index}-attachmentType-error` : undefined}
+              aria-invalid={Boolean(errors[`attachments.${index}.attachmentType`])}
+              className={`min-h-11 w-full rounded-lg border px-3 ${errors[`attachments.${index}.attachmentType`] ? invalidFieldClassName : 'border-slate-300'}`}
               data-field-path={`attachments.${index}.attachmentType`}
               onChange={(event) => {
                 const attachmentType = event.target.value as AttachmentType
@@ -179,6 +182,7 @@ export function AttachmentEditor({
                 <option key={value} value={value}>{label}</option>
               ))}
             </select>
+            <FieldErrorMessage id={`attachments-${index}-attachmentType-error`} message={errors[`attachments.${index}.attachmentType`]} />
           </label>
           {attachment.attachmentType === 'other' ? (
             <label className="block space-y-1 font-semibold">
@@ -203,13 +207,18 @@ export function AttachmentEditor({
           <label className="block space-y-1 font-semibold">
             說明（選填）
             <textarea
-              className="min-h-24 w-full rounded-lg border border-slate-300 p-3"
+              aria-label="說明（選填）"
+              aria-describedby={errors[`attachments.${index}.description`] ? `attachments-${index}-description-error` : undefined}
+              aria-invalid={Boolean(errors[`attachments.${index}.description`])}
+              className={`min-h-24 w-full rounded-lg border p-3 ${errors[`attachments.${index}.description`] ? invalidFieldClassName : 'border-slate-300'}`}
+              data-field-path={`attachments.${index}.description`}
               maxLength={500}
               onChange={(event) =>
                 updateAttachment(index, { description: event.target.value })
               }
               value={attachment.description ?? ''}
             />
+            <FieldErrorMessage id={`attachments-${index}-description-error`} message={errors[`attachments.${index}.description`]} />
           </label>
           <label className="block space-y-1 font-semibold">
             替換檔案
