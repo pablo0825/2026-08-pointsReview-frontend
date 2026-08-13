@@ -41,7 +41,7 @@
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-002 | `published-instructions` | feature | none | none | none | accepted | 修訂後完整 AI Verification、真實後端 Human Integration 與使用者 Human Acceptance 均已通過；桌面排版觀感列為非阻斷後續優化。 | 2026-08-12 |
 | FS-003 | `application-entry` | feature | none | none | none | accepted | 完整 AI Verification 已通過，Human Integration 為 `not-applicable`，使用者已確認 Human Acceptance 通過。 | 2026-08-11 |
-| FS-004 | `competition-application` | feature | FS-003 | none | none | approved | Spec、Plan 與 continuous Commit Plan 已獲使用者核准，等待明確開始實作。 | 2026-08-13 |
+| FS-004 | `competition-application` | feature | FS-003 | none | none | awaiting-human | I1–I6 與完整 AI Verification 已通過；等待真實後端 Human Integration 與使用者 Human Acceptance。 | 2026-08-13 |
 | FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
 | FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約；證照正規化契約待確認。 | 2026-08-13 |
 | FS-007 | `exhibition-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
@@ -65,7 +65,7 @@
 | FS-001 | `docs/blueprint/slices/FS-001-staff-authentication.md` | pending | pending | pending |
 | FS-002 | `docs/blueprint/slices/FS-002-published-instructions.md` | `docs/specs/FS-002/FS-002-published-instructions-spec.md` | `docs/plans/FS-002/FS-002-published-instructions-plan.md` | `docs/verification/FS-002/FS-002-published-instructions-verification.md` |
 | FS-003 | `docs/blueprint/slices/FS-003-application-entry.md` | `docs/specs/FS-003/FS-003-application-entry-spec.md` | `docs/plans/FS-003/FS-003-application-entry-plan.md` | `docs/verification/FS-003/FS-003-application-entry-verification.md` |
-| FS-004 | `docs/blueprint/slices/FS-004-competition-application.md` | `docs/specs/FS-004/FS-004-competition-application-spec.md` | `docs/plans/FS-004/FS-004-competition-application-plan.md` | pending |
+| FS-004 | `docs/blueprint/slices/FS-004-competition-application.md` | `docs/specs/FS-004/FS-004-competition-application-spec.md` | `docs/plans/FS-004/FS-004-competition-application-plan.md` | `docs/verification/FS-004/FS-004-competition-application-verification.md` |
 | FS-005 | `docs/blueprint/slices/FS-005-project-participation-application.md` | pending | pending | pending |
 | FS-006 | `docs/blueprint/slices/FS-006-certificate-application.md` | pending | pending | pending |
 | FS-007 | `docs/blueprint/slices/FS-007-exhibition-application.md` | pending | pending | pending |
