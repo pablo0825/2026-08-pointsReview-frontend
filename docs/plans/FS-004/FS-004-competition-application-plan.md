@@ -259,8 +259,8 @@
 - [x] 將前端逐步驗證與後端 422 欄位錯誤統一寫入 React Hook Form errors，移除獨立欄位錯誤 state。
 - [x] 為競賽、參與者、申請人、點數、老師與附件欄位加入就地文字、紅框、ARIA 關聯與修正後清除；F2 已補齊 `grade`、`classNumber`、附件分類與附件說明。
 - [x] 更新元件、整合與 Playwright 測試，驗證全部可定位 422 path、焦點、桌面／360px 與既有送件流程。
-- [ ] 將 `shared_total` 初始、新增及規則切換值改為 0.00，摘要移至清單上方，加入自訂 0.50 加減按鈕及手動輸入邊界。
-- [ ] 隱藏競賽表單與確認頁的學年度顯示，並以 Mapper／submission tests 保證 payload 仍包含系統學年度。
+- [x] 將 `shared_total` 初始、新增及規則切換值改為 0.00，摘要移至清單上方，加入自訂 0.50 加減按鈕及手動輸入邊界。
+- [x] 隱藏競賽表單與確認頁的學年度顯示，並以 Mapper／submission tests 保證 payload 仍包含系統學年度。
 
 ## AI Verification
 
@@ -275,8 +275,8 @@
 - [x] 驗證前端與後端欄位錯誤都在對應控制項下方顯示，具有紅框、`aria-invalid`、描述關聯及修正後清除
 - [x] 補齊 `participants.*.grade`、`participants.*.classNumber`、`attachments.*.attachmentType` 與 `attachments.*.description` 的 422 就地錯誤及回歸測試
 - [x] 驗證跨欄位／集合錯誤位於相關區塊，無法定位與系統錯誤使用頁面內提示且不呼叫原生 `alert()`
-- [ ] R4 後驗證 shared 0.00 初始值、摘要位置、加減／手動輸入、按鈕邊界與 360px 操作
-- [ ] R4 後驗證競賽畫面不顯示學年度且 multipart payload 的每位參與者仍包含系統學年度
+- [x] R4 後驗證 shared 0.00 初始值、摘要位置、加減／手動輸入、按鈕邊界與 360px 操作
+- [x] R4 後驗證競賽畫面不顯示學年度且 multipart payload 的每位參與者仍包含系統學年度
 
 ## Human Integration
 
