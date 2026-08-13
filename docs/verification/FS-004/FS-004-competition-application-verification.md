@@ -21,6 +21,7 @@
 - 已建立公開競賽規則、老師及 multipart 送件契約；Response 經 Zod 驗證，點數以百分之一點整數運算，送件使用 `credentials: omit` 與 HTTP 201 邊界。
 - 已建立不可變 Idempotency 快照；5xx／Network 結果不確定時沿用同一 Key，409 後改用新 Key，429 顯示可讀取的等待秒數。
 - React Strict Mode 重新掛載時沿用 Query Cache 中的 request，規則與老師正常流程各只查詢一次。
+- 已依真實後端契約將競賽規則增量欄位統一為 `pointIncrement`，並重新執行完整 AI Verification。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
 ## Changed Files
@@ -32,7 +33,7 @@
 | `src/shared/api/api-client.ts`、`api-client.test.ts` | 加入公開 multipart、結構化錯誤、`Retry-After` 與預期 HTTP status 驗證。 |
 | `src/features/applications/common/lib/**` | 建立百分之一點整數解析、格式化、加總與倍數驗證。 |
 | `src/features/applications/common/components/**` | 建立 Wizard、參與者、老師、附件、錯誤摘要及離開確認控制項。 |
-| `src/features/applications/competition/api/**` | 建立規則、老師、payload、成功 Response schemas、queries 與 multipart submit。 |
+| `src/features/applications/competition/api/**` | 建立規則、老師、payload、成功 Response schemas、queries 與 multipart submit；規則增量欄位使用 `pointIncrement`。 |
 | `src/features/applications/competition/model/**` | 建立表單、Mapper、點數分配、正規化及 submission state。 |
 | `src/features/applications/competition/components/**` | 建立競賽內容、確認、結果不確定與成功畫面。 |
 | `src/features/applications/competition/competition-application-page.tsx` | 串接五步流程、單次查詢、錯誤恢復、Idempotency 與 route page。 |
@@ -95,6 +96,7 @@
 | I5 | 完成五步表單與 route | page／router tests、typecheck、lint、test、build | passed | `feat(competition): add public competition application` |
 | I6 | 覆蓋 browser flow | targeted Chromium、typecheck、lint、test、build | passed | `test(competition): cover application workflow` |
 | Verification Fixes | 修正 Strict Mode 重複查詢及補齊送件邊界 | targeted／full Vitest、完整 Chromium、typecheck、lint、build | passed | `fix(competition): avoid duplicate initial queries`、`fix(competition): enforce submission boundaries`、`test(competition): cover submission error recovery` |
+| Contract Alignment Fix | 將前端規則增量欄位對齊後端 `pointIncrement` | contract／page tests、完整 Vitest、Chromium、typecheck、lint、build | passed | `fix(competition): align point increment field` |
 | Verification | 保存完整 AI Verification 與狀態 | 本文件、文件一致性、`git diff --check` | passed | `docs(FS-004): record competition application verification` |
 
 ## Human Integration
@@ -102,7 +104,7 @@
 ### Required Work
 
 1. 確認真實後端提供不帶 Query Parameter 的規則／老師 API，以及未登入、不需 Cookie／CSRF 的 multipart 送件 API。
-2. 使用真實 `per_person` 與多人 `shared_total` 規則，確認正常流程規則與老師各只查詢一次。
+2. 使用含 `pointIncrement` 的真實 `per_person` 與多人 `shared_total` 規則，確認正常流程規則與老師各只查詢一次。
 3. 使用真實 PDF、JPEG、PNG，驗證副檔名、MIME、內容、5 MiB、10 檔與必要附件分類。
 4. 確認相同 Key／相同 request 重試不重複建立案件；確認 409、422、429、5xx 與 `Retry-After` 的真實行為。
 
@@ -159,7 +161,7 @@
 
 ## Final Summary
 
-- AI Verification: `passed；所有核准檢查已於 2026-08-13 重新執行並通過。`
+- AI Verification: `passed；pointIncrement 契約修正後，所有核准檢查已於 2026-08-13 重新執行並通過。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依上述步驟驗收。`
 - Remaining Issues: `真實後端整合待確認；另有非阻擋 bundle size 警示。`
