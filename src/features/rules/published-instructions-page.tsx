@@ -7,7 +7,7 @@ import {
 } from './api/published-instructions.query'
 import { type ApplicationType } from './api/published-instructions.schema'
 import { InstructionsArticle } from './components/instructions-article'
-import { getTaiwanAcademicYear } from './lib/academic-year'
+import { getTaiwanAcademicYear } from '../../shared/lib/academic-year'
 
 const applicationTypes = [
   { value: 'competition', label: '競賽申請' },

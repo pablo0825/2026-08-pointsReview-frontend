@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import { z } from 'zod'
 
 import { server } from '../../test/server'
-import { getJson } from './api-client'
+import { getJson, postPublicMultipart } from './api-client'
 
 const responseSchema = z.object({ data: z.string() }).strict()
 
@@ -76,5 +76,69 @@ describe('getJson', () => {
     await expect(
       getJson('/public/example', responseSchema, controller.signal),
     ).rejects.toMatchObject({ name: 'AbortError' })
+  })
+
+  it('posts public multipart without credentials or a manual content type', async () => {
+    let credentials: RequestCredentials | undefined
+    let contentType: string | null = null
+    let idempotencyKey: string | null = null
+
+    server.use(
+      http.post('*/public/example', async ({ request }) => {
+        credentials = request.credentials
+        contentType = request.headers.get('content-type')
+        idempotencyKey = request.headers.get('idempotency-key')
+        const body = await request.formData()
+        expect(body.get('payload')).toBe('{"ok":true}')
+        return HttpResponse.json({ data: 'created' }, { status: 201 })
+      }),
+    )
+
+    const formData = new FormData()
+    formData.set('payload', '{"ok":true}')
+
+    await expect(
+      postPublicMultipart(
+        '/public/example',
+        formData,
+        responseSchema,
+        { 'Idempotency-Key': '550e8400-e29b-41d4-a716-446655440000' },
+      ),
+    ).resolves.toEqual({ data: 'created' })
+    expect(credentials).toBe('omit')
+    expect(contentType).toMatch(/^multipart\/form-data; boundary=/)
+    expect(idempotencyKey).toBe('550e8400-e29b-41d4-a716-446655440000')
+  })
+
+  it('preserves structured API errors and Retry-After safely', async () => {
+    server.use(
+      http.post('*/public/example', () =>
+        HttpResponse.json(
+          {
+            code: 'rate_limited',
+            message: '嘗試次數過多，請稍後再試。',
+            fields: [{ path: 'participants.0.studentNumber', message: 'Required' }],
+          },
+          { status: 429, headers: { 'Retry-After': '42' } },
+        ),
+      ),
+    )
+
+    const request = postPublicMultipart(
+      '/public/example',
+      new FormData(),
+      responseSchema,
+      {},
+    )
+
+    await expect(request).rejects.toMatchObject({
+      status: 429,
+      apiCode: 'rate_limited',
+      message: '嘗試次數過多，請稍後再試。',
+      retryAfterSeconds: 42,
+      fields: [
+        { path: 'participants.0.studentNumber', message: 'Required' },
+      ],
+    })
   })
 })

@@ -1,6 +1,9 @@
-import { getTaiwanAcademicYear } from './academic-year'
+import {
+  getTaipeiDateString,
+  getTaiwanAcademicYear,
+} from './academic-year'
 
-describe('getTaiwanAcademicYear', () => {
+describe('Taipei calendar helpers', () => {
   it('uses July 31 as the final day of the previous Taiwan academic year', () => {
     expect(getTaiwanAcademicYear(new Date('2026-07-31T15:59:59Z'))).toBe('114')
   })
@@ -9,7 +12,9 @@ describe('getTaiwanAcademicYear', () => {
     expect(getTaiwanAcademicYear(new Date('2026-07-31T16:00:00Z'))).toBe('115')
   })
 
-  it('is independent of the runtime local timezone', () => {
-    expect(getTaiwanAcademicYear(new Date('2027-01-15T00:00:00Z'))).toBe('115')
+  it('formats a stable Taipei date string', () => {
+    expect(getTaipeiDateString(new Date('2026-08-12T16:00:00Z'))).toBe(
+      '2026-08-13',
+    )
   })
 })

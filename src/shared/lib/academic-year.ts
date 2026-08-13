@@ -1,6 +1,12 @@
 const TAIPEI_TIME_ZONE = 'Asia/Taipei'
 
-function getTaipeiDateParts(date: Date) {
+export type TaipeiDateParts = {
+  year: number
+  month: number
+  day: number
+}
+
+export function getTaipeiDateParts(date: Date): TaipeiDateParts {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: TAIPEI_TIME_ZONE,
     year: 'numeric',
@@ -19,6 +25,11 @@ function getTaipeiDateParts(date: Date) {
     month: values.month,
     day: values.day,
   }
+}
+
+export function getTaipeiDateString(date = new Date()) {
+  const { year, month, day } = getTaipeiDateParts(date)
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
 export function getTaiwanAcademicYear(date = new Date()) {
