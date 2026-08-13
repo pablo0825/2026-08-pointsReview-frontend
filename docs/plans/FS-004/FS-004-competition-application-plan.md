@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `draft`
 - Based On Spec: `docs/specs/FS-004/FS-004-competition-application-spec.md`
 - Spec Last Updated: `2026-08-13`
 - Created: `2026-08-13`
@@ -33,6 +33,7 @@
 - 以競賽專屬步驟完成 `/apply/competition` 的資料輸入、點數分配、確認、Idempotent retry 與成功頁。
 - 將競賽申請前兩步修訂為「競賽內容」後接「參與者資料」；第一步只確立規則與競賽資料，第二步才顯示參與者及可用的點數控制項。
 - 修訂競賽申請的申請人互動：初始不預選、選定前隱藏聯絡資料、選定後將聯絡資料置於該參與者卡片，並補齊未選與改選行為。
+- 將前端與後端欄位錯誤整合至 React Hook Form，在控制項下方顯示訊息及紅色錯誤框；跨欄位／集合錯誤留在相關區塊，只有無法定位與系統錯誤使用頁面內提示。
 - 建立單元、契約、元件／整合、MSW 與 Playwright 測試，覆蓋 Spec 的 AI Acceptance。
 
 ### Excluded
@@ -67,6 +68,13 @@
 - 改選申請人沿用確認機制，但確認後須清除 Email、電話並移動聯絡資料區塊；目前申請人不可直接取消或刪除。
 - API、payload 與後端驗證契約不變，正式送件仍保證恰好一位 `isApplicant = true`；FS-005～FS-007 的預設行為不在本修訂範圍。
 
+### Field Error Presentation Revision Assessment
+
+- 現行頁面雖以 React Hook Form 保存表單值，驗證錯誤另由 `errors` React state 與手動 `validateStep()` 管理；一般欄位錯誤集中顯示於頁面上方，輸入控制項本身沒有一致的錯誤訊息、紅框或 ARIA 關聯。
+- 修訂後以 React Hook Form 統一保存前端驗證與後端 `422 fields[].path` 錯誤；各步驟元件接收對應 field error，在控制項下方呈現並於修正後清除。
+- `participants` 點數總和、`participants.applicant` 與 `attachments` 必要附件等無法歸屬單一控制項的規則，顯示於相關區塊；Network、5xx、429、結果不確定及無法定位的錯誤維持頁面內提示。
+- 既有 API contract、Zod schema、payload、Idempotency、步驟順序、資料保留與焦點移動不變；不使用瀏覽器原生 `alert()` 呈現一般錯誤。
+
 ### Reusable Components
 
 - `src/app/layouts/public-layout.tsx`：沿用公開導覽、skip link、寬度與頁面容器。
@@ -94,6 +102,7 @@
 - 既有 API client 只有帶 `credentials: include` 的 GET，錯誤不保留 API `code`、`message`、`fields` 或 headers，無法支援公開 multipart 與 Rate Limit。
 - 缺少 multipart Mapper、`credentials: omit`、UUID v4 Idempotency、不可變快照與結果不確定手動重試。
 - 缺少 FS-004 的 fixture、MSW handler、單元、元件／整合與 browser tests。
+- 目前尚未符合修訂後的就地錯誤呈現：欄位錯誤未寫入 React Hook Form error、控制項沒有一致紅框／`aria-invalid`／描述關聯，且同一批欄位錯誤仍集中顯示於頁面上方。
 
 ### Preserved Behavior
 
@@ -101,6 +110,7 @@
 - `/apply/project-participation`、`/apply/certificate`、`/apply/exhibition` 繼續顯示既有 placeholder。
 - FS-002 的公開辦法查詢、年度切換、Markdown 與錯誤狀態保持通過。
 - 既有 `getJson` 呼叫維持 `credentials: include`、AbortSignal 與安全 Zod 錯誤語意。
+- 錯誤仍返回正確步驟並聚焦第一個可操作欄位；無法定位、網路、5xx、429 與結果不確定狀態仍保留安全訊息及原有可操作恢復流程。
 
 ### Regression Risks
 
@@ -110,6 +120,7 @@
 - Blob URL、File 與 Idempotency snapshot 若生命週期不清楚，可能造成記憶體洩漏、內容變更後錯誤重試或敏感資料被持久化。
 - React StrictMode 可能使不穩定的 effect 造成重複查詢；Query key、enabled 時機與測試必須驗證正常流程只發出一次規則／老師 request。
 - 申請人從預設值改為未選狀態後，Form schema、下一步驗證與確認摘要若仍假設 index 0 為申請人，可能造成無法聚焦、聯絡資料錯置或送出無申請人的 payload。
+- 將錯誤來源整合至 React Hook Form 時，動態陣列 index、條件式申請人欄位與後端 path 若未同步，可能讓訊息顯示在錯誤的參與者或無法聚焦。
 
 ### Compatibility / Migration
 
@@ -171,6 +182,11 @@
 - `src/app/router/router.test.tsx`、`src/app/app.test.tsx`：回歸公開路由並調整競賽 route assertion。
 - `src/test/server.ts`：加入 FS-004 預設 MSW handlers。
 - `e2e/application-entry.spec.ts`：競賽入口期望改為正式表單，其他三類 placeholder 維持。
+- `src/features/applications/competition/competition-application-page.tsx`：以 React Hook Form errors 取代獨立欄位錯誤 state，統一逐步驗證、422 映射、清除、步驟返回與焦點。
+- `src/features/applications/competition/components/competition-details-step.tsx`：在競賽欄位下方顯示錯誤並套用錯誤控制項語意與樣式。
+- `src/features/applications/common/components/participants-editor.tsx`：在動態參與者、申請人聯絡與點數欄位下方顯示錯誤，並保留參與者層級錯誤。
+- `src/features/applications/common/components/advisor-selector.tsx`、`attachment-editor.tsx`：加入老師欄位、附件 metadata 欄位與附件區塊錯誤呈現。
+- `src/features/applications/common/components/error-summary.tsx`：移除一般欄位錯誤摘要用途；若已無其他使用則刪除元件與對應測試，系統錯誤繼續由頁面內提示負責。
 
 ### Tests
 
@@ -180,6 +196,8 @@
 - `src/features/applications/competition/competition-application-page.test.tsx`：五步、單次查詢、確認、送件、錯誤與成功頁整合。
 - `src/app/router/router.test.tsx`、`src/app/app.test.tsx`：route 與既有 application shell 回歸。
 - `e2e/application-entry.spec.ts`、`e2e/published-instructions.spec.ts`、`e2e/competition-application.spec.ts`：既有公開功能與 FS-004 browser regression。
+- `src/features/applications/common/components/*.test.tsx`、`src/features/applications/competition/competition-application-page.test.tsx`：前端／422 欄位錯誤就地呈現、紅框、ARIA、修正清除、區塊與系統錯誤層級。
+- `e2e/competition-application.spec.ts`：跨步驟驗證、第一個錯誤焦點、桌面與 360px 的欄位下方訊息及非彈窗系統提示。
 
 ## Implementation Steps
 
@@ -190,6 +208,8 @@
 5. 建立競賽專屬步驟及 route page，串接單次規則／老師 Query、確認摘要、multipart Mutation、Idempotent retry、Rate Limit、欄位錯誤與成功頁。
 6. 更新 Router 與既有 route tests，加入完整 Testing Library／MSW 整合與 Playwright 關鍵流程；驗證 desktop、360px、鍵盤、觸控目標及無水平溢位。
 7. 執行完整 typecheck、lint、Vitest、production build、targeted Chromium Playwright 與 Spec 行為核對，建立 Verification record 後交付 Human Integration／Acceptance。
+8. 將逐步驗證與後端 422 path 映射改寫為 React Hook Form field／root errors；由各欄位及相關區塊負責呈現、清除與 ARIA 關聯，頁面只保留非欄位提示。
+9. 補齊欄位紅框、欄位下方訊息、動態陣列、區塊錯誤、系統提示、焦點與 360px 的元件／整合／Playwright 回歸，再執行完整 AI Verification。
 
 ## Risks / Open Issues
 
@@ -201,6 +221,8 @@
 | File／Blob URL 與動態附件生命週期複雜 | 可能造成記憶體洩漏、預覽失效或 retry 內容不一致 | 集中 attachment model、明確 revoke 時機、不可變 snapshot 並以 unit／component tests 驗證 |
 | 真實後端契約或 B03／B10／B13 尚未同步 | MSW 通過不代表真實送件可用 | AI Verification 如實記錄；Human Integration 使用真實規則、老師與兩種點數資料完成驗收 |
 | 交換前兩步後仍沿用舊 index | 確認頁修改、422 或規則失效可能返回錯誤步驟 | 集中更新 step labels、render、validation 與 API error mapping，並以元件及 Playwright 流程覆蓋 |
+| React Hook Form field path 與動態參與者／附件 index 不一致 | 錯誤可能出現在錯誤卡片、無法清除或聚焦失敗 | 集中 path 正規化，使用 typed field paths，並測試新增、移除與後端 indexed 422 errors |
+| 只以紅框表示錯誤 | 色覺或螢幕閱讀器使用者無法理解原因 | 同時顯示文字、`aria-invalid`、`aria-describedby` 與焦點，不只依賴顏色 |
 
 ## AI Implementation Tasks
 
@@ -217,6 +239,9 @@
 - [x] 將申請人聯絡資料移入被選參與者卡片，補齊選定、不可取消、改選確認、清除與移動行為。
 - [x] 補齊未選申請人的錯誤摘要、區域訊息、捲動／焦點與選定後立即清除錯誤。
 - [x] 更新相關 Form、ParticipantsEditor、page integration 與 Playwright 測試，並回歸其他申請控制項不受影響。
+- [ ] 將前端逐步驗證與後端 422 欄位錯誤統一寫入 React Hook Form errors，移除獨立欄位錯誤 state。
+- [ ] 為競賽、參與者、申請人、點數、老師與附件欄位加入就地文字、紅框、ARIA 關聯與修正後清除；區塊及系統錯誤維持正確層級。
+- [ ] 更新元件、整合與 Playwright 測試，驗證錯誤呈現、焦點、桌面／360px 與既有送件流程。
 
 ## AI Verification
 
@@ -228,6 +253,8 @@
 - [x] 以 Playwright 驗證修訂後 desktop 與 360px、鍵盤、44 × 44px targets、Dialog 焦點及無水平溢位
 - [x] 驗證初始未選申請人、聯絡資料卡片位置、未選錯誤焦點、改選清除與 payload 唯一申請人
 - [x] 回歸驗證 FS-002、FS-003 的公開辦法、入口、導覽、Router、Provider 與 GET API client
+- [ ] 驗證前端與後端欄位錯誤都在對應控制項下方顯示，具有紅框、`aria-invalid`、描述關聯及修正後清除
+- [ ] 驗證跨欄位／集合錯誤位於相關區塊，無法定位與系統錯誤使用頁面內提示且不呼叫原生 `alert()`
 
 ## Human Integration
 
@@ -242,6 +269,7 @@
 - [ ] 依 Spec Human Acceptance 完成真實 `per_person` 與多人 `shared_total` 送件。
 - [ ] 確認 empty、failure、規則失效、Rate Limit、結果不確定重新確認與成功頁。
 - [ ] 在桌面與 360px 手機確認五步流程、附件、錯誤、離開警告、鍵盤與觸控操作。
+- [ ] 確認欄位錯誤可在輸入框下方直接找到，錯誤控制項有紅框，區塊與系統錯誤出現在正確位置。
 
 只有使用者明確確認後才能勾選。
 
@@ -254,14 +282,17 @@
 - [x] 更新 Plan 狀態與 implementation／verification tasks。
 - [x] 建立並更新 verification record。
 - [x] `not-applicable`：本 Slice 不是 `change`，不需 supersession lineage。
+- [x] 更新 `docs/project/` 的欄位、區塊與系統錯誤呈現規則。
+- [ ] 重新確認需求文件、Slice Brief、Spec 與 Plan 的錯誤呈現修訂一致。
+- [ ] 修訂完成後更新 Verification 與 blueprint 狀態。
 
 ## Commit Plan
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-004): draft competition application specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `approved`
-- Approved By: `使用者`
-- Approved At: `2026-08-13`
+- Commit Plan Approval: `pending`
+- Approved By: `pending`
+- Approved At: `pending`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -282,10 +313,14 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 | Applicant Reverification | 保存申請人互動修訂後完整 AI Verification 與等待人工狀態 | Spec、Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): update applicant selection verification` |
 | F1 | 將 Playwright specs 納入獨立 TypeScript project 與根 project references | `tsconfig.json`、`tsconfig.e2e.json` | `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、完整 Chromium Playwright | `fix(testing): typecheck playwright specifications` |
 | E2E Typecheck Reverification | 記錄 E2E typecheck 缺口修正與完整重新驗證 | Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record e2e typecheck correction` |
+| Field Error Revision Draft | 保存已同意的錯誤呈現需求、draft Spec／Plan 與等待核准狀態 | `docs/project/development-standards.md`、`docs/project/frontend-architecture.md`、`docs/project/routes-and-pages.md`、`docs/project/testing-strategy.md`、FS-004 Slice Brief、Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): revise competition application requirements` |
+| Field Error Approval | 保存重新核准的 FS-004 Spec、Plan、Commit Plan 與狀態 | FS-004 Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): approve field error presentation` |
+| R3 | 以 React Hook Form 統一欄位錯誤並提供就地錯誤、紅框、區塊及系統提示 | `src/features/applications/competition/competition-application-page.tsx`、`src/features/applications/competition/components/competition-details-step.tsx`、`src/features/applications/common/components/participants-editor.tsx`、`src/features/applications/common/components/advisor-selector.tsx`、`src/features/applications/common/components/attachment-editor.tsx`、`src/features/applications/common/components/error-summary.tsx`、相關 component／page tests、`e2e/competition-application.spec.ts` | targeted Vitest、typecheck、lint、test、build、targeted Chromium Playwright | `fix(competition): localize form validation feedback` |
+| Field Error Reverification | 保存錯誤呈現修訂後完整 AI Verification 與等待人工狀態 | Spec、Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record field error verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): record competition application acceptance` |
 
 ## Approval
 
-- Approved By: `使用者`
-- Approved At: `2026-08-13`
-- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；並於 2026-08-13 核准新增 F1 與 E2E Typecheck Reverification，修正 Playwright specs 未納入 typecheck 的缺口。`
+- Approved By: `pending`
+- Approved At: `pending`
+- Approval Note: `pending；欄位／區塊錯誤呈現與 React Hook Form 錯誤管理構成實質修訂，等待重新核准。`

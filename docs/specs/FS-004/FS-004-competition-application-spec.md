@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `draft`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-13`
@@ -63,19 +63,19 @@
 
 - 可返回修改且資料不遺失的五步表單與唯讀確認摘要。
 - 送件前完整且符合契約的競賽 payload、附件 multipart 欄位與 `Idempotency-Key`。
-- 欄位、步驟、讀取、業務、Rate Limit、Idempotency 衝突及結果不確定狀態的可操作中文回饋。
+- 欄位下方、相關區塊或頁面內提示所呈現的可操作中文回饋，涵蓋步驟、讀取、業務、Rate Limit、Idempotency 衝突及結果不確定狀態。
 - 成功頁顯示 `publicId`、`pending_advisor` 對應的目前狀態、Asia/Taipei 送件時間及 Email 通知提醒。
 
 ## Rules
 
-1. 表單固定為「競賽內容」、「參與者資料」、「指導老師」、「附件」、「確認送出」五步；第一步先確立競賽規則，第二步才依規則填寫參與者與分配點數。下一步前驗證目前步驟，錯誤時聚焦第一個錯誤欄位，上一步與確認頁返回修改不得清除資料。
+1. 表單固定為「競賽內容」、「參與者資料」、「指導老師」、「附件」、「確認送出」五步；第一步先確立競賽規則，第二步才依規則填寫參與者與分配點數。下一步前驗證目前步驟，可定位錯誤時聚焦第一個錯誤欄位，上一步與確認頁返回修改不得清除資料。
 2. 學年度依 Asia/Taipei 當日及 8 月 1 日分界自動計算目前民國學年度，只讀顯示並在送件時複製到每位參與者；第一版不提供歷史學年度選擇。
 3. 初始建立一位 `isApplicant = false` 的參與者，不預設申請人；每份競賽申請必須有 1–10 位參與者，且進入下一步與正式送件前必須且只能由使用者明確指定一位申請人。
 4. 每位參與者必填姓名、學號、年級與班級；姓名 trim 後為 1–100 字元，學號 trim 後為 1–50 字元並轉為大寫，正規化後的學號不得重複。
 5. 年級只接受 1–6，班級只接受 1–5；碩一與碩二預設甲班但仍可選甲至戊班。
 6. 每張參與者卡片提供「設為申請人」。選定後按鈕改為「目前申請人」，不提供取消申請人操作；目前申請人不可直接刪除，若要更換或刪除，必須先選擇另一位參與者。更換前須確認，確認後 `applicant.name` 改用新申請人 trim 後的姓名，清除 Email 與電話並要求重新輸入。
 7. 選定申請人前隱藏 Email 與電話；選定後在該參與者卡片的學籍資料下方展開「申請人聯絡資料」。Email 必填、trim、轉小寫、最長 320 字元且符合一般 Email 格式；電話必填、trim 後不可空、最長 30 字元，只接受數字、空格、`+`、`-`、`(`、`)`。
-8. 未指定申請人便按下一步時，留在「參與者資料」，於錯誤摘要與參與者區域顯示「請先選擇一位參與者作為申請人。」並捲動、聚焦第一個「設為申請人」按鈕；選定申請人後立即清除該錯誤並展開聯絡資料。
+8. 未指定申請人便按下一步時，留在「參與者資料」，於參與者區域顯示「請先選擇一位參與者作為申請人。」並捲動、聚焦第一個「設為申請人」按鈕；選定申請人後立即清除該錯誤並展開聯絡資料。
 9. 進入頁面只呼叫一次不帶 Query Parameter 的 `GET /public/competition-point-options`；切換選項、步驟、參與者或點數時不得重複查詢。
 10. 規則 Response 必須包含 `competitionLevel`、`award`、`allocationMethod`、`points`、`minimumPointsPerParticipant` 與 `pointIncrement`；同一組 `competitionLevel + award` 唯一，前端只顯示 Response 實際提供的組合，不使用本機預設規則替代。規則讀取失敗時顯示「暫時無法載入競賽點數規則」，空陣列時顯示「目前沒有可申請的競賽點數規則」；兩者都提供「重新載入」並禁止繼續與送件。「競賽內容」只顯示競賽等級、獎項、其他等級名稱、競賽名稱、類別、日期與規則分配摘要，不顯示參與者編輯區；選定有效等級與獎項後，才可進入「參與者資料」。
 11. 競賽等級顯示已定義的五種中文名稱，獎項顯示已定義的六種中文名稱；`competitionLevel = other` 時其他等級名稱必填、trim 後 1–100 字元，否則固定為 `null`。
@@ -102,7 +102,7 @@
 32. 每次新的邏輯送件產生 UUID v4 `Idempotency-Key`。送出前建立不可變 payload 與附件快照；明確 `201` 後清除 Key 與快照，使用者修改 payload 或附件後也廢棄舊 Key 與快照。
 33. Network Error、timeout、連線中斷、未收到明確 Response 或任何 5xx 都顯示「無法確認是否送件成功」，不宣告成功或失敗且不自動重試；「重新確認送件」必須沿用相同 Key、payload、附件內容、檔名、MIME type 與 `clientFileKey`，「返回修改資料」則廢棄快照並於下次使用新 Key。
 34. `409 idempotency_key_conflict` 廢棄原 Key、返回表單確認並在下次送件產生新 Key；`429 rate_limited` 保留資料且不自動重試，可讀到 `Retry-After` 時顯示等待時間並停用送件，否則顯示通用稍後再試。
-35. `422 validation_failed` 依 `fields[].path` 的點號與數字索引定位欄位與步驟，不依賴錯誤順序並聚焦第一個錯誤；`Required` 顯示「此欄位為必填」，未知欄位訊息使用通用中文 fallback，沒有 `fields` 時顯示頂層 `message`。
+35. 前端驗證與 `422 validation_failed` 都依欄位 path 定位步驟及控制項；可定位的錯誤在控制項正下方顯示文字訊息，控制項使用紅色邊框、`aria-invalid` 與錯誤描述關聯，同一錯誤不在頁面頂端重複顯示，並聚焦第一個錯誤。跨欄位、點數總和、參與者集合或必要附件錯誤顯示於最接近的相關區塊；沒有 `fields`、無法定位的業務錯誤、Network Error、5xx、Rate Limit 與其他系統錯誤使用頁面內提示區塊，不使用瀏覽器原生 `alert()`。`fields[].path` 使用點號與數字索引且不依賴錯誤順序；`Required` 顯示「此欄位為必填」，未知欄位訊息使用通用中文 fallback，沒有 `fields` 時顯示頂層 `message`。
 36. 已知 `400 file_too_large`、`too_many_files` 與 `file_type_not_allowed` 顯示對應附件訊息；未知 4xx 顯示可用的非空白後端訊息或通用中文訊息，保留表單、返回確認頁、廢棄原 Key，且不自動重試。
 37. 後端回報規則已失效時，保留其他資料、返回「競賽內容」並要求手動重載；組合仍存在時依新規則重設點數，不存在時清除等級與獎項選擇。個別點數或參與者總和錯誤返回「參與者資料」。
 38. 成功 Response 必須是 `201` 且包含 `publicId`、固定 `pending_advisor` 與 UTC ISO 8601 `submittedAt`；成功頁以 Asia/Taipei 顯示送件時間及 Email 通知提醒，不顯示老師簽核期限。
@@ -133,7 +133,7 @@
 - 成功為 `HTTP 201` 與 `{ data: { publicId, status: "pending_advisor", submittedAt } }`。後端只記錄已 commit 的 `201` Idempotency 結果；相同 Key 與完全相同內容重試時，已 commit 案件重放相同 Response，commit 前失敗則重新執行。
 - `400` 附件錯誤、`409 idempotency_key_conflict`、`422 validation_failed`、`429 rate_limited`、未知 4xx、所有 5xx 與 Network Error 依 Rules 呈現不同可操作狀態。Mutation 不自動重試。
 - API Response 以 schema 驗證；無法驗證或無法解析的 Response 轉為安全錯誤，不顯示內部資訊，也不記錄 payload、附件、個資或 Idempotency Key。
-- loading 時使用可辨識狀態；empty 與 failure 不混用；非同步結果、錯誤摘要與欄位訊息可由螢幕閱讀器讀出。
+- loading 時使用可辨識狀態；empty 與 failure 不混用；非同步結果、欄位／區塊錯誤與頁面內系統提示可由螢幕閱讀器讀出。
 
 ## AI Acceptance
 
@@ -149,6 +149,8 @@
 - [x] 自動測試 422 路徑定位、規則失效、已知／未知 4xx、429、409、所有 5xx／Network 的不可變 Idempotent retry 及成功頁。
 - [x] `npm run typecheck`、`npm run lint`、`npm run test`、`npm run build` 與 FS-004 Playwright 流程通過。
 - [x] 自動化無障礙與 360px 檢查涵蓋步驟、Dialog、錯誤、附件與成功頁主要操作。
+- [ ] 自動測試前端與 422 欄位錯誤皆顯示於對應控制項下方，控制項具有紅色邊框、`aria-invalid` 與錯誤描述關聯，修正後清除該欄位錯誤。
+- [ ] 自動測試跨欄位／集合錯誤留在相關區塊，無法定位的業務、網路與系統錯誤使用頁面內提示，且不呼叫瀏覽器原生 `alert()`。
 
 ## Human Acceptance
 
@@ -158,6 +160,7 @@
 - [ ] 確認成功頁顯示申請編號、等待指導老師簽核狀態、台北送件時間及 Email 通知提醒，且不顯示老師簽核期限。
 - [ ] 確認真實規則／老師 empty、failure、重載、Rate Limit 與結果不確定重新確認流程可理解且不造成重複案件。
 - [ ] 在桌面與 360px 手機瀏覽器以鍵盤／觸控完成主要流程，確認焦點、錯誤提示、離開警告與附件操作可用。
+- [ ] 確認錯誤輸入框具有紅色邊框且訊息緊鄰欄位下方，區塊與系統錯誤出現在正確層級，不需在頁面頂端尋找欄位錯誤。
 
 ## Open Questions
 
@@ -165,6 +168,6 @@
 
 ## Approval
 
-- Approved By: `使用者`
-- Approved At: `2026-08-13`
-- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；競賽申請採明確選擇申請人、卡片內聯絡資料及未選錯誤焦點流程。`
+- Approved By: `pending`
+- Approved At: `pending`
+- Approval Note: `pending；欄位／區塊錯誤呈現與 React Hook Form 錯誤管理構成實質修訂，等待重新核准。`

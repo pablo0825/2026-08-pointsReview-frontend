@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `awaiting-human`
+- Verification Status: `awaiting-approval`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-13`
 
@@ -30,6 +30,8 @@
 - Human Acceptance 檢查發現 `e2e/**` 未被既有 TypeScript project references 納入；Playwright 可執行，但 `npm run typecheck` 無法涵蓋 E2E specs，VS Code 因此無法識別 Node.js `Buffer` global。
 - 已新增獨立 E2E TypeScript project 並納入根 project references；`npm run typecheck` 現在會檢查全部 Playwright specs，VS Code 可正確識別 Node.js `Buffer` global。
 - F1 後已重新執行完整 AI Verification，產品行為、Vitest、build 與 14 個 Chromium 流程均保持通過。
+- 使用者於 Human Acceptance 前要求調整錯誤呈現：可定位欄位錯誤改在控制項下方顯示並加紅框，區塊錯誤留在相關區塊，只有無法定位與系統錯誤使用頁面內提示；一般錯誤不使用瀏覽器原生 `alert()`。
+- 此修訂尚未實作或重新驗證；既有 AI Verification 證據只代表修訂前版本，FS-004 已返回 `awaiting-approval`。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
 ## Approved Flow Revision
@@ -45,6 +47,13 @@
 - 未選申請人便繼續時顯示錯誤摘要及區域訊息，捲動並聚焦第一個「設為申請人」按鈕；選定後立即清除錯誤。
 - 改選前須確認，確認後清除 Email、電話並將聯絡資料區塊移到新申請人卡片。
 - R2 已完成並重新執行完整 AI Verification；下方表格已更新為申請人互動修訂後的實際結果。
+
+## Proposed Field Error Presentation Revision
+
+- 前端驗證與後端 `422 fields[].path` 將統一寫入 React Hook Form errors。
+- 單一欄位錯誤將顯示於控制項下方，搭配紅色邊框、`aria-invalid`、錯誤描述關聯及第一個錯誤焦點。
+- 點數總和、參與者集合及必要附件等錯誤顯示於相關區塊；Network、5xx、429、結果不確定與無法定位錯誤使用頁面內提示。
+- 修訂後 Spec、Plan 與 Commit Plan 尚待使用者重新核准；本節不代表 AI Verification 通過。
 
 ## Changed Files
 
@@ -134,6 +143,10 @@
 | Applicant Reverification | 保存 R2 後完整 AI Verification 與等待人工狀態 | 68 個 Vitest、14 個 Chromium 流程、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): update applicant selection verification` |
 | F1 | 將 Playwright specs 納入獨立 TypeScript project 與根 project references | typecheck、lint、68 個 Vitest、build、14 個 Chromium 流程 | passed | `fix(testing): typecheck playwright specifications` |
 | E2E Typecheck Reverification | 記錄 E2E typecheck 缺口修正與完整重新驗證 | 完整 AI Verification 證據、文件一致性、`git diff --check` | passed | `docs(FS-004): record e2e typecheck correction` |
+| Field Error Revision Draft | 保存錯誤呈現需求、draft Spec／Plan 與等待核准狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): revise competition application requirements` |
+| Field Error Approval | 重新核准錯誤呈現 Spec、Plan 與 Commit Plan | 文件一致性、`git diff --check` | not-run | `docs(FS-004): approve field error presentation` |
+| R3 | 以 React Hook Form 統一欄位錯誤並提供就地錯誤、紅框、區塊及系統提示 | targeted Vitest、typecheck、lint、test、build、targeted Chromium | not-run | `fix(competition): localize form validation feedback` |
+| Field Error Reverification | 保存修訂後完整 AI Verification 與等待人工狀態 | 完整 AI Verification 證據、文件一致性、`git diff --check` | not-run | `docs(FS-004): record field error verification` |
 
 ## Human Integration
 
@@ -174,14 +187,16 @@
 | Step | Action | Expected Result |
 |---|---|---|
 | 1 | 未登入開啟 `/apply/competition` 並觀察 Network。 | 第一個步驟為「競賽內容」，不顯示參與者欄位；只查詢一次規則且不帶 query。 |
-| 2 | 選定 `per_person` 規則並進入「參與者資料」，不選申請人便按下一步。 | 表單顯示目前臺灣學年度，初始沒有申請人且不顯示 Email、電話；錯誤摘要及參與者區域顯示「請先選擇一位參與者作為申請人。」，並聚焦第一個「設為申請人」按鈕。 |
+| 2 | 選定 `per_person` 規則並進入「參與者資料」，不選申請人便按下一步。 | 表單顯示目前臺灣學年度，初始沒有申請人且不顯示 Email、電話；參與者區域顯示「請先選擇一位參與者作為申請人。」，並聚焦第一個「設為申請人」按鈕。 |
 | 3 | 將其中一位參與者設為申請人，再改選另一位。 | 選定後錯誤立即清除，該卡片顯示「目前申請人」與 Email、電話；改選前要求確認，確認後聯絡資料被清除並移至新卡片，且不可直接取消目前申請人。 |
 | 4 | 上傳合法附件、查看確認頁並送出。 | multipart 欄位與分類正確，payload 恰好一位 `isApplicant = true`，不帶 Cookie／CSRF；成功頁顯示申請編號、等待老師簽核、台北時間與 Email 提醒，不顯示簽核期限。 |
 | 5 | 完成一筆兩人 `shared_total` 流程。 | 每人至少 0.50、以 0.50 為單位且總和等於總點數後才能送件。 |
 | 6 | 測試錯誤格式、超過 5 MiB、第 11 檔及缺少必要分類。 | 前端阻擋或顯示對應附件訊息，既有資料保留。 |
 | 7 | 測試規則／老師 empty、failure 與規則失效。 | empty 與 failure 文案不同；重載可恢復；新規則會重設點數或清除失效組合。 |
 | 8 | 觸發 429 與一次 Response 不確定的 5xx／連線中斷後重新確認。 | 429 顯示等待提示；不確定狀態不宣告失敗，相同 Key 重試且只建立一筆案件。 |
-| 9 | 修改資料後離開頁面，並在 360px／鍵盤重複主要流程。 | 離開前警告；焦點、錯誤摘要、Dialog、附件與按鈕可操作，無非必要水平捲動。 |
+| 9 | 修改資料後離開頁面，並在 360px／鍵盤重複主要流程。 | 離開前警告；焦點、就地錯誤、頁面內系統提示、Dialog、附件與按鈕可操作，無非必要水平捲動。 |
+| 10 | 在各步驟留下必填欄位空白、輸入無效值，再觸發一筆後端 422 欄位錯誤。 | 訊息顯示於對應控制項下方，控制項有紅色邊框及可存取錯誤狀態；修正後該錯誤清除，頁面頂端不重複列出欄位錯誤。 |
+| 11 | 觸發點數總和／必要附件等區塊錯誤，以及 Network／5xx／429 系統錯誤。 | 區塊錯誤靠近相關內容；系統錯誤使用頁面內提示並提供既有恢復操作，不出現瀏覽器原生錯誤彈窗。 |
 
 ### Known Limitations
 
@@ -198,11 +213,11 @@
 
 ## Final Summary
 
-- AI Verification: `passed；E2E specs 已納入 typecheck；App、Node config、E2E TypeScript、lint、68 個 Vitest、production build 與 14 個 Chromium 流程均通過。`
+- AI Verification: `修訂前版本 passed；E2E specs 已納入 typecheck，App、Node config、E2E TypeScript、lint、68 個 Vitest、production build 與 14 個 Chromium 流程均通過。欄位錯誤呈現修訂尚未實作或驗證。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依上述步驟驗收。`
-- Remaining Issues: `真實後端整合與 Human Acceptance 待確認；另有非阻擋 bundle size 警示。`
-- Final Feature Slice Status: `awaiting-human`
+- Remaining Issues: `修訂後 Spec、Plan 與 Commit Plan 等待核准；欄位錯誤呈現尚未實作與重新驗證；真實後端整合與 Human Acceptance 待確認；另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `awaiting-approval`
 
 ## Document Lineage Update
 

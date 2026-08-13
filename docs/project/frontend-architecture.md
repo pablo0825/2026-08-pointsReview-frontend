@@ -102,7 +102,8 @@ Authentication Context 不複製使用者資料成另一份永久狀態，只包
 
 - 表單 Schema 驗證輸入格式、必填、跨欄位及當前公開規則可得的即時限制。
 - API Schema 驗證 Wire Contract，與表單 Schema 分開。
-- 後端 `fields[].path` 轉成 React Hook Form Path，無法可靠對應時顯示表單層級錯誤。
+- React Hook Form 統一管理欄位值、欄位驗證與錯誤狀態；前端驗證與後端 `fields[].path` 都寫入相同的 React Hook Form Path。
+- 可定位錯誤由欄位讀取 React Hook Form error 並就地呈現；跨欄位規則對應至相關區塊，無法可靠對應時才顯示表單層級頁面提示。
 - 多步表單下一步只驗證該步相關欄位；最後送出前驗證完整 Schema。
 - 動態陣列使用穩定 Client Key，不使用畫面 index 作為 React Key。
 - 正式送件開始時凍結 payload 與附件描述／檔案參照的 request 快照；修改任何表單資料或附件即廢棄原 Key 與快照。
@@ -147,7 +148,7 @@ Authentication Context 不複製使用者資料成另一份永久狀態，只包
 
 - 使用語意 HTML、可見 Label 與原生控制項優先。
 - Dialog 使用符合 WAI-ARIA 行為的元件實作焦點鎖定與返回。
-- 非同步狀態、錯誤摘要與成功訊息使用適當 Live Region。
+- 非同步狀態、欄位／區塊錯誤、頁面內系統提示與成功訊息使用適當語意或 Live Region；一般錯誤不使用瀏覽器原生 `alert()`。
 - 表格在手機改為卡片時保留欄位標籤及閱讀順序。
 - 主要操作不只靠 Hover，支援鍵盤、觸控與 200% 放大。
 
