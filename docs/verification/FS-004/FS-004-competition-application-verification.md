@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `in-progress`
+- Verification Status: `approved`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-14`
 
@@ -39,15 +39,16 @@
 - 使用者於 2026-08-14 核准新增 F2 fix batch；F2 已補齊上述四類可定位 422 path 的就地錯誤、紅框、ARIA、清除行為與相關測試。
 - F2 後完整 AI Verification 已通過：typecheck、lint、13 files／73 tests、production build 與 15 個 Chromium 流程均成功；靜態 path 核對確認四類 server 422 均有對應控制項。
 - 使用者於 2026-08-14 Human Acceptance 提出 shared point allocation 與學年度顯示修訂：shared 全員從 0.00 開始、以自訂 0.50 加減按鈕或手動輸入分配、摘要移至參與者清單上方，且競賽表單與確認頁隱藏學年度但 payload 保留系統值。
-- 現有程式仍採修訂前 shared 預設分配、摘要位置與學年度顯示，因此既有 F2 證據不代表新 Target Behavior；FS-004 已退回 `awaiting-approval`，等待重新核准後執行 R4。
+- 現有程式仍採修訂前 shared 預設分配、摘要位置與學年度顯示，因此既有 F2 證據不代表新 Target Behavior；FS-004 在重新核准前曾退回 `awaiting-approval`。
+- 使用者已於 2026-08-14 核准修訂後的 Spec、Plan 與 Commit Plan；R4 尚未開始，修訂後 AI Verification 仍為 `not-run`。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
-## Requested Shared Point Allocation Revision
+## Approved Shared Point Allocation Revision
 
 - `shared_total` 不論一人或多人皆從 0.00 開始，新增參與者亦為 0.00，不進行預先分配。
 - 團隊總點數、已分配與剩餘點數摘要移至參與者清單上方；個別點數使用每次 0.50 的「−」／「＋」按鈕並保留手動輸入。
 - 競賽表單與確認頁不顯示學年度，但每位參與者的 payload 仍包含 Asia/Taipei 系統學年度。
-- 本次 Human Acceptance 結果為 `changes-requested`；完成文件重新核准、R4 與完整 AI Verification 後，才重新進入 Human Acceptance。
+- 本次 Human Acceptance 結果為 `changes-requested`；修訂文件已於 2026-08-14 重新核准，完成 R4 與完整 AI Verification 後才重新進入 Human Acceptance。
 
 ## Approved Flow Revision
 
@@ -183,7 +184,7 @@
 | F2 | 補齊年級、班級、附件分類與附件說明的可定位 422 就地錯誤及測試 | 25 個 targeted Vitest、typecheck、lint、73 個 Vitest、build、6 個 targeted Chromium | passed | `fix(competition): complete field error coverage` |
 | Field Error Fix Reverification | 保存 F2 後完整 AI Verification 與適當狀態 | 73 個 Vitest、15 個 Chromium、typecheck、lint、build、Spec／path 核對 | passed | `docs(FS-004): record field error fix verification` |
 | Shared Point Revision Draft | 保存 shared point allocation 與學年度顯示修訂文件及等待核准狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): revise shared point allocation flow` |
-| Shared Point Approval | 重新核准修訂後 Spec、Plan 與 Commit Plan | 文件一致性、`git diff --check` | not-run | `docs(FS-004): approve shared point allocation revision` |
+| Shared Point Approval | 重新核准修訂後 Spec、Plan 與 Commit Plan | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve shared point allocation revision` |
 | R4 | 實作 shared 0.00、加減控制、摘要上移與隱藏學年度顯示 | targeted／完整自動測試與 build | not-run | `fix(competition): improve shared point allocation controls` |
 | Shared Point Reverification | 保存 R4 後完整 AI Verification 與等待人工狀態 | 完整 AI Verification、文件一致性、`git diff --check` | not-run | `docs(FS-004): record shared point allocation verification` |
 
@@ -255,8 +256,8 @@
 - AI Verification: `修訂前版本 passed；F2 後 typecheck、lint、73 個 Vitest、production build、15 個 Chromium 流程及 Spec／path 核對均通過。修訂後 Target Behavior 尚未實作，須於 R4 後完整重新驗證。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `changes-requested；使用者已提出 shared point allocation、摘要位置與學年度顯示修訂。`
-- Remaining Issues: `等待重新核准 Spec、Plan 與 Commit Plan，完成 R4 及完整 AI Verification；另有非阻擋 bundle size 警示與待完成的 Human Integration。`
-- Final Feature Slice Status: `awaiting-approval`
+- Remaining Issues: `R4 與修訂後完整 AI Verification 尚未執行；另有非阻擋 bundle size 警示與待完成的 Human Integration。`
+- Final Feature Slice Status: `approved`
 
 ## Document Lineage Update
 

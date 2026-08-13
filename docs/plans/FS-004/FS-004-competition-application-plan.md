@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Based On Spec: `docs/specs/FS-004/FS-004-competition-application-spec.md`
 - Spec Last Updated: `2026-08-14`
 - Created: `2026-08-13`
@@ -312,9 +312,9 @@
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-004): draft competition application specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `pending`
-- Approved By: `pending`
-- Approved At: `pending`
+- Commit Plan Approval: `approved`
+- Approved By: `使用者`
+- Approved At: `2026-08-14`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -350,6 +350,6 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `等待使用者重新核准 shared point allocation 與學年度顯示修訂後的 Spec、Plan 與 Commit Plan。`
+- Approved By: `使用者`
+- Approved At: `2026-08-14`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；授權後續 R4 實作 shared_total 0.00 初始值、自訂 0.50 加減控制、摘要上移，以及隱藏學年度顯示但保留 payload。`

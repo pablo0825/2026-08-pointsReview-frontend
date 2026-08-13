@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-14`
@@ -173,6 +173,6 @@
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `等待使用者重新核准 shared point allocation 與學年度顯示修訂後的 Spec、Plan 與 Commit Plan。`
+- Approved By: `使用者`
+- Approved At: `2026-08-14`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；shared_total 全員從 0.00 開始，以自訂 0.50 加減按鈕或手動輸入分配，摘要移至清單上方，競賽畫面隱藏學年度但 payload 保留系統值。`
