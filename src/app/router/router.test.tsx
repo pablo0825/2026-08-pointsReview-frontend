@@ -54,4 +54,16 @@ describe('application router', () => {
       screen.getByRole('heading', { name: '請選擇申請類型' }),
     ).toBeInTheDocument()
   })
+
+  it('renders the competition application route', async () => {
+    const router = createMemoryRouter(appRoutes, {
+      initialEntries: ['/apply/competition'],
+    })
+
+    renderRouter(router)
+
+    expect(
+      await screen.findByRole('heading', { name: '學生與參與者資料' }),
+    ).toBeInTheDocument()
+  })
 })
