@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-14`
@@ -176,6 +176,6 @@
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `使用者已同意確認摘要與進度列修訂提案；等待明確核准本次修訂後的 Spec、Plan 與 Commit Plan。`
+- Approved By: `使用者`
+- Approved At: `2026-08-14`
+- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；確認頁移除分配方式與區塊修改按鈕，申請人與聯絡資料只在顯示層置頂，進度列只允許返回目前步驟之前的已完成階段。`

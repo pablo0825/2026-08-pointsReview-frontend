@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `awaiting-approval`
+- Verification Status: `approved`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-14`
 
@@ -47,10 +47,11 @@
 - F3 已完成並提交為 `971edb2`；頁面實際 import `@hookform/resolvers/zod`，`useForm()` 接入 Resolver，逐步與完整送件分別使用 `trigger()` 與 `handleSubmit()`。
 - F3 後完整 AI Verification 已通過：typecheck、lint、13 files／76 tests、production build 與 15 個 Chromium 流程均成功。
 - 使用者於 2026-08-14 Human Acceptance 提出並同意確認摘要與進度列修訂：移除確認頁分配方式與區塊「修改」按鈕，將申請人與 Email、電話置頂，改由進度列返回目前步驟之前的已完成階段。
-- 現有 F3 AI Verification 證據仍可證明 Resolver 與既有功能，但不代表尚未實作的新確認摘要與進度列 Target Behavior；FS-004 已返回 `awaiting-approval`。
+- 現有 F3 AI Verification 證據仍可證明 Resolver 與既有功能，但不代表尚未實作的新確認摘要與進度列 Target Behavior；FS-004 在重新核准前曾返回 `awaiting-approval`。
+- 使用者已於 2026-08-14 核准修訂後的 Spec、Plan 與 Commit Plan；R5 尚未開始，修訂後 AI Verification 仍為 `not-run`。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
-## Requested Confirmation Summary and Step Navigation Revision
+## Approved Confirmation Summary and Step Navigation Revision
 
 - 競賽確認摘要不顯示由 API 規則決定的分配方式。
 - 參與者摘要只在顯示層將申請人排在第一位，以「姓名｜學號｜點數（申請人）」顯示，Email 與電話緊接於其下；其他參與者依原表單順序顯示，Form Model 與 payload 順序不變。
@@ -239,6 +240,7 @@
 | F3 | 接入 `zodResolver`、`trigger()`／`handleSubmit()`，分離領域驗證並保留 422 mapping | 23 個 targeted Vitest、typecheck、lint、76 個 Vitest、build、6 個 targeted Chromium | passed | `fix(competition): integrate zod form resolver` |
 | Resolver Reverification | 保存 F3 後完整 AI Verification 與等待人工狀態 | 76 個 Vitest、15 個 Chromium、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): record resolver integration verification` |
 | Confirmation Navigation Revision Draft | 保存確認摘要與進度列修訂、changes-requested 與等待核准狀態 | 需求／Spec／Plan／Verification／blueprint 一致性、`git diff --check` | passed | `docs(FS-004): revise confirmation navigation flow` |
+| Confirmation Navigation Approval | 保存重新核准的 FS-004 Spec、Plan、Commit Plan 與狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve confirmation navigation revision` |
 
 ## Human Integration
 
@@ -307,9 +309,9 @@
 
 - AI Verification: `passed；F3 後 typecheck、lint、76 個 Vitest、production build、15 個 Chromium 流程及 Resolver／Target Behavior 核對均通過。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
-- Human Acceptance: `changes-requested；確認摘要與進度列修訂尚待重新核准、實作與驗收。`
-- Remaining Issues: `待重新核准並實作確認摘要與進度列修訂；Human Integration 與最終 Human Acceptance 仍待完成，另有非阻擋 bundle size 警示。`
-- Final Feature Slice Status: `awaiting-approval`
+- Human Acceptance: `changes-requested；確認摘要與進度列修訂已重新核准，尚待 R5 實作、重新驗證與驗收。`
+- Remaining Issues: `R5 與修訂後完整 AI Verification 尚未執行；Human Integration 與最終 Human Acceptance 仍待完成，另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `approved`
 
 ## Document Lineage Update
 
