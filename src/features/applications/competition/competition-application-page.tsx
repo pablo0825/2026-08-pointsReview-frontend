@@ -1,10 +1,10 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch, type FieldErrors, type FieldPath } from 'react-hook-form'
 import { useBlocker } from 'react-router-dom'
 
 import { ApiClientError } from '../../../shared/api/api-client'
-import { getTaipeiDateString } from '../../../shared/lib/academic-year'
 import { AdvisorSelector } from '../common/components/advisor-selector'
 import { ApplicationWizard } from '../common/components/application-wizard'
 import {
@@ -62,8 +62,23 @@ const steps = [
 type DisplayError = { path: string; message: string }
 type FormErrorPath = FieldPath<CompetitionApplicationForm> | `root.${string}`
 
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const phonePattern = /^[0-9+()\- ]+$/
+const stepFields: Record<
+  number,
+  FieldPath<CompetitionApplicationForm>[]
+> = {
+  0: [
+    'competitionLevel',
+    'competitionLevelOther',
+    'award',
+    'competitionName',
+    'competitionCategory',
+    'competitionDate',
+  ],
+  1: ['participants', 'applicantEmail', 'applicantPhone'],
+  2: ['advisorId'],
+  3: ['attachments'],
+  4: [],
+}
 
 function focusField(path: string) {
   const exact = document.querySelector<HTMLElement>(
@@ -76,7 +91,7 @@ function focusField(path: string) {
 }
 
 function errorPath(path: string): FormErrorPath {
-  if (path === 'participants.applicant') return 'root.applicantSelection'
+  if (path === 'participants.applicant') return path as FormErrorPath
   if (path === 'participants') return 'root.participants'
   if (path === 'attachments') return 'root.attachments'
   if (path === 'typeDetails') return 'root.typeDetails'
@@ -114,6 +129,35 @@ function collectErrorMessages(
   return messages
 }
 
+function stepForErrorPath(path: string) {
+  if (
+    path === 'participants' ||
+    path.startsWith('participants.') ||
+    path.startsWith('applicant')
+  ) {
+    return 1
+  }
+  if (path === 'advisorId') return 2
+  if (path === 'attachments' || path.startsWith('attachments.')) return 3
+  return 0
+}
+
+function focusRenderedError() {
+  requestAnimationFrame(() => {
+    const invalidControl = document.querySelector<HTMLElement>(
+      '[aria-invalid="true"]',
+    )
+    const applicantControl = document.querySelector<HTMLElement>(
+      '[data-field-path="participants.applicant"]',
+    )
+    ;(
+      invalidControl ??
+      applicantControl ??
+      document.getElementById('wizard-heading')
+    )?.focus()
+  })
+}
+
 function QueryState({
   title,
   empty,
@@ -141,8 +185,13 @@ function QueryState({
 }
 
 export function CompetitionApplicationPage() {
+  const formSchema = useMemo(
+    () => createCompetitionApplicationFormSchema(),
+    [],
+  )
   const form = useForm<CompetitionApplicationForm>({
     defaultValues: createDefaultCompetitionApplicationForm(),
+    resolver: zodResolver(formSchema),
   })
   const value = useWatch({ control: form.control }) as CompetitionApplicationForm
   const [currentStep, setCurrentStep] = useState(0)
@@ -241,53 +290,26 @@ export function CompetitionApplicationPage() {
     }
   }
 
-  function setStep(step: number) {
-    form.clearErrors()
+  function setStep(step: number, clearErrors = true) {
+    if (clearErrors) form.clearErrors()
     setMessage(null)
     setCurrentStep(step)
     requestAnimationFrame(() => document.getElementById('wizard-heading')?.focus())
   }
 
-  function validateStep(step: number) {
+  function validateDomainStep(step: number) {
     const nextErrors: DisplayError[] = []
-    form.clearErrors()
     if (step === 0) {
-      if (!value.competitionLevel) nextErrors.push({ path: 'competitionLevel', message: '請選擇競賽等級' })
-      else if (!selectedOption) nextErrors.push({ path: 'award', message: '請選擇目前有效的獎項' })
-      if (value.competitionLevel === 'other' && !value.competitionLevelOther?.trim()) nextErrors.push({ path: 'competitionLevelOther', message: '請輸入其他競賽等級' })
-      if (!value.competitionName.trim()) nextErrors.push({ path: 'competitionName', message: '請輸入競賽名稱' })
-      if (!value.competitionCategory.trim()) nextErrors.push({ path: 'competitionCategory', message: '請輸入競賽類別' })
-      if (!value.competitionDate) nextErrors.push({ path: 'competitionDate', message: '請選擇競賽日期' })
-      else if (value.competitionDate > getTaipeiDateString()) nextErrors.push({ path: 'competitionDate', message: '競賽日期不得晚於今天' })
-    }
-    if (step === 1) {
-      const applicant = value.participants.find(({ isApplicant }) => isApplicant)
-      if (!applicant) {
+      if (value.competitionLevel && value.award && !selectedOption) {
         nextErrors.push({
-          path: 'participants.applicant',
-          message: '請先選擇一位參與者作為申請人。',
+          path: 'award',
+          message: '請選擇目前有效的獎項',
         })
       }
+    }
+    if (step === 1) {
       if (value.participants.length < 1 || value.participants.length > participantLimit) {
         nextErrors.push({ path: 'participants', message: `參與者人數須為 1 至 ${participantLimit} 人` })
-      }
-      const seen = new Set<string>()
-      value.participants.forEach((participant, index) => {
-        if (!participant.studentName.trim()) nextErrors.push({ path: `participants.${index}.studentName`, message: `請輸入參與者 ${index + 1} 姓名` })
-        else if (participant.studentName.trim().length > 100) nextErrors.push({ path: `participants.${index}.studentName`, message: `參與者 ${index + 1} 姓名不可超過 100 字` })
-        const studentNumber = participant.studentNumber.trim().toUpperCase()
-        if (!studentNumber) nextErrors.push({ path: `participants.${index}.studentNumber`, message: `請輸入參與者 ${index + 1} 學號` })
-        else if (studentNumber.length > 50) nextErrors.push({ path: `participants.${index}.studentNumber`, message: `參與者 ${index + 1} 學號不可超過 50 字` })
-        else if (seen.has(studentNumber)) nextErrors.push({ path: `participants.${index}.studentNumber`, message: '學號不可重複' })
-        seen.add(studentNumber)
-      })
-      if (applicant) {
-        const email = value.applicantEmail.trim()
-        const phone = value.applicantPhone.trim()
-        if (!email) nextErrors.push({ path: 'applicantEmail', message: '請輸入申請人 Email' })
-        else if (email.length > 320 || !emailPattern.test(email)) nextErrors.push({ path: 'applicantEmail', message: '請輸入有效的 Email' })
-        if (!phone) nextErrors.push({ path: 'applicantPhone', message: '請輸入申請人電話' })
-        else if (phone.length > 30 || !phonePattern.test(phone)) nextErrors.push({ path: 'applicantPhone', message: '電話格式不正確' })
       }
       if (selectedOption?.allocationMethod === 'shared_total') {
         const minimum = parsePoints(selectedOption.minimumPointsPerParticipant) ?? 50
@@ -300,18 +322,19 @@ export function CompetitionApplicationPage() {
         if (!getSharedAllocation(value.participants.map(({ requestedPoints }) => requestedPoints), selectedOption).isBalanced) nextErrors.push({ path: 'participants', message: `參與者點數總和必須等於 ${selectedOption.points}` })
       }
     }
-    if (step === 2 && value.advisorId === null) nextErrors.push({ path: 'advisorId', message: '請選擇指導老師' })
-    if (step === 3) {
-      if (!value.attachments.some(({ attachmentType }) => ['participation_proof', 'finalist_or_award_certificate'].includes(attachmentType))) nextErrors.push({ path: 'attachments', message: '請上傳參賽證明或入圍／獎狀' })
-      value.attachments.forEach((attachment, index) => {
-        if (attachment.attachmentType === 'other' && !attachment.attachmentTypeOther?.trim()) nextErrors.push({ path: `attachments.${index}.attachmentTypeOther`, message: `請輸入附件 ${index + 1} 的其他類型` })
+    if (step === 2 && value.advisorId !== null && !selectedAdvisor) {
+      nextErrors.push({
+        path: 'advisorId',
+        message: '選擇的指導老師目前無效',
       })
     }
-    nextErrors.forEach(({ path, message }) =>
+    return nextErrors
+  }
+
+  function applyDomainErrors(errors: readonly DisplayError[]) {
+    errors.forEach(({ path, message }) =>
       form.setError(errorPath(path), { type: 'validate', message }),
     )
-    if (nextErrors[0]) requestAnimationFrame(() => focusField(nextErrors[0].path))
-    return nextErrors.length === 0
   }
 
   async function reloadRulesAfterInvalidation() {
@@ -344,8 +367,19 @@ export function CompetitionApplicationPage() {
     setMessage(null)
   }
 
-  function next() {
-    if (!validateStep(currentStep)) return
+  async function next() {
+    form.clearErrors()
+    const schemaValid = await form.trigger(stepFields[currentStep])
+    const domainErrors = validateDomainStep(currentStep)
+    applyDomainErrors(domainErrors)
+    if (!schemaValid || domainErrors.length > 0) {
+      if (!schemaValid) {
+        focusRenderedError()
+      } else if (domainErrors[0]) {
+        requestAnimationFrame(() => focusField(domainErrors[0].path))
+      }
+      return
+    }
     setStep(Math.min(currentStep + 1, 4))
   }
 
@@ -362,7 +396,7 @@ export function CompetitionApplicationPage() {
       form.setValue('applicantPhone', '')
     }
     if (newApplicant) {
-      form.clearErrors('root.applicantSelection')
+      form.clearErrors(errorPath('participants.applicant'))
     }
   }
 
@@ -463,32 +497,38 @@ export function CompetitionApplicationPage() {
   }
 
   async function submit() {
-    if (isRateLimited) return
-    const parsed = createCompetitionApplicationFormSchema().safeParse(value)
-    if (!parsed.success || !selectedOption || !selectedAdvisor) {
-      const validationErrors = parsed.success
-        ? [{ path: 'form', message: '請確認所有步驟資料' }]
-        : parsed.error.issues.map((issue) => ({
-            path: issue.path.join('.'),
-            message: issue.message,
-          }))
-      validationErrors.forEach(({ path, message: validationMessage }) =>
-        form.setError(errorPath(path), {
-          type: 'validate',
-          message: validationMessage,
-        }),
-      )
-      if (validationErrors[0]) {
-        requestAnimationFrame(() => focusField(validationErrors[0].path))
-      }
-      return
-    }
-    const nextSnapshot = createCompetitionSubmissionSnapshot(
-      mapCompetitionApplicationPayload(value),
-      value.attachments.map(({ clientFileKey, file }) => ({ clientFileKey, file })),
-    )
-    setSnapshot(nextSnapshot)
-    await send(nextSnapshot)
+    await form.handleSubmit(
+      async (parsedValue) => {
+        if (isRateLimited) return
+        const domainErrors = [0, 1, 2, 3].flatMap((step) =>
+          validateDomainStep(step),
+        )
+        if (domainErrors.length > 0 || !selectedOption || !selectedAdvisor) {
+          const validationErrors =
+            domainErrors.length > 0
+              ? domainErrors
+              : [{ path: 'form', message: '請確認所有步驟資料' }]
+          applyDomainErrors(validationErrors)
+          setStep(stepForErrorPath(validationErrors[0].path), false)
+          requestAnimationFrame(() => focusField(validationErrors[0].path))
+          return
+        }
+        const nextSnapshot = createCompetitionSubmissionSnapshot(
+          mapCompetitionApplicationPayload(parsedValue),
+          parsedValue.attachments.map(({ clientFileKey, file }) => ({
+            clientFileKey,
+            file,
+          })),
+        )
+        setSnapshot(nextSnapshot)
+        await send(nextSnapshot)
+      },
+      (errors) => {
+        const firstPath = Object.keys(collectErrorMessages(errors))[0]
+        if (firstPath) setStep(stepForErrorPath(firstPath), false)
+        focusRenderedError()
+      },
+    )()
   }
 
   if (result) return <CompetitionSuccessPage result={result} />
@@ -504,7 +544,7 @@ export function CompetitionApplicationPage() {
         nextDisabled={submission.isPending || (currentStep === 4 && isRateLimited)}
         nextLabel={currentStep === 4 ? (submission.isPending ? '送件中…' : '確認送出申請') : '下一步'}
         onBack={currentStep > 0 ? () => setStep(currentStep - 1) : undefined}
-        onNext={currentStep === 4 ? () => void submit() : next}
+        onNext={currentStep === 4 ? () => void submit() : () => void next()}
         steps={steps}
       >
         <div className="space-y-5">

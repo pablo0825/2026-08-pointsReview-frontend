@@ -8,14 +8,25 @@ import {
 } from '../api/competition-application.schema'
 
 const phonePattern = /^[0-9+()\- ]+$/
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const participantSchema = z.object({
   clientKey: z.string().min(1),
-  studentName: z.string().trim().min(1, '請輸入姓名').max(100),
-  studentNumber: z.string().trim().min(1, '請輸入學號').max(50),
-  grade: z.coerce.number().int().min(1).max(6),
-  classNumber: z.coerce.number().int().min(1).max(5),
-  requestedPoints: z.string().regex(/^\d+\.\d{2}$/),
+  studentName: z
+    .string()
+    .trim()
+    .min(1, '請輸入姓名')
+    .max(100, '姓名不可超過 100 字'),
+  studentNumber: z
+    .string()
+    .trim()
+    .min(1, '請輸入學號')
+    .max(50, '學號不可超過 50 字'),
+  grade: z.number().int().min(1).max(6),
+  classNumber: z.number().int().min(1).max(5),
+  requestedPoints: z
+    .string()
+    .regex(/^\d+\.\d{2}$/, '點數格式必須包含兩位小數'),
   isApplicant: z.boolean(),
 })
 
@@ -23,8 +34,11 @@ const attachmentSchema = z.object({
   clientFileKey: z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),
   file: z.instanceof(File),
   attachmentType: attachmentTypeSchema,
-  attachmentTypeOther: z.string().max(100).nullable(),
-  description: z.string().max(500).nullable(),
+  attachmentTypeOther: z
+    .string()
+    .max(100, '其他附件類型不可超過 100 字')
+    .nullable(),
+  description: z.string().max(500, '附件說明不可超過 500 字').nullable(),
 })
 
 export function createCompetitionApplicationFormSchema(today = new Date()) {
@@ -33,30 +47,91 @@ export function createCompetitionApplicationFormSchema(today = new Date()) {
   return z
     .object({
       academicYear: z.string().min(1),
-      participants: z.array(participantSchema).min(1).max(10),
-      applicantEmail: z.string().trim().email('請輸入有效的 Email').max(320),
-      applicantPhone: z
+      participants: z
+        .array(participantSchema)
+        .min(1, '至少需要一位參與者')
+        .max(10, '參與者最多 10 人'),
+      applicantEmail: z.string().trim(),
+      applicantPhone: z.string().trim(),
+      competitionLevel: competitionLevelSchema.nullable(),
+      competitionLevelOther: z
+        .string()
+        .max(100, '其他競賽等級不可超過 100 字')
+        .nullable(),
+      award: awardSchema.nullable(),
+      competitionName: z
         .string()
         .trim()
-        .min(1, '請輸入電話')
-        .max(30)
-        .regex(phonePattern, '電話格式不正確'),
-      competitionLevel: competitionLevelSchema.nullable(),
-      competitionLevelOther: z.string().max(100).nullable(),
-      award: awardSchema.nullable(),
-      competitionName: z.string().trim().min(1, '請輸入競賽名稱').max(255),
-      competitionCategory: z.string().trim().min(1, '請輸入競賽類別').max(100),
+        .min(1, '請輸入競賽名稱')
+        .max(255, '競賽名稱不可超過 255 字'),
+      competitionCategory: z
+        .string()
+        .trim()
+        .min(1, '請輸入競賽類別')
+        .max(100, '競賽類別不可超過 100 字'),
       competitionDate: z.string().min(1, '請選擇競賽日期'),
       advisorId: z.number().int().positive().nullable(),
-      attachments: z.array(attachmentSchema).max(10),
+      attachments: z
+        .array(attachmentSchema)
+        .max(10, '每份申請最多 10 個附件'),
     })
     .superRefine((value, context) => {
       const applicants = value.participants.filter(({ isApplicant }) => isApplicant)
       if (applicants.length !== 1) {
         context.addIssue({
           code: 'custom',
-          path: ['participants'],
-          message: '請指定一位申請人',
+          path: ['participants', 'applicant'],
+          message: '請先選擇一位參與者作為申請人。',
+        })
+      } else {
+        if (!value.applicantEmail) {
+          context.addIssue({
+            code: 'custom',
+            path: ['applicantEmail'],
+            message: '請輸入申請人 Email',
+          })
+        } else if (
+          value.applicantEmail.length > 320 ||
+          !emailPattern.test(value.applicantEmail)
+        ) {
+          context.addIssue({
+            code: 'custom',
+            path: ['applicantEmail'],
+            message: '請輸入有效的 Email',
+          })
+        }
+
+        if (!value.applicantPhone) {
+          context.addIssue({
+            code: 'custom',
+            path: ['applicantPhone'],
+            message: '請輸入申請人電話',
+          })
+        } else if (
+          value.applicantPhone.length > 30 ||
+          !phonePattern.test(value.applicantPhone)
+        ) {
+          context.addIssue({
+            code: 'custom',
+            path: ['applicantPhone'],
+            message: '電話格式不正確',
+          })
+        }
+      }
+
+      if (value.competitionLevel === null) {
+        context.addIssue({
+          code: 'custom',
+          path: ['competitionLevel'],
+          message: '請選擇競賽等級',
+        })
+      }
+
+      if (value.award === null) {
+        context.addIssue({
+          code: 'custom',
+          path: ['award'],
+          message: '請選擇獎項',
         })
       }
 

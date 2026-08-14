@@ -104,6 +104,43 @@ describe('competition application page', () => {
     expect(screen.getByLabelText('申請人 Email')).toBeInTheDocument()
   })
 
+  it('uses the Zod resolver for the current step without validating future steps', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await screen.findByRole('heading', { name: '競賽內容' })
+
+    await user.selectOptions(
+      screen.getByLabelText('競賽等級'),
+      'national_integrated',
+    )
+    await user.selectOptions(screen.getByLabelText('獎項'), 'finalist')
+    fireEvent.change(screen.getByLabelText('競賽名稱'), {
+      target: { value: '競'.repeat(256) },
+    })
+    await user.type(screen.getByLabelText('競賽類別'), '設計組')
+    await user.type(screen.getByLabelText('競賽日期'), '2026-08-01')
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+
+    expect(screen.getByRole('heading', { name: '競賽內容' })).toBeInTheDocument()
+    expect(screen.getByLabelText('競賽名稱')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    )
+    expect(screen.getByText('競賽名稱不可超過 255 字')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('競賽名稱'), {
+      target: { value: '測試競賽' },
+    })
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+
+    expect(
+      await screen.findByRole('heading', { name: '參與者資料' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText('請先選擇一位參與者作為申請人。'),
+    ).not.toBeInTheDocument()
+  })
+
   it('moves cleared contact fields after confirming a different applicant', async () => {
     const user = userEvent.setup()
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true)
