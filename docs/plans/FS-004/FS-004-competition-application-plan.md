@@ -93,10 +93,10 @@
 
 ### Confirmation Summary and Step Navigation Revision Assessment
 
-- F3 與完整 AI Verification 已完成，但現行確認頁仍顯示後端規則的分配方式，Email 與電話與申請人列表分離，且四個摘要區塊各自提供「修改」按鈕。
-- 修訂後 `CompetitionConfirmationStep` 不再接收或顯示 `allocationLabel`；參與者摘要以新陣列將申請人排在第一位，將 Email 與電話置於申請人下方，其他人依原表單順序顯示；不改寫 Form Model 或 payload 陣列。
-- `ApplicationWizard` 增加已完成步驟導覽 callback；只將 `index < currentStep` 的階段顯示為可操作按鈕，目前步驟使用 `aria-current="step"`，後續階段 disabled 且使用灰色狀態。
-- 從確認頁返回前面階段後，後續階段立即不可點擊；使用者必須以「下一步」重新逐步驗證，但既有資料不清除。API、Zod Schema、Mapper、payload 與 Idempotency 皆不變。
+- R5 已完成並提交為 `b516214`；確認頁不再顯示後端規則的分配方式，Email 與電話緊接於置頂申請人下方，四個摘要區塊不再提供「修改」按鈕。
+- `CompetitionConfirmationStep` 以新的顯示陣列將申請人排在第一位，其他人依原表單順序顯示；Form Model、Mapper 與 multipart payload 的參與者陣列順序不變。
+- `ApplicationWizard` 已增加已完成步驟導覽 callback；只將 `index < currentStep` 的階段顯示為可操作按鈕，目前步驟使用 `aria-current="step"`，後續階段 disabled 且使用灰色狀態。
+- 從確認頁返回前面階段後，後續階段立即不可點擊；使用者必須以「下一步」重新逐步驗證，既有資料則完整保留。API、Zod Schema、Mapper、payload 與 Idempotency 皆未變更。
 
 ### Reusable Components
 
@@ -128,7 +128,7 @@
 - 目前尚未符合修訂後的就地錯誤呈現：欄位錯誤未寫入 React Hook Form error、控制項沒有一致紅框／`aria-invalid`／描述關聯，且同一批欄位錯誤仍集中顯示於頁面上方。
 - 目前尚未符合 shared point allocation 修訂：shared 初始值與新增值不是 0.00、缺少自訂加減按鈕、摘要位置在清單下方，且競賽表單與確認頁仍顯示學年度。
 - 現行 `useForm()` 尚未接入 `zodResolver`，靜態規則重複存在於手寫 `validateStep()` 與 Zod Schema，最終送件亦自行維護 Zod issue 到 React Hook Form error 的轉換。
-- 現行確認頁尚未符合新修訂：顯示分配方式與區塊「修改」按鈕，申請人聯絡資料未隨申請人置頂，進度列不可操作。
+- R5 前確認頁尚未符合新修訂；R5 已移除分配方式與區塊「修改」按鈕，將申請人聯絡資料置頂，並完成進度列返回互動。
 
 ### Preserved Behavior
 
@@ -288,8 +288,8 @@
 - [x] 隱藏競賽表單與確認頁的學年度顯示，並以 Mapper／submission tests 保證 payload 仍包含系統學年度。
 - [x] 將 `useForm()` 接入 `zodResolver`，以 Zod Schema 統一靜態規則，並以 `trigger()`／`handleSubmit()` 取代手動靜態逐步驗證與 `safeParse()` issue 轉換。
 - [x] 保留 API 規則相關領域驗證與後端 422 `setError()`，補齊 Resolver、逐步欄位、完整送件、錯誤焦點與既有流程回歸測試。
-- [ ] 移除確認頁分配方式與區塊「修改」按鈕，只在顯示層將申請人及 Email、電話置頂，且不改變 Form Model 或 payload 參與者順序。
-- [ ] 將進度列改為只能返回目前步驟之前的已完成階段；目前與後續階段 disabled，返回後必須逐步重新驗證。
+- [x] 移除確認頁分配方式與區塊「修改」按鈕，只在顯示層將申請人及 Email、電話置頂，且不改變 Form Model 或 payload 參與者順序。
+- [x] 將進度列改為只能返回目前步驟之前的已完成階段；目前與後續階段 disabled，返回後必須逐步重新驗證。
 
 ## AI Verification
 
@@ -308,8 +308,8 @@
 - [x] R4 後驗證競賽畫面不顯示學年度且 multipart payload 的每位參與者仍包含系統學年度
 - [x] F3 後驗證 `@hookform/resolvers/zod` 實際接入、`trigger()` 只阻擋目前步驟、`handleSubmit()` 阻擋完整 Schema 錯誤
 - [x] F3 後驗證動態點數／老師規則、後端 422、第一錯誤焦點、ARIA、360px 與 Idempotent retry 不退化
-- [ ] R5 後驗證確認摘要不顯示分配方式／區塊修改按鈕，申請人與聯絡資料置頂但 payload 順序不變
-- [ ] R5 後驗證進度列可用／disabled／`aria-current` 狀態、返回後逐步重新驗證、鍵盤、360px 與資料保留
+- [x] R5 後驗證確認摘要不顯示分配方式／區塊修改按鈕，申請人與聯絡資料置頂但 payload 順序不變
+- [x] R5 後驗證進度列可用／disabled／`aria-current` 狀態、返回後逐步重新驗證、鍵盤、360px 與資料保留
 
 ## Human Integration
 
@@ -342,7 +342,7 @@
 - [x] 重新確認需求文件、Slice Brief、Spec 與 Plan 的錯誤呈現修訂一致。
 - [x] 修訂完成後更新 Verification 與 blueprint 狀態。
 - [x] 更新確認摘要、進度列與對應測試的 `docs/project/` 需求、Slice Brief、Spec、Plan、Verification 與 blueprint。
-- [ ] R5 實作與重新驗證完成後更新狀態與證據。
+- [x] R5 實作與重新驗證完成後更新狀態與證據。
 
 ## Commit Plan
 

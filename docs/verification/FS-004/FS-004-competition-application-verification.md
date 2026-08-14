@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `approved`
+- Verification Status: `completed`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-14`
 
@@ -48,7 +48,8 @@
 - F3 後完整 AI Verification 已通過：typecheck、lint、13 files／76 tests、production build 與 15 個 Chromium 流程均成功。
 - 使用者於 2026-08-14 Human Acceptance 提出並同意確認摘要與進度列修訂：移除確認頁分配方式與區塊「修改」按鈕，將申請人與 Email、電話置頂，改由進度列返回目前步驟之前的已完成階段。
 - 現有 F3 AI Verification 證據仍可證明 Resolver 與既有功能，但不代表尚未實作的新確認摘要與進度列 Target Behavior；FS-004 在重新核准前曾返回 `awaiting-approval`。
-- 使用者已於 2026-08-14 核准修訂後的 Spec、Plan 與 Commit Plan；R5 尚未開始，修訂後 AI Verification 仍為 `not-run`。
+- 使用者已於 2026-08-14 核准修訂後的 Spec、Plan 與 Commit Plan；R5 已完成並提交為 `b516214`。
+- R5 後完整 AI Verification 已通過：typecheck、lint、13 files／77 tests、production build 與 15 個 Chromium 流程均成功；確認摘要、顯示順序、進度列狀態、逐步返回、資料保留與 payload 原順序皆有自動化證據。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
 ## Approved Confirmation Summary and Step Navigation Revision
@@ -57,6 +58,14 @@
 - 參與者摘要只在顯示層將申請人排在第一位，以「姓名｜學號｜點數（申請人）」顯示，Email 與電話緊接於其下；其他參與者依原表單順序顯示，Form Model 與 payload 順序不變。
 - 四個摘要區塊不再顯示「修改」按鈕；確認頁改由頁首進度列返回對應的已完成步驟。
 - 進度列只允許點擊目前步驟之前的階段；目前與後續階段 disabled，後續階段以灰色顯示。從確認頁返回後，必須以「下一步」依序重新驗證，不能跳過後續階段；既有資料保留。
+
+## Completed Confirmation Summary and Step Navigation Revision
+
+- 確認摘要已移除分配方式與所有區塊「修改」按鈕。
+- 參與者摘要使用獨立顯示陣列將申請人置頂，Email、電話緊接於申請人下方；其他參與者維持原表單順序。
+- 進度列只讓目前步驟之前的按鈕可操作；目前步驟標記 `aria-current="step"`，目前與後續按鈕 disabled，後續按鈕使用灰色狀態。
+- 從確認頁返回後，後續步驟不可直接跳轉，必須使用「下一步」逐步重新驗證；既有競賽、參與者、老師與附件資料均保留。
+- Chromium multipart assertion 證明申請人在摘要置頂時，payload 仍依原表單順序送出。
 
 ## Approved Resolver Integration Correction
 
@@ -146,6 +155,9 @@
 | `src/features/applications/competition/model/competition-application.schema.ts` | 補齊 Resolver 所需靜態欄位訊息、條件式聯絡資料、必要選擇與跨欄位路徑。 |
 | `src/features/applications/competition/competition-application-page.tsx` | 接入 `zodResolver`、`trigger()` 與 `handleSubmit()`，分離 server-dependent 領域驗證並保留 422 mapping。 |
 | `src/features/applications/competition/competition-application-page.test.tsx` | 驗證 Schema-only 長度規則由 Resolver 阻擋目前步驟，且未提前阻擋未來步驟。 |
+| `src/features/applications/common/components/application-wizard.tsx`、`application-controls.test.tsx` | 將步驟列改為 completed／current／future 按鈕狀態，覆蓋 callback、disabled 與 `aria-current`。 |
+| `src/features/applications/competition/components/competition-confirmation-step.tsx` | 移除分配方式與區塊修改按鈕，以顯示陣列將申請人及聯絡資料置頂。 |
+| `src/features/applications/competition/competition-application-page.test.tsx`、`e2e/competition-application.spec.ts` | 覆蓋進度列返回、資料保留、逐步重新驗證、摘要順序、360px 與 payload 原順序。 |
 
 ## AI Verification
 
@@ -153,10 +165,10 @@
 |---|---|---|---|---|
 | Typecheck | `npm run typecheck` | passed | exit code 0 | App、Node config 與全部 `e2e/**/*.ts` project references 均通過；`Buffer` 已由 Node types 正確解析。 |
 | Lint | `npm run lint` | passed | exit code 0 | ESLint 無 error 或 warning。 |
-| Unit / Integration Tests | `npm run test` | passed | 13 files、76 tests passed | 覆蓋 Resolver current-step 驗證、Schema-only 規則、transport、點數、422、Idempotent retry 與既有五步流程。 |
+| Unit / Integration Tests | `npm run test` | passed | 13 files、77 tests passed | 覆蓋 Resolver current-step、確認摘要、進度列狀態、返回後資料保留、transport、點數、422、Idempotent retry 與既有五步流程。 |
 | Production Build | `npm run build` | passed | exit code 0；478 modules transformed | Bundle 成功產生；有超過 Vite 預設 500 kB 的非阻擋警示。 |
-| Browser / Responsive | `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium` | passed | 15 tests passed | 覆蓋 shared 0.00、摘要順序、加減／手動輸入、按鈕邊界、學年度 payload、入口、公開辦法、360px、Dialog 與無水平溢位。 |
-| Target Behavior | 既有 Spec／架構、F3 程式與自動測試核對 | passed | Resolver import／configuration、page integration、完整 Chromium suites | React Hook Form 與 Zod 已經由 Resolver 整合；逐步、完整送件、動態規則與 422 使用同一 error state 且既有產品行為保持通過。 |
+| Browser / Responsive | `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium` | passed | 15 tests passed | 覆蓋申請人摘要置頂、進度列返回與重新前進、payload 原順序、shared 0.00、入口、公開辦法、360px、Dialog 與無水平溢位。 |
+| Target Behavior | 核准 Spec、R5 程式與自動測試核對 | passed | Wizard component、page integration、multipart Chromium assertion、完整 suites | 確認摘要與步驟導覽符合核准修訂；React Hook Form／Zod、API、Mapper、payload 與 Idempotent retry 保持不變。 |
 | FS-002／FS-003 Regression | 完整 Vitest、入口與公開辦法 Chromium suites | passed | 既有 `/apply`、`/rules`、Router、Provider 與 GET client 均通過 | 未修改其他三類 placeholder。 |
 
 ## AI Acceptance Summary
@@ -178,6 +190,8 @@
 | 前端／422 欄位錯誤就地呈現、紅框、ARIA 與修正清除 | passed | Component／page integration 覆蓋全部既定欄位 path；Chromium 驗證主要流程與就地錯誤互動。 |
 | 區塊錯誤與頁面內系統提示分層，不使用原生 `alert()` | passed | Participants／Attachment integration 與未知 4xx system-message test。 |
 | React Hook Form 透過 Zod Resolver 執行靜態逐步與完整送件驗證 | passed | Resolver 接入靜態核對、Schema-only 長度 page test、既有逐步與送件 integration／Chromium flows。 |
+| 確認摘要不顯示分配方式／修改按鈕，申請人與聯絡資料置頂但 payload 順序不變 | passed | Page integration 與 shared-total Chromium summary／multipart assertions。 |
+| 進度列只能返回前面階段，目前與後續 disabled，返回後逐步重新驗證並保留資料 | passed | Wizard component、page integration 與 Chromium end-to-end flow。 |
 
 ## Behavior Verification
 
@@ -241,6 +255,8 @@
 | Resolver Reverification | 保存 F3 後完整 AI Verification 與等待人工狀態 | 76 個 Vitest、15 個 Chromium、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): record resolver integration verification` |
 | Confirmation Navigation Revision Draft | 保存確認摘要與進度列修訂、changes-requested 與等待核准狀態 | 需求／Spec／Plan／Verification／blueprint 一致性、`git diff --check` | passed | `docs(FS-004): revise confirmation navigation flow` |
 | Confirmation Navigation Approval | 保存重新核准的 FS-004 Spec、Plan、Commit Plan 與狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve confirmation navigation revision` |
+| R5 | 精簡確認摘要、將申請人與聯絡資料置頂，並以進度列返回前面已完成步驟 | 29 個 targeted Vitest、typecheck、lint、77 個 Vitest、build、6 個 targeted Chromium | passed | `fix(competition): refine confirmation navigation` |
+| Confirmation Navigation Reverification | 保存 R5 後完整 AI Verification 與等待人工狀態 | 77 個 Vitest、15 個 Chromium、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): record confirmation navigation verification` |
 
 ## Human Integration
 
@@ -300,18 +316,18 @@
 
 ## Human Acceptance Result
 
-- Status: `changes-requested`
-- Confirmed By: `使用者`
-- Confirmed At: `2026-08-14`
-- User Feedback: `使用者要求移除確認頁分配方式與區塊修改按鈕，將申請人與聯絡資料置頂，並改用只能返回前面已完成步驟的進度列；修訂提案已同意，等待 Spec、Plan 與 Commit Plan 重新核准。`
+- Status: `pending`
+- Confirmed By: `pending`
+- Confirmed At: `pending`
+- User Feedback: `前次確認摘要與進度列的 changes-requested 已由 R5 完成；等待使用者依修訂後版本重新驗收。`
 
 ## Final Summary
 
-- AI Verification: `passed；F3 後 typecheck、lint、76 個 Vitest、production build、15 個 Chromium 流程及 Resolver／Target Behavior 核對均通過。`
+- AI Verification: `passed；R5 後 typecheck、lint、77 個 Vitest、production build、15 個 Chromium 流程及修訂後 Target Behavior 核對均通過。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
-- Human Acceptance: `changes-requested；確認摘要與進度列修訂已重新核准，尚待 R5 實作、重新驗證與驗收。`
-- Remaining Issues: `R5 與修訂後完整 AI Verification 尚未執行；Human Integration 與最終 Human Acceptance 仍待完成，另有非阻擋 bundle size 警示。`
-- Final Feature Slice Status: `approved`
+- Human Acceptance: `pending；R5 已完成並通過 AI Verification，等待使用者重新驗收。`
+- Remaining Issues: `Human Integration 與最終 Human Acceptance 仍待完成，另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `awaiting-human`
 
 ## Document Lineage Update
 
