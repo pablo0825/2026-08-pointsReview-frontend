@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `draft`
 - Based On Spec: `docs/specs/FS-004/FS-004-competition-application-spec.md`
 - Spec Last Updated: `2026-08-14`
 - Created: `2026-08-13`
@@ -35,6 +35,7 @@
 - 修訂競賽申請的申請人互動：初始不預選、選定前隱藏聯絡資料、選定後將聯絡資料置於該參與者卡片，並補齊未選與改選行為。
 - 將前端與後端欄位錯誤整合至 React Hook Form，在控制項下方顯示訊息及紅色錯誤框；跨欄位／集合錯誤留在相關區塊，只有無法定位與系統錯誤使用頁面內提示。
 - 修訂 `shared_total` 互動：所有參與者從 0.00 開始，摘要移至清單上方，提供每次 0.50 的自訂加減按鈕及手動輸入；競賽表單與確認頁隱藏學年度但 payload 保留系統值。
+- 修訂確認摘要與步驟導覽：移除分配方式與區塊「修改」按鈕，只在確認頁將申請人及其聯絡資料置頂，並讓進度列只能返回目前步驟之前已完成的階段。
 - 建立單元、契約、元件／整合、MSW 與 Playwright 測試，覆蓋 Spec 的 AI Acceptance。
 
 ### Excluded
@@ -90,6 +91,13 @@
 - 有效競賽組合、API 規則決定的人數上限、`shared_total` 最低值／增量／總和及老師仍存在等 server-dependent 規則保留為領域驗證，並繼續透過 React Hook Form `setError()` 顯示。
 - 後端 `422 fields[].path`、錯誤焦點、ARIA、五步資料保留、Idempotent retry、payload 與 API 契約不變；本修正不改產品需求或使用者操作流程。
 
+### Confirmation Summary and Step Navigation Revision Assessment
+
+- F3 與完整 AI Verification 已完成，但現行確認頁仍顯示後端規則的分配方式，Email 與電話與申請人列表分離，且四個摘要區塊各自提供「修改」按鈕。
+- 修訂後 `CompetitionConfirmationStep` 不再接收或顯示 `allocationLabel`；參與者摘要以新陣列將申請人排在第一位，將 Email 與電話置於申請人下方，其他人依原表單順序顯示；不改寫 Form Model 或 payload 陣列。
+- `ApplicationWizard` 增加已完成步驟導覽 callback；只將 `index < currentStep` 的階段顯示為可操作按鈕，目前步驟使用 `aria-current="step"`，後續階段 disabled 且使用灰色狀態。
+- 從確認頁返回前面階段後，後續階段立即不可點擊；使用者必須以「下一步」重新逐步驗證，但既有資料不清除。API、Zod Schema、Mapper、payload 與 Idempotency 皆不變。
+
 ### Reusable Components
 
 - `src/app/layouts/public-layout.tsx`：沿用公開導覽、skip link、寬度與頁面容器。
@@ -120,6 +128,7 @@
 - 目前尚未符合修訂後的就地錯誤呈現：欄位錯誤未寫入 React Hook Form error、控制項沒有一致紅框／`aria-invalid`／描述關聯，且同一批欄位錯誤仍集中顯示於頁面上方。
 - 目前尚未符合 shared point allocation 修訂：shared 初始值與新增值不是 0.00、缺少自訂加減按鈕、摘要位置在清單下方，且競賽表單與確認頁仍顯示學年度。
 - 現行 `useForm()` 尚未接入 `zodResolver`，靜態規則重複存在於手寫 `validateStep()` 與 Zod Schema，最終送件亦自行維護 Zod issue 到 React Hook Form error 的轉換。
+- 現行確認頁尚未符合新修訂：顯示分配方式與區塊「修改」按鈕，申請人聯絡資料未隨申請人置頂，進度列不可操作。
 
 ### Preserved Behavior
 
@@ -128,6 +137,7 @@
 - FS-002 的公開辦法查詢、年度切換、Markdown 與錯誤狀態保持通過。
 - 既有 `getJson` 呼叫維持 `credentials: include`、AbortSignal 與安全 Zod 錯誤語意。
 - 錯誤仍返回正確步驟並聚焦第一個可操作欄位；無法定位、網路、5xx、429 與結果不確定狀態仍保留安全訊息及原有可操作恢復流程。
+- 參與者的 Form Model、編輯順序、Mapper 與 multipart payload 順序保持不變；只調整確認頁的顯示順序。
 
 ### Regression Risks
 
@@ -140,6 +150,8 @@
 - 將錯誤來源整合至 React Hook Form 時，動態陣列 index、條件式申請人欄位與後端 path 若未同步，可能讓訊息顯示在錯誤的參與者或無法聚焦。
 - 自訂加減按鈕、手動輸入與即時摘要若未共用整數點數 helper，可能產生浮點誤差、超額分配或按鈕狀態不同步。
 - 隱藏學年度時若誤刪 Mapper 的系統值，後端會收到缺少 `participants[].academicYear` 的 payload。
+- 進度列若將已曾造訪但位於目前後方的階段維持可點擊，使用者可能在修改前面資料後跳過驗證；可操作條件固定為 `index < currentStep`，返回後後續階段 disabled，並以元件與 Playwright 驗證。
+- 為確認頁排序若直接修改 `participants` 原陣列，可能造成返回表單或 payload 順序變動；建立獨立顯示陣列且不 mutate Form Model。
 
 ### Compatibility / Migration
 
@@ -209,7 +221,9 @@
 - `src/features/applications/competition/model/competition-points.ts`、`competition-application.test.ts`：shared 初始化、新增與規則切換改為 0.00，保留整數點數驗證。
 - `src/features/applications/common/components/participants-editor.tsx`、`application-controls.test.tsx`：摘要移至清單上方，加入自訂 0.50 加減按鈕、手動輸入與邊界狀態，隱藏學年度及原生數字箭頭。
 - `src/features/applications/competition/competition-application-page.tsx`、`competition-application-page.test.tsx`：串接新分配互動並驗證 hidden academic year 仍存在 payload。
-- `src/features/applications/competition/components/competition-confirmation-step.tsx`：競賽確認摘要移除學年度顯示。
+- `src/features/applications/competition/components/competition-confirmation-step.tsx`：競賽確認摘要移除學年度與分配方式，將申請人及聯絡資料置頂，並移除區塊「修改」按鈕。
+- `src/features/applications/common/components/application-wizard.tsx`、`application-controls.test.tsx`：將目前步驟之前的已完成進度階段改為可點擊按鈕，後續階段 disabled，並補齊鍵盤與 ARIA 測試。
+- `src/features/applications/competition/competition-application-page.tsx`、`competition-application-page.test.tsx`：接入進度列返回，移除確認摘要的 `allocationLabel`／`onEdit`，驗證返回後必須逐步前進且資料保留。
 - `e2e/competition-application.spec.ts`：覆蓋 shared 0.00 初始值、摘要位置、加減／手動輸入、按鈕邊界與學年度 payload。
 
 ### Tests
@@ -222,6 +236,7 @@
 - `e2e/application-entry.spec.ts`、`e2e/published-instructions.spec.ts`、`e2e/competition-application.spec.ts`：既有公開功能與 FS-004 browser regression。
 - `src/features/applications/common/components/*.test.tsx`、`src/features/applications/competition/competition-application-page.test.tsx`：前端／422 欄位錯誤就地呈現、紅框、ARIA、修正清除、區塊與系統錯誤層級。
 - `e2e/competition-application.spec.ts`：跨步驟驗證、第一個錯誤焦點、桌面與 360px 的欄位下方訊息及非彈窗系統提示。
+- `src/features/applications/common/components/application-controls.test.tsx`、`src/features/applications/competition/competition-application-page.test.tsx`、`e2e/competition-application.spec.ts`：確認摘要的移除／置頂，顯示排序與 payload 順序分離，進度列的可用／disabled／`aria-current` 狀態、鍵盤、360px、返回後重新驗證與資料保留。
 
 ## Implementation Steps
 
@@ -236,6 +251,7 @@
 9. 補齊欄位紅框、欄位下方訊息、動態陣列、區塊錯誤、系統提示、焦點與 360px 的元件／整合／Playwright 回歸，再執行完整 AI Verification。
 10. 實作 R4：調整 shared point model 與參與者控制項、上移摘要、隱藏競賽學年度顯示但保留 Mapper payload，補齊 targeted／完整測試並重新執行 AI Verification。
 11. 實作 F3：接入 `zodResolver`，以 `trigger()` 驗證目前步驟、以 `handleSubmit()` 驗證完整 Schema，將 server-dependent 規則分離為領域驗證並回歸錯誤定位、422 與五步流程。
+12. 實作 R5：精簡確認摘要、以顯示陣列將申請人置頂，將進度列改為只能返回前面已完成階段，補齊元件／整合／Playwright 測試並重新執行完整 AI Verification。
 
 ## Risks / Open Issues
 
@@ -272,6 +288,8 @@
 - [x] 隱藏競賽表單與確認頁的學年度顯示，並以 Mapper／submission tests 保證 payload 仍包含系統學年度。
 - [x] 將 `useForm()` 接入 `zodResolver`，以 Zod Schema 統一靜態規則，並以 `trigger()`／`handleSubmit()` 取代手動靜態逐步驗證與 `safeParse()` issue 轉換。
 - [x] 保留 API 規則相關領域驗證與後端 422 `setError()`，補齊 Resolver、逐步欄位、完整送件、錯誤焦點與既有流程回歸測試。
+- [ ] 移除確認頁分配方式與區塊「修改」按鈕，只在顯示層將申請人及 Email、電話置頂，且不改變 Form Model 或 payload 參與者順序。
+- [ ] 將進度列改為只能返回目前步驟之前的已完成階段；目前與後續階段 disabled，返回後必須逐步重新驗證。
 
 ## AI Verification
 
@@ -290,6 +308,8 @@
 - [x] R4 後驗證競賽畫面不顯示學年度且 multipart payload 的每位參與者仍包含系統學年度
 - [x] F3 後驗證 `@hookform/resolvers/zod` 實際接入、`trigger()` 只阻擋目前步驟、`handleSubmit()` 阻擋完整 Schema 錯誤
 - [x] F3 後驗證動態點數／老師規則、後端 422、第一錯誤焦點、ARIA、360px 與 Idempotent retry 不退化
+- [ ] R5 後驗證確認摘要不顯示分配方式／區塊修改按鈕，申請人與聯絡資料置頂但 payload 順序不變
+- [ ] R5 後驗證進度列可用／disabled／`aria-current` 狀態、返回後逐步重新驗證、鍵盤、360px 與資料保留
 
 ## Human Integration
 
@@ -305,6 +325,7 @@
 - [ ] 確認 empty、failure、規則失效、Rate Limit、結果不確定重新確認與成功頁。
 - [ ] 在桌面與 360px 手機確認五步流程、附件、錯誤、離開警告、鍵盤與觸控操作。
 - [ ] 確認欄位錯誤可在輸入框下方直接找到，錯誤控制項有紅框，區塊與系統錯誤出現在正確位置。
+- [ ] 確認確認頁無分配方式與區塊「修改」按鈕，申請人與聯絡資料置頂，進度列只可返回前面已完成步驟且返回後須逐步重新驗證。
 
 只有使用者明確確認後才能勾選。
 
@@ -320,14 +341,16 @@
 - [x] 更新 `docs/project/` 的欄位、區塊與系統錯誤呈現規則。
 - [x] 重新確認需求文件、Slice Brief、Spec 與 Plan 的錯誤呈現修訂一致。
 - [x] 修訂完成後更新 Verification 與 blueprint 狀態。
+- [x] 更新確認摘要、進度列與對應測試的 `docs/project/` 需求、Slice Brief、Spec、Plan、Verification 與 blueprint。
+- [ ] R5 實作與重新驗證完成後更新狀態與證據。
 
 ## Commit Plan
 
 Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權，建立本文件後直接以 `docs(FS-004): draft competition application specification` 提交，不受下列尚為 `pending` 的 Commit Plan 限制。
 
-- Commit Plan Approval: `approved`
-- Approved By: `使用者`
-- Approved At: `2026-08-14`
+- Commit Plan Approval: `pending`
+- Approved By: `pending`
+- Approved At: `pending`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -362,10 +385,14 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 | Resolver Fix Approval | 保存已核准的 Resolver 整合修正、驗證範圍與進行中狀態 | Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): approve resolver integration fix` |
 | F3 | 接入 `zodResolver`，以 `trigger()`／`handleSubmit()` 使用同一 Form Schema，並保留 server-dependent 領域驗證與 422 mapping | `src/features/applications/competition/model/competition-application.schema.ts`、相關 model tests、`src/features/applications/competition/competition-application-page.tsx`、page tests、`e2e/competition-application.spec.ts` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `fix(competition): integrate zod form resolver` |
 | Resolver Reverification | 保存 F3 後完整 AI Verification 與等待人工狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record resolver integration verification` |
+| Confirmation Navigation Revision Draft | 保存已同意的確認摘要與進度列修訂、draft Spec／Plan、changes-requested 與等待核准狀態 | `docs/project/routes-and-pages.md`、`docs/project/testing-strategy.md`、FS-004 Slice Brief、Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): revise confirmation navigation flow` |
+| Confirmation Navigation Approval | 保存重新核准的 FS-004 Spec、Plan、Commit Plan 與狀態 | FS-004 Slice Brief、Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): approve confirmation navigation revision` |
+| R5 | 精簡確認摘要、將申請人與聯絡資料置頂，並以進度列返回前面已完成步驟 | `src/features/applications/common/components/application-wizard.tsx`、`application-controls.test.tsx`、`src/features/applications/competition/components/competition-confirmation-step.tsx`、`src/features/applications/competition/competition-application-page.tsx`、page tests、`e2e/competition-application.spec.ts` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `fix(competition): refine confirmation navigation` |
+| Confirmation Navigation Reverification | 保存 R5 後完整 AI Verification 與等待人工狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record confirmation navigation verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): record competition application acceptance` |
 
 ## Approval
 
-- Approved By: `使用者`
-- Approved At: `2026-08-14`
-- Approval Note: `使用者已明確核准既有 React Hook Form＋Zod Resolver 架構的 F3 修正方案並要求開始修改；授權接入 zodResolver、以 trigger／handleSubmit 使用同一 Schema、保留 server-dependent 領域驗證與完整重新驗證。`
+- Approved By: `pending`
+- Approved At: `pending`
+- Approval Note: `使用者已同意確認摘要與進度列修訂提案；等待明確核准本次修訂後的 Spec、Plan 與 Commit Plan。`

@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `awaiting-human`
+- Verification Status: `awaiting-approval`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-14`
 
@@ -46,7 +46,16 @@
 - 使用者已於 2026-08-14 確認 Resolver 整合方案並要求開始修改；F3 核准範圍為接入 `zodResolver`、以 `trigger()`／`handleSubmit()` 執行 Schema，並保留 server-dependent 領域驗證與後端 422 mapping。
 - F3 已完成並提交為 `971edb2`；頁面實際 import `@hookform/resolvers/zod`，`useForm()` 接入 Resolver，逐步與完整送件分別使用 `trigger()` 與 `handleSubmit()`。
 - F3 後完整 AI Verification 已通過：typecheck、lint、13 files／76 tests、production build 與 15 個 Chromium 流程均成功。
+- 使用者於 2026-08-14 Human Acceptance 提出並同意確認摘要與進度列修訂：移除確認頁分配方式與區塊「修改」按鈕，將申請人與 Email、電話置頂，改由進度列返回目前步驟之前的已完成階段。
+- 現有 F3 AI Verification 證據仍可證明 Resolver 與既有功能，但不代表尚未實作的新確認摘要與進度列 Target Behavior；FS-004 已返回 `awaiting-approval`。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
+
+## Requested Confirmation Summary and Step Navigation Revision
+
+- 競賽確認摘要不顯示由 API 規則決定的分配方式。
+- 參與者摘要只在顯示層將申請人排在第一位，以「姓名｜學號｜點數（申請人）」顯示，Email 與電話緊接於其下；其他參與者依原表單順序顯示，Form Model 與 payload 順序不變。
+- 四個摘要區塊不再顯示「修改」按鈕；確認頁改由頁首進度列返回對應的已完成步驟。
+- 進度列只允許點擊目前步驟之前的階段；目前與後續階段 disabled，後續階段以灰色顯示。從確認頁返回後，必須以「下一步」依序重新驗證，不能跳過後續階段；既有資料保留。
 
 ## Approved Resolver Integration Correction
 
@@ -229,6 +238,7 @@
 | Resolver Fix Approval | 保存 Resolver 整合修正、驗證範圍與進行中狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve resolver integration fix` |
 | F3 | 接入 `zodResolver`、`trigger()`／`handleSubmit()`，分離領域驗證並保留 422 mapping | 23 個 targeted Vitest、typecheck、lint、76 個 Vitest、build、6 個 targeted Chromium | passed | `fix(competition): integrate zod form resolver` |
 | Resolver Reverification | 保存 F3 後完整 AI Verification 與等待人工狀態 | 76 個 Vitest、15 個 Chromium、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): record resolver integration verification` |
+| Confirmation Navigation Revision Draft | 保存確認摘要與進度列修訂、changes-requested 與等待核准狀態 | 需求／Spec／Plan／Verification／blueprint 一致性、`git diff --check` | passed | `docs(FS-004): revise confirmation navigation flow` |
 
 ## Human Integration
 
@@ -271,7 +281,7 @@
 | 1 | 未登入開啟 `/apply/competition` 並觀察 Network。 | 第一個步驟為「競賽內容」，不顯示參與者欄位；只查詢一次規則且不帶 query。 |
 | 2 | 選定 `per_person` 規則並進入「參與者資料」，不選申請人便按下一步。 | 表單與後續確認頁不顯示學年度；初始沒有申請人且不顯示 Email、電話。參與者區域顯示「請先選擇一位參與者作為申請人。」，並聚焦第一個「設為申請人」按鈕；送件 payload 仍為每位參與者帶入系統學年度。 |
 | 3 | 將其中一位參與者設為申請人，再改選另一位。 | 選定後錯誤立即清除，該卡片顯示「目前申請人」與 Email、電話；改選前要求確認，確認後聯絡資料被清除並移至新卡片，且不可直接取消目前申請人。 |
-| 4 | 上傳合法附件、查看確認頁並送出。 | multipart 欄位與分類正確，payload 恰好一位 `isApplicant = true`，不帶 Cookie／CSRF；成功頁顯示申請編號、等待老師簽核、台北時間與 Email 提醒，不顯示簽核期限。 |
+| 4 | 上傳合法附件並查看確認頁；點擊前面的進度階段返回，再重新逐步前進並送出。 | 確認頁不顯示分配方式或區塊「修改」；申請人與 Email、電話置頂，其他人維持原順序。只有目前之前的已完成階段可點擊，目前與後續階段 disabled；返回後必須逐步重新驗證，資料保留。multipart payload 參與者順序不變且恰好一位 `isApplicant = true`，不帶 Cookie／CSRF；成功頁顯示申請編號、等待老師簽核、台北時間與 Email 提醒，不顯示簽核期限。 |
 | 5 | 完成一筆兩人 `shared_total` 流程。 | 摘要位於參與者清單上方；兩人皆從 0.00 開始，可用每次 0.50 的「−」／「＋」按鈕或手動輸入。按鈕不會產生負數或超額分配；完成時每人至少 0.50 且總和等於總點數後才能送件。 |
 | 6 | 測試錯誤格式、超過 5 MiB、第 11 檔及缺少必要分類。 | 前端阻擋或顯示對應附件訊息，既有資料保留。 |
 | 7 | 測試規則／老師 empty、failure 與規則失效。 | empty 與 failure 文案不同；重載可恢復；新規則會重設點數或清除失效組合。 |
@@ -288,18 +298,18 @@
 
 ## Human Acceptance Result
 
-- Status: `pending`
-- Confirmed By: `pending`
-- Confirmed At: `pending`
-- User Feedback: `pending；前次 changes-requested 已由 R4 處理，等待使用者依更新後步驟重新驗收。`
+- Status: `changes-requested`
+- Confirmed By: `使用者`
+- Confirmed At: `2026-08-14`
+- User Feedback: `使用者要求移除確認頁分配方式與區塊修改按鈕，將申請人與聯絡資料置頂，並改用只能返回前面已完成步驟的進度列；修訂提案已同意，等待 Spec、Plan 與 Commit Plan 重新核准。`
 
 ## Final Summary
 
 - AI Verification: `passed；F3 後 typecheck、lint、76 個 Vitest、production build、15 個 Chromium 流程及 Resolver／Target Behavior 核對均通過。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
-- Human Acceptance: `pending；等待使用者依 R4 更新後步驟重新驗收。`
-- Remaining Issues: `待完成 Human Integration 與 Human Acceptance；另有非阻擋 bundle size 警示。Resolver 架構落差已由 F3 解決。`
-- Final Feature Slice Status: `awaiting-human`
+- Human Acceptance: `changes-requested；確認摘要與進度列修訂尚待重新核准、實作與驗收。`
+- Remaining Issues: `待重新核准並實作確認摘要與進度列修訂；Human Integration 與最終 Human Acceptance 仍待完成，另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `awaiting-approval`
 
 ## Document Lineage Update
 
