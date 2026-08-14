@@ -83,6 +83,13 @@
 - 參與者清單上方顯示團隊總點數、已分配與剩餘點數；個別點數使用自訂「−」／「＋」按鈕每次調整 0.50，同時保留手動輸入並隱藏原生數字箭頭。
 - 競賽表單與確認頁不顯示學年度；`getCurrentAcademicYear()` 與 Mapper 保留，正式 payload 仍為每位參與者帶入系統學年度，API 契約不變。
 
+### Resolver Integration Correction Assessment
+
+- FS-004 已安裝 `@hookform/resolvers`，但 `useForm()` 未設定 `zodResolver`；逐步驗證由手寫 `validateStep()` 執行，最後送件才手動 `safeParse()` 並以 `setError()` 寫回，未符合既有 React Hook Form＋Zod Resolver 架構要求。
+- 修正後以同一份 Zod Form Schema 作為必填、格式、長度與靜態跨欄位規則來源；`useForm()` 接入 `zodResolver`，逐步流程以 `trigger()` 驗證目前步驟，最後送件透過 `handleSubmit()` 執行完整 Schema 驗證。
+- 有效競賽組合、API 規則決定的人數上限、`shared_total` 最低值／增量／總和及老師仍存在等 server-dependent 規則保留為領域驗證，並繼續透過 React Hook Form `setError()` 顯示。
+- 後端 `422 fields[].path`、錯誤焦點、ARIA、五步資料保留、Idempotent retry、payload 與 API 契約不變；本修正不改產品需求或使用者操作流程。
+
 ### Reusable Components
 
 - `src/app/layouts/public-layout.tsx`：沿用公開導覽、skip link、寬度與頁面容器。
@@ -112,6 +119,7 @@
 - 缺少 FS-004 的 fixture、MSW handler、單元、元件／整合與 browser tests。
 - 目前尚未符合修訂後的就地錯誤呈現：欄位錯誤未寫入 React Hook Form error、控制項沒有一致紅框／`aria-invalid`／描述關聯，且同一批欄位錯誤仍集中顯示於頁面上方。
 - 目前尚未符合 shared point allocation 修訂：shared 初始值與新增值不是 0.00、缺少自訂加減按鈕、摘要位置在清單下方，且競賽表單與確認頁仍顯示學年度。
+- 現行 `useForm()` 尚未接入 `zodResolver`，靜態規則重複存在於手寫 `validateStep()` 與 Zod Schema，最終送件亦自行維護 Zod issue 到 React Hook Form error 的轉換。
 
 ### Preserved Behavior
 
@@ -227,6 +235,7 @@
 8. 將逐步驗證與後端 422 path 映射改寫為 React Hook Form field／root errors；由各欄位及相關區塊負責呈現、清除與 ARIA 關聯，頁面只保留非欄位提示。
 9. 補齊欄位紅框、欄位下方訊息、動態陣列、區塊錯誤、系統提示、焦點與 360px 的元件／整合／Playwright 回歸，再執行完整 AI Verification。
 10. 實作 R4：調整 shared point model 與參與者控制項、上移摘要、隱藏競賽學年度顯示但保留 Mapper payload，補齊 targeted／完整測試並重新執行 AI Verification。
+11. 實作 F3：接入 `zodResolver`，以 `trigger()` 驗證目前步驟、以 `handleSubmit()` 驗證完整 Schema，將 server-dependent 規則分離為領域驗證並回歸錯誤定位、422 與五步流程。
 
 ## Risks / Open Issues
 
@@ -261,6 +270,8 @@
 - [x] 更新元件、整合與 Playwright 測試，驗證全部可定位 422 path、焦點、桌面／360px 與既有送件流程。
 - [x] 將 `shared_total` 初始、新增及規則切換值改為 0.00，摘要移至清單上方，加入自訂 0.50 加減按鈕及手動輸入邊界。
 - [x] 隱藏競賽表單與確認頁的學年度顯示，並以 Mapper／submission tests 保證 payload 仍包含系統學年度。
+- [ ] 將 `useForm()` 接入 `zodResolver`，以 Zod Schema 統一靜態規則，並以 `trigger()`／`handleSubmit()` 取代手動靜態逐步驗證與 `safeParse()` issue 轉換。
+- [ ] 保留 API 規則相關領域驗證與後端 422 `setError()`，補齊 Resolver、逐步欄位、完整送件、錯誤焦點與既有流程回歸測試。
 
 ## AI Verification
 
@@ -277,6 +288,8 @@
 - [x] 驗證跨欄位／集合錯誤位於相關區塊，無法定位與系統錯誤使用頁面內提示且不呼叫原生 `alert()`
 - [x] R4 後驗證 shared 0.00 初始值、摘要位置、加減／手動輸入、按鈕邊界與 360px 操作
 - [x] R4 後驗證競賽畫面不顯示學年度且 multipart payload 的每位參與者仍包含系統學年度
+- [ ] F3 後驗證 `@hookform/resolvers/zod` 實際接入、`trigger()` 只阻擋目前步驟、`handleSubmit()` 阻擋完整 Schema 錯誤
+- [ ] F3 後驗證動態點數／老師規則、後端 422、第一錯誤焦點、ARIA、360px 與 Idempotent retry 不退化
 
 ## Human Integration
 
@@ -346,10 +359,13 @@ Draft Documentation Batch 由使用者建立 Spec / Plan 的明確要求授權�
 | Shared Point Approval | 保存重新核准的 FS-004 Spec、Plan、Commit Plan 與狀態 | FS-004 Slice Brief、Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): approve shared point allocation revision` |
 | R4 | shared 全員 0.00 初始化、自訂 0.50 加減控制、摘要上移，並隱藏學年度顯示但保留 payload | `competition-points.ts` 與測試、`participants-editor.tsx` 與控制項測試、`competition-application-page.tsx` 與測試、`competition-confirmation-step.tsx`、`e2e/competition-application.spec.ts` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `fix(competition): improve shared point allocation controls` |
 | Shared Point Reverification | 保存 R4 後完整 AI Verification 與等待人工狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record shared point allocation verification` |
+| Resolver Fix Approval | 保存已核准的 Resolver 整合修正、驗證範圍與進行中狀態 | Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): approve resolver integration fix` |
+| F3 | 接入 `zodResolver`，以 `trigger()`／`handleSubmit()` 使用同一 Form Schema，並保留 server-dependent 領域驗證與 422 mapping | `src/features/applications/competition/model/competition-application.schema.ts`、相關 model tests、`src/features/applications/competition/competition-application-page.tsx`、page tests、`e2e/competition-application.spec.ts` | targeted Vitest、`npm run typecheck`、`npm run lint`、`npm run test`、`npm run build`、targeted Chromium Playwright | `fix(competition): integrate zod form resolver` |
+| Resolver Reverification | 保存 F3 後完整 AI Verification 與等待人工狀態 | Plan、Verification、blueprint | 完整 AI Verification 證據、文件一致性、`git diff --check` | `docs(FS-004): record resolver integration verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint | 文件一致性、`git diff --check` | `docs(FS-004): record competition application acceptance` |
 
 ## Approval
 
 - Approved By: `使用者`
 - Approved At: `2026-08-14`
-- Approval Note: `使用者已明確核准修訂後的 Spec、Plan 與 Commit Plan；授權後續 R4 實作 shared_total 0.00 初始值、自訂 0.50 加減控制、摘要上移，以及隱藏學年度顯示但保留 payload。`
+- Approval Note: `使用者已明確核准既有 React Hook Form＋Zod Resolver 架構的 F3 修正方案並要求開始修改；授權接入 zodResolver、以 trigger／handleSubmit 使用同一 Schema、保留 server-dependent 領域驗證與完整重新驗證。`

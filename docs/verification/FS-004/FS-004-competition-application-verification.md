@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `awaiting-human`
+- Verification Status: `in-progress`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-14`
 
@@ -42,7 +42,16 @@
 - 現有程式仍採修訂前 shared 預設分配、摘要位置與學年度顯示，因此既有 F2 證據不代表新 Target Behavior；FS-004 在重新核准前曾退回 `awaiting-approval`。
 - 使用者已於 2026-08-14 核准修訂後的 Spec、Plan 與 Commit Plan；R4 已完成並提交為 `a67fc1b`。
 - R4 後完整 AI Verification 已通過：typecheck、lint、13 files／75 tests、production build 與 15 個 Chromium 流程均成功。
+- AI conformance review 發現 `@hookform/resolvers` 雖已安裝，但 `useForm()` 未接入 `zodResolver`；逐步手寫驗證與最終手動 `safeParse()` 形成重複且可能不同步的靜態規則來源。
+- 使用者已於 2026-08-14 確認 Resolver 整合方案並要求開始修改；F3 將接入 `zodResolver`、以 `trigger()`／`handleSubmit()` 執行 Schema，並保留 server-dependent 領域驗證與後端 422 mapping。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
+
+## Approved Resolver Integration Correction
+
+- React Hook Form 透過 `zodResolver` 使用競賽 Form Schema，必填、格式、長度與靜態跨欄位規則不再於頁面重複實作。
+- 下一步以 `trigger()` 驗證目前步驟，最終送件以 `handleSubmit()` 執行完整 Schema；Zod errors 直接進入 `formState.errors`。
+- 有效 API 組合、動態人數與點數、老師有效性等 server-dependent 規則維持獨立領域驗證，後端 422 繼續使用 `setError()`。
+- 現有錯誤文案與位置、第一錯誤焦點、ARIA、360px、資料保留、payload 與 Idempotent retry 必須維持。
 
 ## Approved Shared Point Allocation Revision
 
