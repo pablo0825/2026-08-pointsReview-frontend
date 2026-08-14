@@ -215,6 +215,40 @@ describe('competition application page', () => {
     })
   })
 
+  it('uses the confirmation summary and completed progress steps for revision', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await completeForm(user)
+
+    expect(screen.queryByText(/分配方式/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '修改' })).not.toBeInTheDocument()
+    const participantsSection = screen
+      .getByRole('heading', { name: '參與者資料' })
+      .closest('section')
+    expect(participantsSection).not.toBeNull()
+    expect(within(participantsSection!).getByText('測試學生｜4A0X0001｜3.00 點（申請人）')).toBeInTheDocument()
+    expect(within(participantsSection!).getByText('Email：STUDENT@EXAMPLE.COM')).toBeInTheDocument()
+    expect(within(participantsSection!).getByText('電話：0912-345-678')).toBeInTheDocument()
+
+    const firstStep = screen.getByRole('button', { name: '1. 競賽內容' })
+    expect(firstStep).toBeEnabled()
+    await user.click(firstStep)
+
+    expect(screen.getByRole('heading', { name: '競賽內容' })).toBeInTheDocument()
+    expect(screen.getByLabelText('競賽名稱')).toHaveValue('測試競賽')
+    expect(screen.getByRole('button', { name: '2. 參與者資料' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '1. 競賽內容' })).toHaveAttribute(
+      'aria-current',
+      'step',
+    )
+
+    await user.click(screen.getByRole('button', { name: '下一步' }))
+    expect(
+      await screen.findByRole('heading', { name: '參與者資料' }),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText('姓名')).toHaveValue('測試學生')
+  })
+
   it('shows shared allocation before participants and supports point controls', async () => {
     const user = userEvent.setup()
     renderPage()

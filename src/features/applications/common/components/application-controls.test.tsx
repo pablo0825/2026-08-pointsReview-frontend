@@ -20,22 +20,44 @@ import {
 } from './participants-editor'
 
 const steps = [
-  { label: '學生與參與者資料' },
-  { label: '申請內容與點數' },
+  { label: '競賽內容' },
+  { label: '參與者資料' },
+  { label: '指導老師' },
 ] satisfies WizardStep[]
 
 describe('shared application controls', () => {
   it('renders accessible wizard progress and navigation', async () => {
     const user = userEvent.setup()
     const onNext = vi.fn()
+    const onStepSelect = vi.fn()
     render(
-      <ApplicationWizard currentStep={0} onNext={onNext} steps={steps}>
+      <ApplicationWizard
+        currentStep={1}
+        onNext={onNext}
+        onStepSelect={onStepSelect}
+        steps={steps}
+      >
         <p>步驟內容</p>
       </ApplicationWizard>,
     )
 
-    expect(screen.getByText('步驟 1／2')).toBeInTheDocument()
+    expect(screen.getByText('步驟 2／3')).toBeInTheDocument()
     expect(screen.getByRole('list', { name: '申請步驟' })).toBeInTheDocument()
+    const completedStep = screen.getByRole('button', {
+      name: '1. 競賽內容',
+    })
+    const currentStep = screen.getByRole('button', {
+      name: '2. 參與者資料',
+    })
+    const futureStep = screen.getByRole('button', {
+      name: '3. 指導老師',
+    })
+    expect(completedStep).toBeEnabled()
+    expect(currentStep).toBeDisabled()
+    expect(currentStep).toHaveAttribute('aria-current', 'step')
+    expect(futureStep).toBeDisabled()
+    await user.click(completedStep)
+    expect(onStepSelect).toHaveBeenCalledWith(0)
     await user.click(screen.getByRole('button', { name: '下一步' }))
     expect(onNext).toHaveBeenCalledOnce()
   })

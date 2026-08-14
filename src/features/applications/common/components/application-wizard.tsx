@@ -10,6 +10,7 @@ type ApplicationWizardProps = {
   children: ReactNode
   onBack?: () => void
   onNext?: () => void
+  onStepSelect?: (step: number) => void
   nextDisabled?: boolean
   nextLabel?: string
 }
@@ -20,6 +21,7 @@ export function ApplicationWizard({
   children,
   onBack,
   onNext,
+  onStepSelect,
   nextDisabled = false,
   nextLabel = '下一步',
 }: ApplicationWizardProps) {
@@ -39,20 +41,31 @@ export function ApplicationWizard({
           {step.label}
         </h1>
         <ol aria-label="申請步驟" className="grid gap-2 sm:grid-cols-5">
-          {steps.map(({ label }, index) => (
-            <li
-              aria-current={index === currentStep ? 'step' : undefined}
-              className={[
-                'rounded-lg border px-3 py-2 text-sm font-semibold',
-                index === currentStep
-                  ? 'border-blue-700 bg-blue-50 text-blue-900'
-                  : 'border-slate-200 bg-white text-slate-600',
-              ].join(' ')}
-              key={label}
-            >
-              {index + 1}. {label}
-            </li>
-          ))}
+          {steps.map(({ label }, index) => {
+            const isCurrent = index === currentStep
+            const canNavigate = index < currentStep && Boolean(onStepSelect)
+
+            return (
+              <li key={label}>
+                <button
+                  aria-current={isCurrent ? 'step' : undefined}
+                  className={[
+                    'min-h-11 w-full rounded-lg border px-3 py-2 text-left text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2',
+                    isCurrent
+                      ? 'border-blue-700 bg-blue-50 text-blue-900'
+                      : canNavigate
+                        ? 'border-slate-300 bg-white text-slate-700 hover:border-blue-700 hover:text-blue-900'
+                        : 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400',
+                  ].join(' ')}
+                  disabled={!canNavigate}
+                  onClick={() => onStepSelect?.(index)}
+                  type="button"
+                >
+                  {index + 1}. {label}
+                </button>
+              </li>
+            )
+          })}
         </ol>
       </header>
 

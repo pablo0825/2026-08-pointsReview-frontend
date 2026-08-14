@@ -58,7 +58,11 @@ async function mockQueries(page: Page) {
   }
 }
 
-async function completeParticipantsStep(page: Page, twoParticipants = false) {
+async function completeParticipantsStep(
+  page: Page,
+  twoParticipants = false,
+  applicantIndex = 0,
+) {
   await page.getByLabel('姓名').first().fill('王小明')
   await page.getByLabel('學號').first().fill('4a0x0001')
   if (twoParticipants) {
@@ -66,7 +70,10 @@ async function completeParticipantsStep(page: Page, twoParticipants = false) {
     await page.getByLabel('姓名').nth(1).fill('陳小華')
     await page.getByLabel('學號').nth(1).fill('4a0x0002')
   }
-  await page.getByRole('button', { name: '設為申請人' }).first().click()
+  await page
+    .getByRole('button', { name: '設為申請人' })
+    .nth(applicantIndex)
+    .click()
   await page.getByLabel('申請人 Email').fill(' STUDENT@EXAMPLE.COM ')
   await page.getByLabel('申請人電話').fill('0912-345-678')
 }
@@ -147,7 +154,7 @@ test('submits a shared-total application and preserves normalized payload values
   await page.goto('/apply/competition')
   await completeDetails(page, 'first_place')
   await page.getByRole('button', { name: '下一步' }).click()
-  await completeParticipantsStep(page, true)
+  await completeParticipantsStep(page, true, 1)
 
   const points = page.getByLabel('申請點數', { exact: true })
   await expect(points).toHaveCount(2)
@@ -184,6 +191,40 @@ test('submits a shared-total application and preserves normalized payload values
   ).toBeDisabled()
   await completeAdvisorAndAttachment(page)
   await expect(page.getByText(/學年度/)).toHaveCount(0)
+  await expect(page.getByText(/分配方式/)).toHaveCount(0)
+  await expect(page.getByRole('button', { name: '修改' })).toHaveCount(0)
+  const participantsSection = page
+    .getByRole('heading', { name: '參與者資料' })
+    .locator('..')
+  const applicantSummary = participantsSection.getByText(
+    '陳小華｜4A0X0002｜40.00 點（申請人）',
+  )
+  const firstParticipantSummary = participantsSection.getByText(
+    '王小明｜4A0X0001｜20.00 點',
+    { exact: true },
+  )
+  await expect(applicantSummary).toBeVisible()
+  await expect(firstParticipantSummary).toBeVisible()
+  await expect(participantsSection.getByText(/Email：\s*STUDENT@EXAMPLE.COM/)).toBeVisible()
+  await expect(participantsSection.getByText('電話：0912-345-678')).toBeVisible()
+  await expect(participantsSection.locator('li > p')).toHaveText([
+    '陳小華｜4A0X0002｜40.00 點（申請人）',
+    '王小明｜4A0X0001｜20.00 點',
+  ])
+
+  await page.getByRole('button', { name: '1. 競賽內容' }).click()
+  await expect(page.getByRole('heading', { name: '競賽內容' })).toBeVisible()
+  await expect(page.getByLabel('競賽名稱')).toHaveValue('全國數位設計競賽')
+  await expect(
+    page.getByRole('button', { name: '2. 參與者資料' }),
+  ).toBeDisabled()
+  await page.getByRole('button', { name: '下一步' }).click()
+  await expect(page.getByRole('heading', { name: '參與者資料' })).toBeVisible()
+  await expect(page.getByLabel('姓名').first()).toHaveValue('王小明')
+  await page.getByRole('button', { name: '下一步' }).click()
+  await page.getByRole('button', { name: '下一步' }).click()
+  await page.getByRole('button', { name: '下一步' }).click()
+  await expect(page.getByRole('heading', { name: '確認送出' })).toBeVisible()
   await page.getByRole('button', { name: '確認送出申請' }).click()
 
   await expect(page.getByRole('heading', { name: '申請已成功送出' })).toBeVisible()
@@ -195,6 +236,9 @@ test('submits a shared-total application and preserves normalized payload values
   expect(submittedBody).toContain('"academicYear":"115"')
   expect(submittedBody).toContain('"requestedPoints":"20.00"')
   expect(submittedBody).toContain('"requestedPoints":"40.00"')
+  expect(submittedBody.indexOf('"studentNumber":"4A0X0001"')).toBeLessThan(
+    submittedBody.indexOf('"studentNumber":"4A0X0002"'),
+  )
   expect(submittedBody).toContain('attachments[')
 })
 

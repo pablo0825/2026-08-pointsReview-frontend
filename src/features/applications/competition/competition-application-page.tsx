@@ -545,6 +545,7 @@ export function CompetitionApplicationPage() {
         nextLabel={currentStep === 4 ? (submission.isPending ? '送件中…' : '確認送出申請') : '下一步'}
         onBack={currentStep > 0 ? () => setStep(currentStep - 1) : undefined}
         onNext={currentStep === 4 ? () => void submit() : () => void next()}
+        onStepSelect={setStep}
         steps={steps}
       >
         <div className="space-y-5">
@@ -615,7 +616,7 @@ export function CompetitionApplicationPage() {
             }} />
           ) : selectedAdvisor && selectedOption ? (
             <div className="space-y-6">
-              <CompetitionConfirmationStep advisor={selectedAdvisor} allocationLabel={selectedOption.allocationMethod === 'per_person' ? '每人固定點數' : '團隊總點數分配'} onEdit={setStep} value={value} />
+              <CompetitionConfirmationStep advisor={selectedAdvisor} value={value} />
               <p className="rounded-lg bg-blue-50 p-4 font-semibold text-blue-950">資料與附件送出後，將交由所選指導老師簽核。</p>
               {isRateLimited ? <p className="font-semibold text-amber-900" role="status">請等待 {rateLimitSeconds} 秒後再試。</p> : null}
             </div>
