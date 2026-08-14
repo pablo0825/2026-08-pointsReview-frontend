@@ -56,6 +56,15 @@
 - 現有錯誤文案與位置、第一錯誤焦點、ARIA、360px、資料保留、payload 與 Idempotent retry 必須維持。
 - 已完成：頁面只保留 API 組合、動態人數／點數與老師有效性領域驗證；後端 422 維持 `setError()`，靜態規則與 Zod issue mapping 不再重複於頁面。
 
+### Resolver Integration Omission Record
+
+- 原始需求並未缺漏：`docs/project/frontend-architecture.md` 已規定申請表單使用 React Hook Form 與 Zod Resolver，FS-004 Plan 也明確要求「安裝並設定 FS-004 實際使用的 React Hook Form 與 Zod Resolver」。
+- I1 只將 `react-hook-form` 與 `@hookform/resolvers` 加入依賴；I5 實作雖使用 `useForm()` 保存表單狀態，卻未設定 `resolver`，改由頁面手寫 `validateStep()` 執行逐步驗證，最終送件時才手動呼叫 Zod `safeParse()`。
+- 手寫驗證複製了大部分 Schema 規則，使必填阻擋、錯誤顯示與送件流程仍可通過當時的元件、整合與 E2E 測試；原驗證只確認依賴安裝與可見行為，沒有核對 `zodResolver` 是否實際接入 `useForm()` 的執行路徑，因此未在最初 AI Verification 發現。
+- R3 將前端與後端錯誤統一寫入 React Hook Form `setError()`／`clearErrors()`，但當時的修正重點是就地錯誤呈現，仍保留手寫 `validateStep()` 與 `safeParse()`，所以 Resolver 整合缺口繼續存在。
+- 本事件定性為實作與驗證疏漏，不是需求或討論未定義，也不是 Feature Slice skill 限制。F3 已於 commit `971edb2` 完成 Resolver 整合，commit `627b387` 保存完整重新驗證結果。
+- 使用者於 2026-08-14 決定只保留本次個案紀錄，不因此新增通用工作流程規則。
+
 ## Approved Shared Point Allocation Revision
 
 - `shared_total` 不論一人或多人皆從 0.00 開始，新增參與者亦為 0.00，不進行預先分配。
