@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Verification Status: `in-progress`
+- Verification Status: `awaiting-human`
 - Created: `2026-08-13`
 - Last Updated: `2026-08-14`
 
@@ -43,7 +43,9 @@
 - 使用者已於 2026-08-14 核准修訂後的 Spec、Plan 與 Commit Plan；R4 已完成並提交為 `a67fc1b`。
 - R4 後完整 AI Verification 已通過：typecheck、lint、13 files／75 tests、production build 與 15 個 Chromium 流程均成功。
 - AI conformance review 發現 `@hookform/resolvers` 雖已安裝，但 `useForm()` 未接入 `zodResolver`；逐步手寫驗證與最終手動 `safeParse()` 形成重複且可能不同步的靜態規則來源。
-- 使用者已於 2026-08-14 確認 Resolver 整合方案並要求開始修改；F3 將接入 `zodResolver`、以 `trigger()`／`handleSubmit()` 執行 Schema，並保留 server-dependent 領域驗證與後端 422 mapping。
+- 使用者已於 2026-08-14 確認 Resolver 整合方案並要求開始修改；F3 核准範圍為接入 `zodResolver`、以 `trigger()`／`handleSubmit()` 執行 Schema，並保留 server-dependent 領域驗證與後端 422 mapping。
+- F3 已完成並提交為 `971edb2`；頁面實際 import `@hookform/resolvers/zod`，`useForm()` 接入 Resolver，逐步與完整送件分別使用 `trigger()` 與 `handleSubmit()`。
+- F3 後完整 AI Verification 已通過：typecheck、lint、13 files／76 tests、production build 與 15 個 Chromium 流程均成功。
 - 真實後端、CORS、Rate Limit header、檔案內容檢查及不重複建立案件仍須由 Human Integration 確認。
 
 ## Approved Resolver Integration Correction
@@ -52,6 +54,7 @@
 - 下一步以 `trigger()` 驗證目前步驟，最終送件以 `handleSubmit()` 執行完整 Schema；Zod errors 直接進入 `formState.errors`。
 - 有效 API 組合、動態人數與點數、老師有效性等 server-dependent 規則維持獨立領域驗證，後端 422 繼續使用 `setError()`。
 - 現有錯誤文案與位置、第一錯誤焦點、ARIA、360px、資料保留、payload 與 Idempotent retry 必須維持。
+- 已完成：頁面只保留 API 組合、動態人數／點數與老師有效性領域驗證；後端 422 維持 `setError()`，靜態規則與 Zod issue mapping 不再重複於頁面。
 
 ## Approved Shared Point Allocation Revision
 
@@ -121,6 +124,9 @@
 | `src/features/applications/competition/model/competition-points.ts`、`src/features/applications/common/components/participants-editor.tsx` | 將 shared 初始／新增點數改為 0.00，加入整數點數加減控制與按鈕邊界。 |
 | `src/features/applications/competition/competition-application-page.tsx`、`components/competition-confirmation-step.tsx` | 將 shared 摘要移至參與者清單上方，並隱藏競賽畫面與確認頁的學年度。 |
 | R4 model、component、page 與 Playwright tests | 覆蓋 shared 0.00、加減／手動輸入、摘要順序、學年度顯示及 payload 保留。 |
+| `src/features/applications/competition/model/competition-application.schema.ts` | 補齊 Resolver 所需靜態欄位訊息、條件式聯絡資料、必要選擇與跨欄位路徑。 |
+| `src/features/applications/competition/competition-application-page.tsx` | 接入 `zodResolver`、`trigger()` 與 `handleSubmit()`，分離 server-dependent 領域驗證並保留 422 mapping。 |
+| `src/features/applications/competition/competition-application-page.test.tsx` | 驗證 Schema-only 長度規則由 Resolver 阻擋目前步驟，且未提前阻擋未來步驟。 |
 
 ## AI Verification
 
@@ -128,10 +134,10 @@
 |---|---|---|---|---|
 | Typecheck | `npm run typecheck` | passed | exit code 0 | App、Node config 與全部 `e2e/**/*.ts` project references 均通過；`Buffer` 已由 Node types 正確解析。 |
 | Lint | `npm run lint` | passed | exit code 0 | ESLint 無 error 或 warning。 |
-| Unit / Integration Tests | `npm run test` | passed | 13 files、75 tests passed | 覆蓋 transport、schemas、點數、shared 0.00／加減控制、學年度 payload、全部可定位 422 錯誤及既有五步流程。 |
-| Production Build | `npm run build` | passed | exit code 0；476 modules transformed | Bundle 成功產生；有超過 Vite 預設 500 kB 的非阻擋警示。 |
+| Unit / Integration Tests | `npm run test` | passed | 13 files、76 tests passed | 覆蓋 Resolver current-step 驗證、Schema-only 規則、transport、點數、422、Idempotent retry 與既有五步流程。 |
+| Production Build | `npm run build` | passed | exit code 0；478 modules transformed | Bundle 成功產生；有超過 Vite 預設 500 kB 的非阻擋警示。 |
 | Browser / Responsive | `npm run test:e2e -- e2e/application-entry.spec.ts e2e/published-instructions.spec.ts e2e/competition-application.spec.ts --project=chromium` | passed | 15 tests passed | 覆蓋 shared 0.00、摘要順序、加減／手動輸入、按鈕邊界、學年度 payload、入口、公開辦法、360px、Dialog 與無水平溢位。 |
-| Target Behavior | 修訂後 Spec、R4 程式與自動測試核對 | passed | model／component／page tests、shared-total Chromium submission | shared 0.00、摘要上移、自訂加減與手動輸入、學年度隱藏及 payload 保留均符合核准行為。 |
+| Target Behavior | 既有 Spec／架構、F3 程式與自動測試核對 | passed | Resolver import／configuration、page integration、完整 Chromium suites | React Hook Form 與 Zod 已經由 Resolver 整合；逐步、完整送件、動態規則與 422 使用同一 error state 且既有產品行為保持通過。 |
 | FS-002／FS-003 Regression | 完整 Vitest、入口與公開辦法 Chromium suites | passed | 既有 `/apply`、`/rules`、Router、Provider 與 GET client 均通過 | 未修改其他三類 placeholder。 |
 
 ## AI Acceptance Summary
@@ -152,6 +158,7 @@
 | 鍵盤、Dialog 焦點、錯誤定位、44px 與 360px | passed | Common component tests、application entry keyboard flow 與 mobile full flow。 |
 | 前端／422 欄位錯誤就地呈現、紅框、ARIA 與修正清除 | passed | Component／page integration 覆蓋全部既定欄位 path；Chromium 驗證主要流程與就地錯誤互動。 |
 | 區塊錯誤與頁面內系統提示分層，不使用原生 `alert()` | passed | Participants／Attachment integration 與未知 4xx system-message test。 |
+| React Hook Form 透過 Zod Resolver 執行靜態逐步與完整送件驗證 | passed | Resolver 接入靜態核對、Schema-only 長度 page test、既有逐步與送件 integration／Chromium flows。 |
 
 ## Behavior Verification
 
@@ -169,6 +176,7 @@
 | 跨欄位／集合錯誤與系統錯誤呈現在正確層級 | passed | Participants、attachments、429、unknown 4xx、5xx 與 Network tests。 |
 | shared 分配不預填且提供 0.50 加減與手動輸入 | passed | Points model、ParticipantsEditor、page integration 與 Chromium shared-total flow。 |
 | 畫面不顯示學年度但正式 payload 保留系統值 | passed | Confirmation／page tests、Mapper 與 multipart request assertion。 |
+| 靜態規則由 Zod Resolver 統一，動態 API 規則與 422 保持正確 | passed | Page integration 覆蓋 current-step、shared rules、advisor、422 與 same-key retry；15 個 Chromium flows 通過。 |
 
 ### Preserved Behavior Regression
 
@@ -209,6 +217,9 @@
 | Shared Point Approval | 重新核准修訂後 Spec、Plan 與 Commit Plan | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve shared point allocation revision` |
 | R4 | 實作 shared 0.00、加減控制、摘要上移與隱藏學年度顯示 | 32 個 targeted Vitest、typecheck、lint、75 個 Vitest、build、6 個 targeted Chromium | passed | `fix(competition): improve shared point allocation controls` |
 | Shared Point Reverification | 保存 R4 後完整 AI Verification 與等待人工狀態 | 75 個 Vitest、15 個 Chromium、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): record shared point allocation verification` |
+| Resolver Fix Approval | 保存 Resolver 整合修正、驗證範圍與進行中狀態 | 文件一致性、`git diff --check` | passed | `docs(FS-004): approve resolver integration fix` |
+| F3 | 接入 `zodResolver`、`trigger()`／`handleSubmit()`，分離領域驗證並保留 422 mapping | 23 個 targeted Vitest、typecheck、lint、76 個 Vitest、build、6 個 targeted Chromium | passed | `fix(competition): integrate zod form resolver` |
+| Resolver Reverification | 保存 F3 後完整 AI Verification 與等待人工狀態 | 76 個 Vitest、15 個 Chromium、typecheck、lint、build、文件一致性 | passed | `docs(FS-004): record resolver integration verification` |
 
 ## Human Integration
 
@@ -275,10 +286,10 @@
 
 ## Final Summary
 
-- AI Verification: `passed；R4 後 typecheck、lint、75 個 Vitest、production build、15 個 Chromium 流程及修訂後 Target Behavior 核對均通過。`
+- AI Verification: `passed；F3 後 typecheck、lint、76 個 Vitest、production build、15 個 Chromium 流程及 Resolver／Target Behavior 核對均通過。`
 - Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
 - Human Acceptance: `pending；等待使用者依 R4 更新後步驟重新驗收。`
-- Remaining Issues: `待完成 Human Integration 與 Human Acceptance；另有非阻擋 bundle size 警示。`
+- Remaining Issues: `待完成 Human Integration 與 Human Acceptance；另有非阻擋 bundle size 警示。Resolver 架構落差已由 F3 解決。`
 - Final Feature Slice Status: `awaiting-human`
 
 ## Document Lineage Update

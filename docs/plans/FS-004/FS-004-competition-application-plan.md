@@ -270,8 +270,8 @@
 - [x] 更新元件、整合與 Playwright 測試，驗證全部可定位 422 path、焦點、桌面／360px 與既有送件流程。
 - [x] 將 `shared_total` 初始、新增及規則切換值改為 0.00，摘要移至清單上方，加入自訂 0.50 加減按鈕及手動輸入邊界。
 - [x] 隱藏競賽表單與確認頁的學年度顯示，並以 Mapper／submission tests 保證 payload 仍包含系統學年度。
-- [ ] 將 `useForm()` 接入 `zodResolver`，以 Zod Schema 統一靜態規則，並以 `trigger()`／`handleSubmit()` 取代手動靜態逐步驗證與 `safeParse()` issue 轉換。
-- [ ] 保留 API 規則相關領域驗證與後端 422 `setError()`，補齊 Resolver、逐步欄位、完整送件、錯誤焦點與既有流程回歸測試。
+- [x] 將 `useForm()` 接入 `zodResolver`，以 Zod Schema 統一靜態規則，並以 `trigger()`／`handleSubmit()` 取代手動靜態逐步驗證與 `safeParse()` issue 轉換。
+- [x] 保留 API 規則相關領域驗證與後端 422 `setError()`，補齊 Resolver、逐步欄位、完整送件、錯誤焦點與既有流程回歸測試。
 
 ## AI Verification
 
@@ -288,8 +288,8 @@
 - [x] 驗證跨欄位／集合錯誤位於相關區塊，無法定位與系統錯誤使用頁面內提示且不呼叫原生 `alert()`
 - [x] R4 後驗證 shared 0.00 初始值、摘要位置、加減／手動輸入、按鈕邊界與 360px 操作
 - [x] R4 後驗證競賽畫面不顯示學年度且 multipart payload 的每位參與者仍包含系統學年度
-- [ ] F3 後驗證 `@hookform/resolvers/zod` 實際接入、`trigger()` 只阻擋目前步驟、`handleSubmit()` 阻擋完整 Schema 錯誤
-- [ ] F3 後驗證動態點數／老師規則、後端 422、第一錯誤焦點、ARIA、360px 與 Idempotent retry 不退化
+- [x] F3 後驗證 `@hookform/resolvers/zod` 實際接入、`trigger()` 只阻擋目前步驟、`handleSubmit()` 阻擋完整 Schema 錯誤
+- [x] F3 後驗證動態點數／老師規則、後端 422、第一錯誤焦點、ARIA、360px 與 Idempotent retry 不退化
 
 ## Human Integration
 
