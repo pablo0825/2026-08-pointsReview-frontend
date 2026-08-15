@@ -6,7 +6,7 @@
 - Change Type: `feature`
 - Verification Status: `completed`
 - Created: `2026-08-13`
-- Last Updated: `2026-08-14`
+- Last Updated: `2026-08-15`
 
 ## Change Context
 
@@ -269,10 +269,27 @@
 
 ### Result
 
-- Status: `pending`
-- Confirmed By: `pending`
-- Confirmed At: `pending`
-- Notes: `pending`
+- Status: `passed`
+- Confirmed By: `使用者`
+- Confirmed At: `2026-08-15`
+- Notes:
+  - 真實公開規則／老師 API、未登入且不帶 Cookie／CSRF 的 multipart 送件、`per_person` 與多人 `shared_total`、payload／附件與後端資料：`passed`；由使用者以真實後端確認。
+  - 相同 Key／相同內容重試重放 `201` 且僅一筆案件、相同 Key／不同內容回傳 `409`、無效資料回傳 `422`、Network Error 後沿用不可變 request 與 Key 重試：`passed`；由使用者以真實後端及資料庫確認。
+  - 真實後端空規則情境：`not-run`；使用者確認目前缺少安全的空資料測試條件，建立該前置狀態所需處理較多，因此本次略過。
+  - 前端對 `HTTP 200` 與 `{ data: [] }` 的空狀態呈現已有自動化測試覆蓋；此證據不取代真實後端整合驗證。
+  - 指導老師 API 失敗、頁面內錯誤提示、後端恢復後手動重新載入及既有資料保留：`passed`；由使用者於 2026-08-15 以真實後端確認。
+  - 真實 `429 rate_limited` 與 `Retry-After`：`not-run`；測試會暫時封鎖同一 IP 的送件，且目前沒有安全的 Rate Limit 重設條件，因此由使用者確認本次略過。
+  - 前端對 `429` 通用提示與可讀取 `Retry-After` 時的等待提示已有自動化測試覆蓋；此證據不取代真實後端整合驗證。
+  - 填寫途中競賽規則失效或變更：`not-run`；目前缺少可安全修改並還原真實規則的測試條件，因此由使用者確認本次略過。
+  - 前端對後端 `422 typeDetails`、重新載入規則、更新點數及清除失效組合已有自動化測試覆蓋；此證據不取代真實後端整合驗證。
+  - 真實老師清單空狀態：`not-run`；目前缺少可安全停用並還原全部有效老師的測試條件，因此由使用者確認本次略過。
+  - 前端對 `HTTP 200` 與 `{ data: [] }` 的老師空狀態呈現已有自動化測試覆蓋；此證據不取代真實後端整合驗證。
+  - 單一附件超過 5 MiB：`not-run`；目前沒有大於 5,242,880 bytes 的 PDF、JPEG 或 PNG 測試檔案，因此由使用者確認本次不標示為通過。
+  - 前端與 API 錯誤對 `file_too_large` 的處理已有自動化測試覆蓋；此證據不取代真實檔案整合驗證。
+  - 真實 PDF、JPEG、PNG 同次送件、`HTTP 201` 及後端建立三筆附件：`passed`；由使用者於 2026-08-15 以真實後端確認。
+  - 非 PDF、JPEG、PNG 檔案的前端阻擋、附件區域提示及既有資料保留：`passed`；由使用者於 2026-08-15 確認。先前真實後端亦已回傳 `HTTP 400 file_type_not_allowed`。
+  - 真實後端 `5xx`：`not-run`；目前沒有可安全讓送件端點回傳 `500`、`502` 或 `503` 的錯誤注入方式，因此由使用者確認本次略過。
+  - Network Error 的不可變 request／Idempotency Key 重試及只建立一筆案件已由使用者確認；前端對所有 `5xx` 的結果不確定流程另有自動化測試覆蓋，但不取代真實 `5xx` 整合驗證。
 
 ## Human Acceptance Instructions
 
@@ -316,18 +333,27 @@
 
 ## Human Acceptance Result
 
-- Status: `pending`
-- Confirmed By: `pending`
-- Confirmed At: `pending`
-- User Feedback: `前次確認摘要與進度列的 changes-requested 已由 R5 完成；等待使用者依修訂後版本重新驗收。`
+- Status: `passed`
+- Confirmed By: `使用者`
+- Confirmed At: `2026-08-15`
+- User Feedback:
+  - 前次確認摘要與進度列的 `changes-requested` 已由 R5 完成。
+  - 填寫表單後重新整理或離開頁面的未送出資料警告：`passed`；由使用者於 2026-08-15 確認。
+  - Chrome responsive mode `360 × 800` 的五步流程版面與操作：`passed`；由使用者於 2026-08-15 確認。
+  - 只使用鍵盤完成主要流程、操作按鈕與 Dialog 焦點：`passed`；由使用者於 2026-08-15 確認。
+  - 必填欄位錯誤顯示於控制項下方、紅色外框、第一錯誤焦點、頂端不重複顯示及修正後清除：`passed`；由使用者於 2026-08-15 確認。
+  - `shared_total` 點數總和不符時的區塊錯誤、資料保留及修正後繼續流程：`passed`；由使用者於 2026-08-15 確認。
+  - 缺少 `participation_proof` 或 `finalist_or_award_certificate` 時的附件區塊錯誤、資料保留及補齊後繼續流程：`passed`；由使用者於 2026-08-15 確認。
+  - 每份申請最多 10 個附件，加入第 11 個附件時的阻擋、錯誤位置及既有資料保留：`passed`；由使用者於 2026-08-15 確認。
+  - FS-004 Human Integration 與 Human Acceptance：`passed`；使用者於 2026-08-15 明確確認，並接受 Verification 所列六項 `not-run` 為非阻擋項目。
 
 ## Final Summary
 
 - AI Verification: `passed；R5 後 typecheck、lint、77 個 Vitest、production build、15 個 Chromium 流程及修訂後 Target Behavior 核對均通過。`
-- Human Integration: `pending；需以真實公開端點、檔案及 Idempotency 行為確認。`
-- Human Acceptance: `pending；R5 已完成並通過 AI Verification，等待使用者重新驗收。`
-- Remaining Issues: `Human Integration 與最終 Human Acceptance 仍待完成，另有非阻擋 bundle size 警示。`
-- Final Feature Slice Status: `awaiting-human`
+- Human Integration: `passed；真實公開端點、multipart 檔案、兩種點數模式、Idempotency、422、409、Network retry 與資料庫結果均由使用者確認；六項特殊情境保留為非阻擋 not-run。`
+- Human Acceptance: `passed；使用者已逐項確認修訂後流程，並於 2026-08-15 明確宣告驗收通過。`
+- Remaining Issues: `真實後端空規則、空老師、429 Rate Limit、5xx、填寫途中規則失效及超過 5 MiB 附件為非阻擋 not-run；另有非阻擋 bundle size 警示。`
+- Final Feature Slice Status: `accepted`
 
 ## Document Lineage Update
 

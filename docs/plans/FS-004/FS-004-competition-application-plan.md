@@ -4,11 +4,11 @@
 
 - Feature Slice: `FS-004`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `completed`
 - Based On Spec: `docs/specs/FS-004/FS-004-competition-application-spec.md`
-- Spec Last Updated: `2026-08-14`
+- Spec Last Updated: `2026-08-15`
 - Created: `2026-08-13`
-- Last Updated: `2026-08-14`
+- Last Updated: `2026-08-15`
 
 ## Goal
 
@@ -313,19 +313,19 @@
 
 ## Human Integration
 
-- [ ] 確認真實後端已提供 B03、B10、B13、`GET /public/competition-point-options`、`GET /public/advisors`、未登入 `POST /public/applications`、完整 Idempotency 與測試資料。
-- [ ] 確認開發／正式環境 API Base URL、CORS 與 `Retry-After` header 是否可由瀏覽器讀取；讀不到時驗證通用 Rate Limit 提示。
-- [ ] 使用真實 PDF、JPEG、PNG 測試檔驗證後端副檔名、MIME、內容、5 MiB、10 檔與最低附件規則。
+- [x] 確認真實後端已提供 B03、B10、B13、`GET /public/competition-point-options`、`GET /public/advisors`、未登入 `POST /public/applications`、完整 Idempotency 與測試資料。
+- [x] 確認開發環境 API Base URL 與 CORS；`Retry-After` 因真實 429 未執行而保留自動化證據。
+- [x] 使用真實 PDF、JPEG、PNG 驗證後端副檔名、MIME、內容、10 檔與最低附件規則；超過 5 MiB 因缺少測試檔標記為 `not-run`。
 
 只有使用者明確確認後才能勾選。
 
 ## Human Acceptance
 
-- [ ] 依 Spec Human Acceptance 完成真實 `per_person` 與多人 `shared_total` 送件。
-- [ ] 確認 empty、failure、規則失效、Rate Limit、結果不確定重新確認與成功頁。
-- [ ] 在桌面與 360px 手機確認五步流程、附件、錯誤、離開警告、鍵盤與觸控操作。
-- [ ] 確認欄位錯誤可在輸入框下方直接找到，錯誤控制項有紅框，區塊與系統錯誤出現在正確位置。
-- [ ] 確認確認頁無分配方式與區塊「修改」按鈕，申請人與聯絡資料置頂，進度列只可返回前面已完成步驟且返回後須逐步重新驗證。
+- [x] 依 Spec Human Acceptance 完成真實 `per_person` 與多人 `shared_total` 送件。
+- [x] 確認 failure、重載、Network Error 結果不確定重新確認與成功頁；empty、規則失效、Rate Limit 與真實 5xx 標記為非阻擋 `not-run`。
+- [x] 在桌面與 360px 手機確認五步流程、附件、錯誤、離開警告、鍵盤與觸控操作。
+- [x] 確認欄位錯誤可在輸入框下方直接找到，錯誤控制項有紅框，區塊與系統錯誤出現在正確位置。
+- [x] 確認確認頁無分配方式與區塊「修改」按鈕，申請人與聯絡資料置頂，進度列只可返回前面已完成步驟且返回後須逐步重新驗證。
 
 只有使用者明確確認後才能勾選。
 

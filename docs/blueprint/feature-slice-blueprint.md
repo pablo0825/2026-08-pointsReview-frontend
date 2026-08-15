@@ -41,7 +41,7 @@
 | FS-001 | `staff-authentication` | feature | none | none | none | proposed | 已補充登入與受保護頁面共用架構責任，尚未開始 Spec。 | 2026-08-10 |
 | FS-002 | `published-instructions` | feature | none | none | none | accepted | 修訂後完整 AI Verification、真實後端 Human Integration 與使用者 Human Acceptance 均已通過；桌面排版觀感列為非阻斷後續優化。 | 2026-08-12 |
 | FS-003 | `application-entry` | feature | none | none | none | accepted | 完整 AI Verification 已通過，Human Integration 為 `not-applicable`，使用者已確認 Human Acceptance 通過。 | 2026-08-11 |
-| FS-004 | `competition-application` | feature | FS-003 | none | none | awaiting-human | R5 與完整 AI Verification 已完成；確認摘要、申請人置頂、進度列返回與 payload 原順序均有自動化證據，等待 Human Integration 與 Human Acceptance。 | 2026-08-14 |
+| FS-004 | `competition-application` | feature | FS-003 | none | none | accepted | 完整 AI Verification、真實後端 Human Integration 與使用者 Human Acceptance 均已通過；六項缺少安全測試條件的情境保留為非阻擋 `not-run`。 | 2026-08-15 |
 | FS-005 | `project-participation-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
 | FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約；證照正規化契約待確認。 | 2026-08-13 |
 | FS-007 | `exhibition-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
