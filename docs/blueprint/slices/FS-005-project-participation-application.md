@@ -10,10 +10,10 @@
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 
 ## Goal
-讓學生依薪資與有效規則完成單人參與計畫申請。
+讓學生先以多月薪資取得後端點數試算，再完成單人參與計畫申請。
 
 ## User-Visible Result
-申請人可輸入計畫與不重複的薪資月份，查看點數預估，補齊老師及附件後送件。
+申請人可先填寫計畫與 1～12 個不重複的薪資月份，手動取得唯讀點數試算；符合資格後再補齊單一申請人、老師及附件，預覽並送件。
 
 ## Source Reference
 - `docs/project/product-requirements.md`, sections 5–7, 10, 12
@@ -22,22 +22,22 @@
 - `docs/project/api-integration.md`, sections 5–6, 11
 
 ## Included
-- 單人五步表單、計畫資料、薪資明細、預估、老師、附件、預覽與 multipart 送件。
+- 「計畫內容與薪資試算」優先的單人五步表單、計畫欄位限制、薪資明細增刪與月份轉換、後端試算及失效處理、動態但隱藏的學年度、單一申請人、老師、附件、預覽與 multipart 送件。
 
 ## Excluded
 - 合併不同計畫、其他申請類型、補件、草稿與進度查詢。
 
 ## AI Responsibility
-- 完成垂直功能、學號大寫正規化、安全整數薪資與點數計算、API／錯誤、測試與文件；未登入正式送件不得索取 Session 或 CSRF Token，且須以必填 Idempotency Key 與不可變快照防止同一次操作重複建立案件，所有 5xx 皆依結果不確定流程以相同快照手動重新確認。
+- 完成垂直功能、學號大寫正規化、安全整數薪資驗證、後端試算整合、API／錯誤、測試與文件；不得在前端重作點數公式或允許修改試算點數。未登入正式送件不得索取 Session 或 CSRF Token，且須以必填 Idempotency Key 與不可變快照防止同一次操作重複建立案件，所有 5xx 皆依結果不確定流程以相同快照手動重新確認。
 
 ## Human Integration
-- 後端需完成 B10、B13、點數預估與正式送件契約並提供測試資料。
+- 後端需完成 B10、B13、點數試算、單人正式 multipart 送件、必要薪資附件與 Idempotency 契約，並提供合格、不合格、驗證失敗及成功送件測試資料。
 
 ## AI Acceptance
-- 自動驗證學號正規化、月份、整數金額、先加總再換點、未滿千元阻擋、附件、Idempotent retry 與送件狀態。
+- 自動驗證學號正規化、動態隱藏學年度、1～12 個月份、1～50,000 整數金額、月份選擇轉換、明確試算、`isEligible` 阻擋、異動失效、唯讀點數、單一申請人、必要薪資附件、錯誤定位、Idempotent retry 與送件狀態。
 
 ## Human Acceptance
-- 使用者以多月薪資完成真實預估與送件，確認規則提示及成功資訊。
+- 使用者以多月薪資完成真實後端試算與送件，確認不合格阻擋、薪資異動後重新試算、單一申請人、必要薪資附件、確認摘要及成功資訊。
 
 ## Template Rules
 

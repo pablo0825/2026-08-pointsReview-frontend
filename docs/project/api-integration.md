@@ -1,7 +1,7 @@
 # 點數審核系統－API 整合設計
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-13
+- 最後更新：2026-08-16
 - 相關文件：[前端架構](frontend-architecture.md)、[後端契約異動](backend-contract-changes.md)
 
 ## 1. 契約策略
@@ -213,7 +213,53 @@ GET /public/application-instructions?applicationType=competition
 - `shared_total` 的 `points` 是團隊總點數，`minimumPointsPerParticipant` 用於每人最低值；第一版另固定要求 0.5 倍數與總和精確相等。
 - 查無有效規則時仍回傳 `HTTP 200 OK` 與 `{ "data": [] }`。
 
-### 5.4 公開老師清單
+### 5.4 參與計畫點數試算
+
+`POST /public/point-estimates/project-participation` 接受 JSON：
+
+```json
+{
+  "salaryItems": [
+    { "salaryMonth": "2026-06-01", "salaryAmount": 5000 },
+    { "salaryMonth": "2026-07-01", "salaryAmount": 3500 }
+  ]
+}
+```
+
+- `salaryItems` 至少一筆、最多 12 筆；月份不得重複。
+- `salaryMonth` 必須是 `YYYY-MM-01`，且不得晚於後端收到 Request 時的 Asia/Taipei 當月。
+- `salaryAmount` 必須是 JSON number、整數且介於 1～50,000；總薪資最高自然為 600,000。
+- 此端點不需要登入、Session Cookie 或 CSRF Token。
+
+成功固定回傳 `HTTP 200 OK`；符合資格例如：
+
+```json
+{
+  "data": {
+    "totalSalary": 8500,
+    "estimatedPoints": "4.00",
+    "isEligible": true
+  }
+}
+```
+
+換算點數不足時仍是成功 Response，不回傳 422：
+
+```json
+{
+  "data": {
+    "totalSalary": 999,
+    "estimatedPoints": "0.00",
+    "isEligible": false
+  }
+}
+```
+
+前端以 `isEligible` 判斷是否允許繼續，不自行實作換算公式或硬編碼總薪資門檻。任何薪資異動都使既有 Response 失效；重新試算只由使用者明確操作觸發。
+
+試算驗證失敗回傳 `HTTP 422 validation_failed`，`fields[].path` 以 `salaryItems.{index}.*` 指向對應欄位。重複月份標記後出現的項目，例如 `salaryItems.1.salaryMonth`；未來月份使用「薪資月份不可晚於目前月份。」。若多筆月份不合法，`fields` 包含每一筆對應錯誤。金額錯誤使用 `salaryItems.{index}.salaryAmount`，超過筆數使用 `salaryItems`。
+
+### 5.5 公開老師清單
 
 `GET /public/advisors` 不接受搜尋、系所篩選、分頁或其他 Query Parameter。成功回傳：
 
@@ -348,7 +394,51 @@ interface CompetitionApplicationPayload {
 - `typeDetails.competitionDate` 使用 `YYYY-MM-DD`，不得晚於 Asia/Taipei 今天，不設定最早日期。
 - `attachments[].clientFileKey`、分類、其他名稱、說明及實際檔案限制依 `application-rules.md` section 7；同一 Idempotent retry 的 Key、檔案、檔名、MIME type 與 `clientFileKey` 必須完全相同。
 
-### 6.3 公開送件錯誤
+### 6.3 參與計畫申請 Payload
+
+參與計畫正式 `payload` 必須符合：
+
+```typescript
+interface ProjectParticipationApplicationPayload {
+  applicationType: "project_participation";
+  advisorId: number;
+  applicant: { name: string; email: string; phone: string };
+  participants: [{
+    academicYear: string;
+    grade: number;
+    classNumber: number;
+    studentNumber: string;
+    studentName: string;
+    requestedPoints: string;
+    isApplicant: true;
+  }];
+  typeDetails: {
+    projectName: string;
+    principalInvestigator: string;
+    workDescription: string;
+    salaryItems: Array<{
+      salaryMonth: string;
+      salaryAmount: number;
+    }>;
+  };
+  attachments: Array<{
+    clientFileKey: string;
+    attachmentType: "salary_proof" | "official_document" | "other";
+    attachmentTypeOther: string | null;
+    description: string | null;
+  }>;
+}
+```
+
+- 只能有一位參與者，且必須是申請人；學年度依 Asia/Taipei 與 8 月 1 日分界動態計算，畫面隱藏但 payload 必須包含。
+- `requestedPoints` 使用最近一次仍有效的試算 Response `estimatedPoints`；前端不提供修改。後端正式送件時重新計算並覆寫，不能由前端決定最終值。
+- `projectName` 必填、trim 後不可空、最長 255；`principalInvestigator` 必填、trim 後不可空、最長 100；`workDescription` 必填、trim 後不可空、最長 1,000。
+- 正式送件沿用試算的薪資筆數、月份與金額限制；未來月份錯誤路徑為 `typeDetails.salaryItems.{index}.salaryMonth`，訊息為「薪資月份不可晚於送件月份。」。
+- 正式換算點數低於 0.50 時回傳 `422 validation_failed`，路徑為 `typeDetails.salaryItems`，訊息為「薪資換算點數必須至少為 0.50。」。
+- 至少一個附件必須為 `salary_proof`；檔案欄位名稱使用 `attachments[{clientFileKey}]`。附件格式、大小、數量、其他分類與說明依 `application-rules.md` section 7。
+- 成功 Response 與 section 6.2 相同，固定為 `201`、`pending_advisor`、公開 `publicId` 與 UTC `submittedAt`。
+
+### 6.4 公開送件錯誤
 
 - `422 validation_failed` 使用 `{ code, message, fields?: [{ path, message }] }`；`path` 使用點號與數字索引，例如 `participants.0.studentNumber`、`typeDetails.competitionDate`、`attachments.0.attachmentType`，不得依賴錯誤陣列順序。
 - 缺少 multipart 檔案可使用 `attachments.<clientFileKey>`；最低附件錯誤使用 `attachments`；規則錯誤使用 `typeDetails` 或 `participants`。

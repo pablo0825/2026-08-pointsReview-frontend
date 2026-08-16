@@ -1,7 +1,7 @@
 # 後端契約同步清單
 
 - 文件狀態：待後端專案逐項同步
-- 最後更新：2026-08-13
+- 最後更新：2026-08-16
 - 用途：記錄前端需求討論後，與既有後端文件或實作計畫不同的契約。
 - 相關文件：[申請規則](application-rules.md)、[流程與權限](workflows-and-permissions.md)、[API 整合](api-integration.md)
 
@@ -133,9 +133,10 @@ GET /reviewer/applications/review?status=needs_revision
 - `competitionDate` 不得晚於台北今天。
 - `certificateDate` 不得晚於台北今天。
 - 展覽 `endDate >= startDate` 且 `endDate` 不得晚於台北今天。
-- 薪資月份不得重複，只能當月或過去月份。
-- 薪資金額為大於 0 的新臺幣整數。
-- 參與計畫總薪資未滿 1,000 元不得正式送件。
+- 每份參與計畫至少一筆、最多 12 筆不同薪資月份；月份只能是後端收到 Request 時 Asia/Taipei 的當月或過去月份。
+- 單月薪資必須是 1～50,000 的新臺幣整數，12 個月份的總額最高自然為 600,000 元；資料庫同步使用 `salary_amount BETWEEN 1 AND 50000` 約束。
+- 試算結果為 0.00 時仍回傳 `200` 與 `isEligible: false`；正式送件依有效規則重新換算，結果低於 0.50 時以 `422 validation_failed` 拒絕，不以固定總薪資數字作為契約判斷。
+- `projectName`、`principalInvestigator`、`workDescription` 必填且 trim 後不可空，最長分別為 255、100、1,000 字元。
 
 ### B11 證照重複申請
 
