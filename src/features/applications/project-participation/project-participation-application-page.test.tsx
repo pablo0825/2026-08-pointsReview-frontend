@@ -42,11 +42,19 @@ async function completeForm(user: ReturnType<typeof userEvent.setup>) {
   await completeFirstStep(user)
   await user.click(screen.getByRole('button', { name: '下一步' }))
 
-  await user.type(screen.getByLabelText('姓名'), '測試學生')
-  await user.type(screen.getByLabelText('學號'), '4a0x0001')
+  fireEvent.change(screen.getByLabelText('姓名'), {
+    target: { value: '測試學生' },
+  })
+  fireEvent.change(screen.getByLabelText('學號'), {
+    target: { value: '4a0x0001' },
+  })
   await user.selectOptions(screen.getByLabelText('年級'), '3')
-  await user.type(screen.getByLabelText('Email'), 'STUDENT@EXAMPLE.COM')
-  await user.type(screen.getByLabelText('電話'), '0912-345-678')
+  fireEvent.change(screen.getByLabelText('Email'), {
+    target: { value: 'STUDENT@EXAMPLE.COM' },
+  })
+  fireEvent.change(screen.getByLabelText('電話'), {
+    target: { value: '0912-345-678' },
+  })
   await user.click(screen.getByRole('button', { name: '下一步' }))
 
   await user.click(await screen.findByRole('radio', { name: /測試老師/ }))
