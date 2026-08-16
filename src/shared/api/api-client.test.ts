@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import { z } from 'zod'
 
 import { server } from '../../test/server'
-import { getJson, postPublicMultipart } from './api-client'
+import { getJson, postPublicJson, postPublicMultipart } from './api-client'
 
 const responseSchema = z.object({ data: z.string() }).strict()
 
@@ -139,6 +139,69 @@ describe('getJson', () => {
       fields: [
         { path: 'participants.0.studentNumber', message: 'Required' },
       ],
+    })
+  })
+
+  it('posts public JSON without credentials and validates the response', async () => {
+    let credentials: RequestCredentials | undefined
+    let contentType: string | null = null
+    let receivedBody: unknown
+
+    server.use(
+      http.post('*/public/estimate', async ({ request }) => {
+        credentials = request.credentials
+        contentType = request.headers.get('content-type')
+        receivedBody = await request.json()
+        return HttpResponse.json({ data: 'estimated' })
+      }),
+    )
+
+    await expect(
+      postPublicJson(
+        '/public/estimate',
+        { salaryItems: [] },
+        responseSchema,
+        undefined,
+        200,
+      ),
+    ).resolves.toEqual({ data: 'estimated' })
+    expect(credentials).toBe('omit')
+    expect(contentType).toBe('application/json')
+    expect(receivedBody).toEqual({ salaryItems: [] })
+  })
+
+  it('preserves public JSON field errors and rejects an unexpected status', async () => {
+    server.use(
+      http.post('*/public/estimate', () =>
+        HttpResponse.json(
+          {
+            code: 'validation_failed',
+            message: '輸入資料格式不正確。',
+            fields: [{ path: 'salaryItems.0.salaryMonth', message: 'Required' }],
+          },
+          { status: 422 },
+        ),
+      ),
+    )
+
+    await expect(
+      postPublicJson('/public/estimate', {}, responseSchema),
+    ).rejects.toMatchObject({
+      status: 422,
+      apiCode: 'validation_failed',
+      fields: [{ path: 'salaryItems.0.salaryMonth', message: 'Required' }],
+    })
+
+    server.use(
+      http.post('*/public/estimate', () =>
+        HttpResponse.json({ data: 'estimated' }, { status: 201 }),
+      ),
+    )
+    await expect(
+      postPublicJson('/public/estimate', {}, responseSchema, undefined, 200),
+    ).rejects.toMatchObject({
+      code: 'unexpected_response',
+      status: 201,
     })
   })
 })

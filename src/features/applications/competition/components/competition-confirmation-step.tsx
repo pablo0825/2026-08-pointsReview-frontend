@@ -1,5 +1,5 @@
 import { getAdvisorTitle } from '../../common/components/advisor-options'
-import type { PublicAdvisor } from '../api/competition-application.schema'
+import type { PublicAdvisor } from '../../common/api/public-application.schema'
 import type { CompetitionApplicationForm } from '../model/competition-application.schema'
 import { awardLabels, competitionLevelLabels } from './competition-options'
 

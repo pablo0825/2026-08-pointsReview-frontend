@@ -25,6 +25,12 @@ const steps = [
   { label: '指導老師' },
 ] satisfies WizardStep[]
 
+const competitionAttachmentTypes = [
+  ['official_document', '公文'],
+  ['participation_proof', '參賽證明'],
+  ['other', '其他'],
+] as const
+
 describe('shared application controls', () => {
   it('renders accessible wizard progress and navigation', async () => {
     const user = userEvent.setup()
@@ -329,7 +335,14 @@ describe('shared application controls', () => {
     })
 
     const { rerender, unmount } = render(
-      <AttachmentEditor attachments={[]} onChange={onChange} onError={onError} />,
+      <AttachmentEditor
+        attachmentTypes={competitionAttachmentTypes}
+        attachments={[]}
+        defaultAttachmentType="participation_proof"
+        inputId="test-attachments"
+        onChange={onChange}
+        onError={onError}
+      />,
     )
     const file = new File(['proof'], 'proof.pdf', { type: 'application/pdf' })
     await user.upload(screen.getByLabelText('新增附件'), file)
@@ -340,7 +353,10 @@ describe('shared application controls', () => {
     const attachment = onChange.mock.calls[0][0][0] as AttachmentEditorValue
     rerender(
       <AttachmentEditor
+        attachmentTypes={competitionAttachmentTypes}
         attachments={[attachment]}
+        defaultAttachmentType="participation_proof"
+        inputId="test-attachments"
         onChange={onChange}
         onError={onError}
       />,
@@ -384,7 +400,10 @@ describe('shared application controls', () => {
     confirm.mockClear()
     render(
       <AttachmentEditor
+        attachmentTypes={competitionAttachmentTypes}
         attachments={[attachment]}
+        defaultAttachmentType="participation_proof"
+        inputId="test-attachments"
         onChange={onChange}
         onError={vi.fn()}
       />,
@@ -427,11 +446,14 @@ describe('shared application controls', () => {
 
     render(
       <AttachmentEditor
+        attachmentTypes={competitionAttachmentTypes}
         attachments={[attachment]}
+        defaultAttachmentType="participation_proof"
         errors={{
           'attachments.0.attachmentType': '附件分類不正確。',
           'attachments.0.description': '附件說明不正確。',
         }}
+        inputId="test-attachments"
         onChange={vi.fn()}
         onError={vi.fn()}
         onFieldChange={onFieldChange}

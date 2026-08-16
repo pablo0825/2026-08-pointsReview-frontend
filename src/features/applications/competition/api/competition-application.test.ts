@@ -7,8 +7,8 @@ import {
 } from '../../../../test/fixtures/competition-application'
 import {
   fetchCompetitionPointOptions,
-  fetchPublicAdvisors,
 } from './competition-application.query'
+import { fetchPublicAdvisors } from '../../common/api/public-advisors.query'
 import {
   createCompetitionSubmissionSnapshot,
   submitCompetitionApplication,

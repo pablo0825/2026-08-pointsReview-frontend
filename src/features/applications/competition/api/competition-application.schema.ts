@@ -1,5 +1,12 @@
 import { z } from 'zod'
 
+import {
+  publicApplicantSchema,
+  publicApplicationSuccessResponseSchema,
+  publicParticipantSchema,
+} from '../../common/api/public-application.schema'
+export type { PublicAdvisor } from '../../common/api/public-application.schema'
+
 const pointsSchema = z.string().regex(/^\d+\.\d{2}$/)
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 
@@ -37,20 +44,6 @@ export const competitionPointOptionsResponseSchema = z
   .object({ data: z.array(competitionPointOptionSchema) })
   .strict()
 
-export const publicAdvisorSchema = z
-  .object({
-    id: z.number().int().positive(),
-    name: z.string().min(1),
-    titleCode: z.number().int(),
-    department: z.string(),
-    isDirector: z.boolean(),
-  })
-  .strict()
-
-export const publicAdvisorsResponseSchema = z
-  .object({ data: z.array(publicAdvisorSchema) })
-  .strict()
-
 export const attachmentTypeSchema = z.enum([
   'competition_rules',
   'competition_poster',
@@ -65,26 +58,8 @@ export const competitionApplicationPayloadSchema = z
   .object({
     applicationType: z.literal('competition'),
     advisorId: z.number().int().positive(),
-    applicant: z
-      .object({
-        name: z.string().min(1).max(100),
-        email: z.string().email().max(320),
-        phone: z.string().min(1).max(30),
-      })
-      .strict(),
-    participants: z.array(
-      z
-        .object({
-          academicYear: z.string().min(1),
-          grade: z.number().int().min(1).max(6),
-          classNumber: z.number().int().min(1).max(5),
-          studentNumber: z.string().min(1).max(50),
-          studentName: z.string().min(1).max(100),
-          requestedPoints: pointsSchema,
-          isApplicant: z.boolean(),
-        })
-        .strict(),
-    ).min(1).max(10),
+    applicant: publicApplicantSchema,
+    participants: z.array(publicParticipantSchema).min(1).max(10),
     typeDetails: z
       .object({
         competitionLevel: competitionLevelSchema,
@@ -108,23 +83,13 @@ export const competitionApplicationPayloadSchema = z
   })
   .strict()
 
-export const competitionApplicationSuccessResponseSchema = z
-  .object({
-    data: z
-      .object({
-        publicId: z.string().uuid(),
-        status: z.literal('pending_advisor'),
-        submittedAt: z.string().datetime({ offset: true }),
-      })
-      .strict(),
-  })
-  .strict()
+export const competitionApplicationSuccessResponseSchema =
+  publicApplicationSuccessResponseSchema
 
 export type CompetitionLevel = z.infer<typeof competitionLevelSchema>
 export type Award = z.infer<typeof awardSchema>
 export type AllocationMethod = z.infer<typeof allocationMethodSchema>
 export type CompetitionPointOption = z.infer<typeof competitionPointOptionSchema>
-export type PublicAdvisor = z.infer<typeof publicAdvisorSchema>
 export type AttachmentType = z.infer<typeof attachmentTypeSchema>
 export type CompetitionApplicationPayload = z.infer<
   typeof competitionApplicationPayloadSchema

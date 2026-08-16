@@ -18,10 +18,12 @@ import {
 } from '../common/components/participants-editor'
 import { isPointsIncrement, parsePoints } from '../common/lib/points'
 import {
-  fetchCompetitionPointOptions,
   fetchPublicAdvisors,
-  competitionPointOptionsQueryKey,
   publicAdvisorsQueryKey,
+} from '../common/api/public-advisors.query'
+import {
+  fetchCompetitionPointOptions,
+  competitionPointOptionsQueryKey,
 } from './api/competition-application.query'
 import {
   createCompetitionSubmissionSnapshot,
@@ -43,6 +45,7 @@ import {
   createDefaultCompetitionApplicationForm,
   type CompetitionApplicationForm,
 } from './model/competition-application.schema'
+import type { AttachmentType } from './api/competition-application.schema'
 import {
   buildPointOptionLookup,
   getCompetitionParticipantLimit,
@@ -50,6 +53,7 @@ import {
   pointOptionKey,
   resetParticipantPoints,
 } from './model/competition-points'
+import { competitionAttachmentTypes } from './components/competition-options'
 
 const steps = [
   { label: '競賽內容' },
@@ -606,7 +610,7 @@ export function CompetitionApplicationPage() {
           ) : currentStep === 2 ? (
             advisorsQuery.isPending ? <p role="status">正在載入指導老師名單…</p> : advisorsQuery.isError ? <QueryState retry={() => void advisorsQuery.refetch()} title="暫時無法載入指導老師名單" /> : advisorsQuery.data.length === 0 ? <QueryState empty retry={() => void advisorsQuery.refetch()} title="目前沒有可選擇的指導老師" /> : <AdvisorSelector advisors={advisorsQuery.data} error={fieldErrors.advisorId} onSelect={(id) => updateValue('advisorId', id)} selectedId={value.advisorId} />
           ) : currentStep === 3 ? (
-            <AttachmentEditor attachments={value.attachments as AttachmentEditorValue[]} errors={fieldErrors} onChange={(attachments) => updateValue('attachments', attachments, false)} onError={setMessage} onFieldChange={(path) => {
+            <AttachmentEditor attachmentTypes={competitionAttachmentTypes} attachments={value.attachments as AttachmentEditorValue<AttachmentType>[]} defaultAttachmentType="participation_proof" errors={fieldErrors} inputId="competition-attachments" onChange={(attachments) => updateValue('attachments', attachments, false)} onError={setMessage} onFieldChange={(path) => {
               if (path === 'attachments.*') {
                 form.clearErrors('attachments')
                 form.clearErrors('root.attachments')

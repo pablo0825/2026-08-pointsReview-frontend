@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import type { PublicAdvisor } from '../../competition/api/competition-application.schema'
+import type { PublicAdvisor } from '../api/public-application.schema'
 import { getAdvisorTitle } from './advisor-options'
 import { FieldErrorMessage, invalidFieldClassName } from './error-summary'
 

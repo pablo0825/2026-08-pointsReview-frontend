@@ -214,3 +214,35 @@ export async function postPublicMultipart<T>(
 
   return parseJson(response, schema)
 }
+
+export async function postPublicJson<TRequest, TResponse>(
+  path: string,
+  body: TRequest,
+  schema: z.ZodType<TResponse>,
+  signal?: AbortSignal,
+  expectedStatus?: number,
+): Promise<TResponse> {
+  const response = await executeRequest(
+    path,
+    {
+      method: 'POST',
+      credentials: 'omit',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    },
+    signal,
+  )
+
+  if (!response.ok) {
+    throw await createHttpError(response, true)
+  }
+
+  if (expectedStatus !== undefined && response.status !== expectedStatus) {
+    throw new ApiClientError('unexpected_response', response.status)
+  }
+
+  return parseJson(response, schema)
+}

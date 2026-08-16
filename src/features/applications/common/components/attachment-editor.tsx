@@ -1,34 +1,31 @@
 import { useEffect, useMemo, useRef } from 'react'
 
-import type { AttachmentType } from '../../competition/api/competition-application.schema'
 import { validateAttachmentFile } from './attachment-validation'
 import { FieldErrorMessage, invalidFieldClassName } from './error-summary'
 
-export type AttachmentEditorValue = {
+export type AttachmentEditorValue<TAttachmentType extends string = string> = {
   clientFileKey: string
   file: File
-  attachmentType: AttachmentType
+  attachmentType: TAttachmentType
   attachmentTypeOther: string | null
   description: string | null
 }
 
-type AttachmentEditorProps = {
-  attachments: readonly AttachmentEditorValue[]
-  onChange: (attachments: AttachmentEditorValue[]) => void
+export type AttachmentTypeOption<TAttachmentType extends string> = readonly [
+  TAttachmentType,
+  string,
+]
+
+type AttachmentEditorProps<TAttachmentType extends string> = {
+  attachments: readonly AttachmentEditorValue<TAttachmentType>[]
+  attachmentTypes: readonly AttachmentTypeOption<TAttachmentType>[]
+  defaultAttachmentType: TAttachmentType
+  inputId: string
+  onChange: (attachments: AttachmentEditorValue<TAttachmentType>[]) => void
   onError: (message: string | null) => void
   errors?: Readonly<Record<string, string | undefined>>
   onFieldChange?: (path: string) => void
 }
-
-const attachmentTypes = [
-  ['competition_rules', '競賽辦法'],
-  ['competition_poster', '競賽海報'],
-  ['official_website_screenshot', '官網截圖'],
-  ['official_document', '公文'],
-  ['participation_proof', '參賽證明'],
-  ['finalist_or_award_certificate', '入圍或獎狀'],
-  ['other', '其他'],
-] as const satisfies readonly (readonly [AttachmentType, string])[]
 
 function AttachmentPreview({ file }: { file: File }) {
   const url = useMemo(() => URL.createObjectURL(file), [file])
@@ -59,13 +56,16 @@ function AttachmentPreview({ file }: { file: File }) {
   )
 }
 
-export function AttachmentEditor({
+export function AttachmentEditor<TAttachmentType extends string>({
   attachments,
+  attachmentTypes,
+  defaultAttachmentType,
+  inputId,
   onChange,
   onError,
   errors = {},
   onFieldChange,
-}: AttachmentEditorProps) {
+}: AttachmentEditorProps<TAttachmentType>) {
   const addInputRef = useRef<HTMLInputElement>(null)
 
   function addFiles(files: FileList | null) {
@@ -97,7 +97,7 @@ export function AttachmentEditor({
       next.push({
         clientFileKey: crypto.randomUUID(),
         file,
-        attachmentType: 'participation_proof',
+        attachmentType: defaultAttachmentType,
         attachmentTypeOther: null,
         description: null,
       })
@@ -111,7 +111,7 @@ export function AttachmentEditor({
 
   function updateAttachment(
     index: number,
-    patch: Partial<AttachmentEditorValue>,
+    patch: Partial<AttachmentEditorValue<TAttachmentType>>,
   ) {
     Object.keys(patch).forEach((key) =>
       onFieldChange?.(`attachments.${index}.${key}`),
@@ -126,7 +126,7 @@ export function AttachmentEditor({
   return (
     <div className="space-y-5">
       <div className="space-y-2">
-        <label className="font-bold" htmlFor="competition-attachments">
+        <label className="font-bold" htmlFor={inputId}>
           新增附件
         </label>
         <input
@@ -135,7 +135,7 @@ export function AttachmentEditor({
           aria-invalid={Boolean(errors.attachments)}
           className={`block min-h-11 w-full rounded-lg border p-2 ${errors.attachments ? invalidFieldClassName : 'border-slate-300'}`}
           data-field-path="attachments"
-          id="competition-attachments"
+          id={inputId}
           multiple
           onChange={(event) => addFiles(event.target.files)}
           ref={addInputRef}
@@ -167,7 +167,7 @@ export function AttachmentEditor({
               className={`min-h-11 w-full rounded-lg border px-3 ${errors[`attachments.${index}.attachmentType`] ? invalidFieldClassName : 'border-slate-300'}`}
               data-field-path={`attachments.${index}.attachmentType`}
               onChange={(event) => {
-                const attachmentType = event.target.value as AttachmentType
+                const attachmentType = event.target.value as TAttachmentType
                 updateAttachment(index, {
                   attachmentType,
                   attachmentTypeOther:
