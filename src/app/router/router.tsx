@@ -8,6 +8,7 @@ import { RouteErrorPage } from '../error-boundaries/route-error-page'
 import { PublicLayout } from '../layouts/public-layout'
 import { ApplicationEntryPage } from '../../features/applications/entry/application-entry-page'
 import { CompetitionApplicationPage } from '../../features/applications/competition/competition-application-page'
+import { ProjectParticipationApplicationPage } from '../../features/applications/project-participation/project-participation-application-page'
 import { PublishedInstructionsPage } from '../../features/rules/published-instructions-page'
 
 function createRoutePlaceholder(title: string) {
@@ -40,7 +41,7 @@ export const appRoutes: RouteObject[] = [
       },
       {
         path: 'apply/project-participation',
-        element: createRoutePlaceholder('參與計畫申請表單準備中'),
+        element: <ProjectParticipationApplicationPage />,
       },
       {
         path: 'apply/certificate',
