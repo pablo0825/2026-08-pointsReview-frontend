@@ -125,13 +125,13 @@
 
 ## AI Verification
 
-- [ ] 執行 `npm run typecheck`
-- [ ] 執行 `npm run lint`
-- [ ] 執行 `npm run test`
-- [ ] 執行 `npm run build`
-- [ ] 執行 `npm run test:e2e -- --project=chromium e2e/project-participation-application.spec.ts e2e/competition-application.spec.ts`
-- [ ] 驗證 Spec Target Behavior：五步、試算資格與失效、單一申請人、老師、附件、確認、multipart、錯誤與成功狀態。
-- [ ] 回歸驗證 Preserved Behavior：`/apply`、`/rules`、FS-004 competition route 與共用公開申請元件。
+- [x] 執行 `npm run typecheck`
+- [x] 執行 `npm run lint`
+- [x] 執行 `npm run test`
+- [x] 執行 `npm run build`
+- [x] 執行 `npm run test:e2e -- --project=chromium e2e/project-participation-application.spec.ts e2e/competition-application.spec.ts`
+- [x] 驗證 Spec Target Behavior：五步、試算資格與失效、單一申請人、老師、附件、確認、multipart、錯誤與成功狀態。
+- [x] 回歸驗證 Preserved Behavior：`/apply`、`/rules`、FS-004 competition route 與共用公開申請元件。
 
 ## Human Integration
 
