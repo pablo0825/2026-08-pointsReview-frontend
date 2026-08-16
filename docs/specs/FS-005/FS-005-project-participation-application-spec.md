@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-005`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-16`
 - Last Updated: `2026-08-16`
@@ -144,6 +144,6 @@
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `pending`
+- Approved By: `user`
+- Approved At: `2026-08-16`
+- Approval Note: `核准 FS-005 的 Spec、Plan 與 Commit Plan，並開始實作。`
