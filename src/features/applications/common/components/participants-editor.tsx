@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import { formatPoints, parsePoints } from '../lib/points'
+import { classNumberOptions, gradeOptions } from '../lib/student-profile-options'
 
 export type ParticipantEditorValue = {
   clientKey: string
@@ -27,23 +28,6 @@ type ParticipantsEditorProps = {
   onDirty: () => void
   onFieldChange?: (path: string) => void
 }
-
-const grades = [
-  [1, '大一'],
-  [2, '大二'],
-  [3, '大三'],
-  [4, '大四'],
-  [5, '碩一'],
-  [6, '碩二'],
-] as const
-
-const classes = [
-  [1, '甲班'],
-  [2, '乙班'],
-  [3, '丙班'],
-  [4, '丁班'],
-  [5, '戊班'],
-] as const
 
 export function ParticipantsEditor({
   participants,
@@ -178,7 +162,7 @@ export function ParticipantsEditor({
                 }
                 value={participant.grade}
               >
-                {grades.map(([value, label]) => (
+                {gradeOptions.map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
               </select>
@@ -199,7 +183,7 @@ export function ParticipantsEditor({
                 }
                 value={participant.classNumber}
               >
-                {classes.map(([value, label]) => (
+                {classNumberOptions.map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
               </select>

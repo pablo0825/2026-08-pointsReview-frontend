@@ -26,7 +26,7 @@ function renderPage() {
 }
 
 async function completeFirstStep(user: ReturnType<typeof userEvent.setup>) {
-  await screen.findByRole('heading', { name: '計畫內容與薪資試算' })
+  await screen.findByRole('heading', { name: '計畫與薪資試算' })
   await user.type(screen.getByLabelText('計畫名稱'), '數位學習計畫')
   await user.type(screen.getByLabelText('計畫主持人'), '陳教授')
   await user.type(screen.getByLabelText('工作內容'), '協助教材設計。')
@@ -91,7 +91,8 @@ describe('project participation application page', () => {
     )
 
     renderPage()
-    await screen.findByRole('heading', { name: '計畫內容與薪資試算' })
+    await screen.findByRole('heading', { name: '計畫與薪資試算' })
+    expect(screen.queryByText('每月 1～50,000 元，最多 12 個不同月份。')).not.toBeInTheDocument()
     expect(estimateRequests).toBe(0)
     await completeFirstStep(user)
     expect(estimateRequests).toBe(1)
@@ -115,7 +116,7 @@ describe('project participation application page', () => {
     )
 
     renderPage()
-    await screen.findByRole('heading', { name: '計畫內容與薪資試算' })
+    await screen.findByRole('heading', { name: '計畫與薪資試算' })
     await user.type(screen.getByLabelText('計畫名稱'), '數位學習計畫')
     await user.type(screen.getByLabelText('計畫主持人'), '陳教授')
     await user.type(screen.getByLabelText('工作內容'), '協助教材設計。')
@@ -150,7 +151,7 @@ describe('project participation application page', () => {
     )
 
     renderPage()
-    await screen.findByRole('heading', { name: '計畫內容與薪資試算' })
+    await screen.findByRole('heading', { name: '計畫與薪資試算' })
     fireEvent.change(screen.getByLabelText('薪資月份'), { target: { value: '2026-08' } })
     await user.type(screen.getByLabelText('單月薪資'), '1000')
     await user.click(screen.getByRole('button', { name: '試算點數' }))
@@ -173,7 +174,7 @@ describe('project participation application page', () => {
     )
 
     renderPage()
-    await screen.findByRole('heading', { name: '計畫內容與薪資試算' })
+    await screen.findByRole('heading', { name: '計畫與薪資試算' })
     fireEvent.change(screen.getByLabelText('薪資月份'), { target: { value: '2026-06' } })
     await user.type(screen.getByLabelText('單月薪資'), '8500')
     await user.click(screen.getByRole('button', { name: '試算點數' }))
@@ -205,6 +206,7 @@ describe('project participation application page', () => {
     await completeForm(user)
     expect(screen.queryByText(/學年度/)).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '計畫與薪資' })).toBeInTheDocument()
+    expect(screen.getByText('測試學生｜4A0X0001｜大三 甲班')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: '確認送出申請' }))
 
     expect(await screen.findByRole('heading', { name: '申請已成功送出' })).toBeInTheDocument()
@@ -215,6 +217,8 @@ describe('project participation application page', () => {
       participants: [
         {
           studentNumber: '4A0X0001',
+          grade: 3,
+          classNumber: 1,
           requestedPoints: '4.00',
           isApplicant: true,
         },
@@ -274,7 +278,7 @@ describe('project participation application page', () => {
     await completeForm(user)
     await user.click(screen.getByRole('button', { name: '確認送出申請' }))
 
-    await screen.findByRole('heading', { name: '計畫內容與薪資試算' })
+    await screen.findByRole('heading', { name: '計畫與薪資試算' })
     expect(screen.getByLabelText('薪資月份')).toHaveAccessibleDescription(
       '薪資月份不可晚於送件月份。',
     )

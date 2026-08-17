@@ -1,5 +1,6 @@
 import type { PublicAdvisor } from '../../common/api/public-application.schema'
 import { getAdvisorTitle } from '../../common/components/advisor-options'
+import { getClassNumberLabel, getGradeLabel } from '../../common/lib/student-profile-options'
 import type { ProjectEstimateState } from '../model/project-estimate-state'
 import type { ProjectParticipationForm } from '../model/project-participation.schema'
 
@@ -34,7 +35,7 @@ export function ProjectConfirmationStep({
         <p className="font-bold">預估點數：{estimateState.result.estimatedPoints} 點</p>
       </SummarySection>
       <SummarySection title="申請人資料">
-        <p>{value.studentName}｜{value.studentNumber}｜{value.grade} 年級 {value.classNumber} 班</p>
+        <p>{value.studentName}｜{value.studentNumber}｜{getGradeLabel(value.grade)} {getClassNumberLabel(value.classNumber)}</p>
         <p>Email：{value.applicantEmail}</p>
         <p>電話：{value.applicantPhone}</p>
       </SummarySection>

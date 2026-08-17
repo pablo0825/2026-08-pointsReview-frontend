@@ -55,7 +55,7 @@ import {
 } from './model/project-participation.schema'
 
 const steps = [
-  { label: '計畫內容與薪資試算' },
+  { label: '計畫與薪資試算' },
   { label: '申請人資料' },
   { label: '指導老師' },
   { label: '附件' },

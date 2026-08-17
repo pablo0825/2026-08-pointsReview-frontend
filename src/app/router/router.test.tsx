@@ -76,7 +76,7 @@ describe('application router', () => {
 
     expect(
       await screen.findByRole('heading', {
-        name: '計畫內容與薪資試算',
+        name: '計畫與薪資試算',
       }),
     ).toBeInTheDocument()
   })

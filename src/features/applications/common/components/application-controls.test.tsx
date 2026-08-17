@@ -308,6 +308,8 @@ describe('shared application controls', () => {
 
     const grade = screen.getByLabelText('年級')
     const classNumber = screen.getByLabelText('班級')
+    expect(grade).toHaveDisplayValue('大一')
+    expect(classNumber).toHaveDisplayValue('甲班')
     expect(grade).toHaveClass('border-red-600')
     expect(grade).toHaveAccessibleDescription('年級資料不正確。')
     expect(classNumber).toHaveClass('border-red-600')

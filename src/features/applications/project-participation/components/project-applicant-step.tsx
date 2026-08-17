@@ -1,5 +1,6 @@
 import type { ProjectParticipationForm } from '../model/project-participation.schema'
 import { FieldErrorMessage, invalidFieldClassName } from '../../common/components/error-summary'
+import { classNumberOptions, gradeOptions } from '../../common/lib/student-profile-options'
 
 type ApplicantField =
   | 'studentName'
@@ -37,14 +38,14 @@ export function ProjectApplicantStep({
       <label className="block space-y-1 font-semibold">
         年級
         <select aria-describedby={errors.grade ? 'grade-error' : undefined} aria-invalid={Boolean(errors.grade)} className={inputClass(errors.grade)} data-field-path="grade" onChange={(event) => onChange('grade', Number(event.target.value))} value={value.grade}>
-          {[1, 2, 3, 4, 5, 6].map((grade) => <option key={grade} value={grade}>{grade} 年級</option>)}
+          {gradeOptions.map(([grade, label]) => <option key={grade} value={grade}>{label}</option>)}
         </select>
         <FieldErrorMessage id="grade-error" message={errors.grade} />
       </label>
       <label className="block space-y-1 font-semibold">
         班級
         <select aria-describedby={errors.classNumber ? 'classNumber-error' : undefined} aria-invalid={Boolean(errors.classNumber)} className={inputClass(errors.classNumber)} data-field-path="classNumber" onChange={(event) => onChange('classNumber', Number(event.target.value))} value={value.classNumber}>
-          {[1, 2, 3, 4, 5].map((classNumber) => <option key={classNumber} value={classNumber}>{classNumber} 班</option>)}
+          {classNumberOptions.map(([classNumber, label]) => <option key={classNumber} value={classNumber}>{label}</option>)}
         </select>
         <FieldErrorMessage id="classNumber-error" message={errors.classNumber} />
       </label>

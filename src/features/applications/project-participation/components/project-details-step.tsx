@@ -88,10 +88,7 @@ export function ProjectDetailsStep({
 
       <section aria-labelledby="salary-heading" className="space-y-4 rounded-xl border border-slate-200 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-bold" id="salary-heading">薪資明細</h2>
-            <p className="text-sm text-slate-600">每月 1～50,000 元，最多 12 個不同月份。</p>
-          </div>
+          <h2 className="text-lg font-bold" id="salary-heading">薪資明細</h2>
           <button
             className="min-h-11 rounded-lg border border-blue-700 px-4 py-2 font-bold text-blue-800 disabled:border-slate-300 disabled:text-slate-400"
             disabled={value.salaryItems.length >= 12}
