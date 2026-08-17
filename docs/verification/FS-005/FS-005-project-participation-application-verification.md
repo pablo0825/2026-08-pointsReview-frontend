@@ -3,7 +3,7 @@
 ## Document Information
 
 - Feature Slice: `FS-005`
-- Verification Status: `awaiting-human`
+- Verification Status: `completed`
 - Created: `2026-08-16`
 - Last Updated: `2026-08-17`
 
@@ -63,10 +63,10 @@
 
 ## Human Integration
 
-- Status: `pending`
-- Confirmed By: `pending`
-- Confirmed At: `pending`
-- Notes: `pending`
+- Status: `passed`
+- Confirmed By: `user`
+- Confirmed At: `2026-08-17`
+- Notes: `使用真實後端完成合格薪資試算、老師選擇、salary_proof multipart 正式送件與 201 成功流程，並確認後端只建立一筆申請且計畫、薪資、點數、數字學籍代碼、老師及附件關聯正確。特殊不合格、未來／重複月份、Idempotency 重放與其他錯誤條件未人工重做，標記為非阻擋 not-run。`
 
 ## Human Acceptance Instructions
 
@@ -104,10 +104,10 @@
 
 ## Human Acceptance Result
 
-- Status: `pending`
-- Confirmed By: `pending`
-- Confirmed At: `pending`
-- User Feedback: `pending`
+- Status: `passed`
+- Confirmed By: `user`
+- Confirmed At: `2026-08-17`
+- User Feedback: `使用者確認 R1 可見調整與 FS-005 整體驗收通過。`
 
 ## Remaining Issues
 

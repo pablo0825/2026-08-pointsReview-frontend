@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-005`
 - Change Type: `feature`
-- Document Status: `approved`
+- Document Status: `completed`
 - Based On Spec: `docs/specs/FS-005/FS-005-project-participation-application-spec.md`
 - Spec Last Updated: `2026-08-17`
 - Created: `2026-08-16`
@@ -148,16 +148,16 @@
 
 ## Human Integration
 
-- [ ] 以真實後端驗證合格薪資試算、異動失效及重新試算，確認前端沒有自行換算點數。
-- [ ] 以真實後端驗證不合格、重複月份、未來月份與欄位路徑顯示。
-- [ ] 以真實老師清單及 `salary_proof` 檔案完成 multipart 送件，確認後端只建立一筆且 payload、附件與動態學年度正確。
-- [ ] 以相同 Idempotency Key／相同快照驗證重放 201，以相同 Key／不同內容驗證 409；可安全建立條件不足時標記 `not-run`。
+- [x] 以真實後端完成合格薪資試算，確認前端顯示後端點數並可繼續送件。
+- [ ] `not-run`：未以真實後端重做不合格、重複月份、未來月份與特殊欄位錯誤；相關自動化測試已通過。
+- [x] 以真實老師清單及 `salary_proof` 檔案完成 multipart 送件，確認 201、後端只建立一筆且 payload、附件與動態學年度正確。
+- [ ] `not-run`：未以真實後端重做相同 Idempotency Key 重放 201 與不同內容 409；共用送件基礎已由 FS-004 人工驗證，FS-005 自動化測試已通過。
 
 ## Human Acceptance
 
-- [ ] 使用者確認「計畫與薪資試算」優先的五步流程、薪資限制提示已移除、正式年級／班級名稱、手動試算與異動後重新試算符合直覺。
-- [ ] 使用者確認單一申請人、老師、薪資證明附件、確認摘要、就地錯誤與 360px 版面可理解且可操作。
-- [ ] 使用者確認成功頁申請編號、等待指導老師簽核、Asia/Taipei 送件時間與 Email 提醒正確。
+- [x] 使用者確認「計畫與薪資試算」優先的五步流程、薪資限制提示已移除、正式年級／班級名稱、手動試算與異動後重新試算符合直覺。
+- [x] 使用者確認單一申請人、老師、薪資證明附件、確認摘要、就地錯誤與 360px 版面可理解且可操作。
+- [x] 使用者確認成功頁申請編號、等待指導老師簽核、Asia/Taipei 送件時間與 Email 提醒正確。
 
 ## Commit Plan
 
@@ -185,4 +185,4 @@ Draft Documentation Batch 由建立 Spec／Plan 的要求授權，不受下列 p
 
 - Approved By: `user`
 - Approved At: `2026-08-17`
-- Approval Note: `使用者已核准 2026-08-17 修訂後的 Spec、Plan 與 R1 Commit Plan；等待明確開始 R1 實作。`
+- Approval Note: `使用者已核准 2026-08-17 修訂後的 Spec、Plan 與 R1 Commit Plan；R1、重新驗證與最終人工驗收均已完成。`
