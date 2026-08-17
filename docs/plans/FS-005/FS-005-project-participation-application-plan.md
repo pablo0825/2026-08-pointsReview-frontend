@@ -138,13 +138,13 @@
 
 ## AI Verification
 
-- [ ] 執行 `npm run typecheck`
-- [ ] 執行 `npm run lint`
-- [ ] 執行 `npm run test`
-- [ ] 執行 `npm run build`
-- [ ] 執行 `npm run test:e2e -- --project=chromium e2e/project-participation-application.spec.ts e2e/competition-application.spec.ts`
-- [ ] 驗證 Spec Target Behavior：精簡文案、移除提示、FS-005 正式年級／班級名稱、數字 payload 與既有完整申請流程。
-- [ ] 回歸驗證 Preserved Behavior：`/apply`、`/rules`、FS-004 competition route、既有學籍顯示與共用公開申請元件。
+- [x] 執行 `npm run typecheck`
+- [x] 執行 `npm run lint`
+- [x] 執行 `npm run test`
+- [x] 執行 `npm run build`
+- [x] 執行 `npm run test:e2e -- --project=chromium e2e/project-participation-application.spec.ts e2e/competition-application.spec.ts`
+- [x] 驗證 Spec Target Behavior：精簡文案、移除提示、FS-005 正式年級／班級名稱、數字 payload 與既有完整申請流程。
+- [x] 回歸驗證 Preserved Behavior：`/apply`、`/rules`、FS-004 competition route、既有學籍顯示與共用公開申請元件。
 
 ## Human Integration
 

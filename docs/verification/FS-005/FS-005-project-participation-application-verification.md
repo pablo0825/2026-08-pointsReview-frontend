@@ -3,7 +3,7 @@
 ## Document Information
 
 - Feature Slice: `FS-005`
-- Verification Status: `in-progress`
+- Verification Status: `awaiting-human`
 - Created: `2026-08-16`
 - Last Updated: `2026-08-17`
 
@@ -12,7 +12,8 @@
 - 將公開老師、公開申請成功契約、附件編輯器、multipart snapshot、Idempotency 與成功／不確定狀態整理為 `applications/common`，並保留 FS-004 競賽行為。
 - 完成 `/apply/project-participation` 五步表單、1～12 筆薪資、明確後端試算、異動失效、單一申請人、老師、必要薪資證明、確認摘要與公開 multipart 送件。
 - 完成試算及正式 422 路徑、附件 400、409、429、未知 4xx、Network／5xx 不確定結果、不可變快照重試及 201 成功狀態。
-- 2026-08-17 Human Acceptance 要求精簡第一步名稱、移除薪資限制提示，並讓 FS-005 與 FS-004 共用年級／班級正式顯示名稱；修訂尚待重新核准與實作。
+- R1 將第一步名稱精簡為「計畫與薪資試算」、移除薪資限制固定提示，並讓 FS-004 與 FS-005 共用年級／班級正式顯示名稱；表單與 Wire Payload 維持數字代碼。
+- 修訂後完整 AI Verification 全部通過；production build 只有既有的單一輸出 chunk 大於 500 kB 警告，沒有阻擋結果。
 
 ## Changed Files
 
@@ -27,6 +28,9 @@
 | `src/features/applications/project-participation/components/**` | 計畫／薪資、單一申請人與確認摘要步驟。 |
 | `src/features/applications/project-participation/project-participation-application-page.tsx` | 五步流程、試算、老師、附件、送件與錯誤 orchestration。 |
 | `src/features/applications/project-participation/**/*.test.ts*` | API、Model 與完整頁面整合測試。 |
+| `src/features/applications/common/lib/student-profile-options.ts`、`student-profile-options.test.ts` | 共用數字學籍代碼、正式顯示名稱、formatter 與完整對照測試。 |
+| `src/features/applications/common/components/participants-editor.tsx`、`application-controls.test.tsx` | FS-004 改用共用學籍選項，保留既有顯示與數字值。 |
+| `src/features/applications/project-participation/components/**`、page tests | 精簡文案、移除提示、顯示正式年級／班級名稱並驗證數字 payload。 |
 | `src/app/router/router.tsx`、`router.test.tsx` | 以正式頁面取代 FS-005 placeholder 並加入 route smoke test。 |
 | `src/test/**/project-participation-application.ts`、`src/test/server.ts` | FS-005 MSW fixtures、handlers 與預設註冊。 |
 | `e2e/project-participation-application.spec.ts` | 正常送件、失效／不合格、Idempotent retry、360px 與離開警告。 |
@@ -35,26 +39,27 @@
 
 | Check | Command / Method | Result | Evidence | Notes |
 |---|---|---|---|---|
-| TypeScript | `npm run typecheck` | not-run | 等待 R1 實作 | 修訂後須重新執行。 |
-| ESLint | `npm run lint` | not-run | 等待 R1 實作 | 修訂後須重新執行。 |
-| Vitest | `npm run test` | not-run | 等待 R1 實作 | 修訂後須涵蓋共用學籍標籤與 FS-004 回歸。 |
-| Production Build | `npm run build` | not-run | 等待 R1 實作 | 修訂後須重新執行。 |
-| Chromium E2E | `npm run test:e2e -- --project=chromium e2e/project-participation-application.spec.ts e2e/competition-application.spec.ts` | not-run | 等待 R1 實作 | 修訂後須重新執行 FS-005 與 FS-004。 |
-| Diff Integrity | `git diff --check` | not-run | 等待 R1 實作 | Reverification checkpoint 前執行。 |
+| TypeScript | `npm run typecheck` | passed | exit code 0 | 修訂後 Strict TypeScript project 通過。 |
+| ESLint | `npm run lint` | passed | exit code 0 | 修訂後全專案 ESLint 通過。 |
+| Vitest | `npm run test` | passed | 18 files、100 tests passed | 共用學籍對照、FS-005、FS-004、Router 與既有回歸全部通過。 |
+| Production Build | `npm run build` | passed | exit code 0；493 modules transformed | Vite 成功輸出；保留大於 500 kB 的非阻擋 chunk warning。 |
+| Chromium E2E | `npm run test:e2e -- --project=chromium e2e/project-participation-application.spec.ts e2e/competition-application.spec.ts` | passed | 10 tests passed | FS-005 4 條＋FS-004 6 條，含新文案、正式學籍名稱、數字 payload、360px 與鍵盤流程。 |
+| Diff Integrity | `git diff --check` | passed | no output | Reverification 文件提交前檢查。 |
 
 ## Acceptance Evidence
 
 | Spec Criterion | Result | Evidence |
 |---|---|---|
-| 「計畫與薪資試算」名稱及薪資限制提示移除 | not-run | 等待 R1 實作與驗證。 |
-| FS-004／FS-005 共用正式年級／班級名稱且 payload 保持數字 | not-run | 等待 R1 實作與跨 Slice 回歸。 |
-| 五步、薪資試算、單一申請人、老師、附件、送件與成功狀態 | not-run | R1 後須執行完整回歸，不沿用前一輪報告作為本次證據。 |
+| 「計畫與薪資試算」名稱及薪資限制提示移除 | passed | FS-005 page test、Router test 與 Chromium normal journey。 |
+| FS-004／FS-005 共用正式年級／班級名稱且 payload 保持數字 | passed | Common option unit tests、component tests、FS-005 multipart assertions 與兩 Slice Chromium E2E。 |
+| 五步、薪資試算、單一申請人、老師、附件、送件與成功狀態 | passed | 18 files／100 Vitest tests 與 10 條 Chromium E2E。 |
 
 ## Batch Exceptions
 
 | Batch | Exception | Resolution / Evidence |
 |---|---|---|
 | AI Verification | 第一次全套 Vitest 中，一個 controlled form 測試以逐字 `user.type()` 輸入時在並行負載下偶發遺失姓名。 | 改用與既有競賽測試一致的一次性 `fireEvent.change()`，提交 `0584ff6`；重新執行全套為 17 files／98 tests passed，Chromium 真實輸入流程亦通過。 |
+| R1 | `ParticipantsEditor` 的受控元件測試在父層未回傳新 value 時，錯誤期待選取後 DOM 立即更新。 | 移除不符合受控元件測試模型的 post-change 顯示斷言，保留初始正式標籤、callback、共用 formatter、FS-005 確認頁及 E2E 驗證；targeted 43 tests 與完整 100 tests 通過。 |
 
 ## Human Integration
 
@@ -99,12 +104,11 @@
 
 ## Human Acceptance Result
 
-- Status: `changes-requested`
-- Confirmed By: `user`
-- Confirmed At: `2026-08-17`
-- User Feedback: `將「計畫內容與薪資試算」改為「計畫與薪資試算」、移除薪資限制提示，並讓 FS-005 年級／班級使用 FS-004 的正式代碼對照顯示。`
+- Status: `pending`
+- Confirmed By: `pending`
+- Confirmed At: `pending`
+- User Feedback: `pending`
 
 ## Remaining Issues
 
-- 2026-08-17 修訂後 Spec、Plan 與 R1 Commit Plan 已核准；R1 等待明確開始實作。
-- R1 尚未實作與重新執行完整 AI Verification。
+- `None`

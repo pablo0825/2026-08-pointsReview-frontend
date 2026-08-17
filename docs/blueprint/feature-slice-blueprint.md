@@ -42,7 +42,7 @@
 | FS-002 | `published-instructions` | feature | none | none | none | accepted | 修訂後完整 AI Verification、真實後端 Human Integration 與使用者 Human Acceptance 均已通過；桌面排版觀感列為非阻斷後續優化。 | 2026-08-12 |
 | FS-003 | `application-entry` | feature | none | none | none | accepted | 完整 AI Verification 已通過，Human Integration 為 `not-applicable`，使用者已確認 Human Acceptance 通過。 | 2026-08-11 |
 | FS-004 | `competition-application` | feature | FS-003 | none | none | accepted | 完整 AI Verification、真實後端 Human Integration 與使用者 Human Acceptance 均已通過；六項缺少安全測試條件的情境保留為非阻擋 `not-run`。 | 2026-08-15 |
-| FS-005 | `project-participation-application` | feature | FS-003 | none | none | approved | 2026-08-17 修訂後 Spec、Plan 與 R1 Commit Plan 已核准；等待明確開始 R1 實作。 | 2026-08-17 |
+| FS-005 | `project-participation-application` | feature | FS-003 | none | none | awaiting-human | R1 與修訂後完整 AI Verification 已完成；等待真實後端 Human Integration 與使用者重新執行 Human Acceptance。 | 2026-08-17 |
 | FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約；證照正規化契約待確認。 | 2026-08-13 |
 | FS-007 | `exhibition-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
 | FS-008 | `application-revision` | feature | FS-004, FS-005, FS-006, FS-007 | none | none | proposed | 已補充學號正規化契約，尚未開始 Spec。 | 2026-08-13 |
