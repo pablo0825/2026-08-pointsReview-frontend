@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-005`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-16`
 - Last Updated: `2026-08-17`
@@ -146,6 +146,6 @@
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `等待核准 2026-08-17 修訂：精簡第一步名稱、移除薪資限制提示，並共用 FS-004 的年級／班級正式顯示名稱。`
+- Approved By: `user`
+- Approved At: `2026-08-17`
+- Approval Note: `使用者已核准 2026-08-17 修訂：精簡第一步名稱、移除薪資限制提示，並共用 FS-004 的年級／班級正式顯示名稱。`

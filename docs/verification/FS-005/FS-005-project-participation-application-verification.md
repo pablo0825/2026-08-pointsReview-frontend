@@ -106,5 +106,5 @@
 
 ## Remaining Issues
 
-- 2026-08-17 修訂後 Spec、Plan 與 R1 Commit Plan 等待重新核准。
+- 2026-08-17 修訂後 Spec、Plan 與 R1 Commit Plan 已核准；R1 等待明確開始實作。
 - R1 尚未實作與重新執行完整 AI Verification。

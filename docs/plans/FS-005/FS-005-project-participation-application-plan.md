@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-005`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Based On Spec: `docs/specs/FS-005/FS-005-project-participation-application-spec.md`
 - Spec Last Updated: `2026-08-17`
 - Created: `2026-08-16`
@@ -163,9 +163,9 @@
 
 Draft Documentation Batch 由建立 Spec／Plan 的要求授權，不受下列 pending 狀態限制。
 
-- Commit Plan Approval: `pending`
-- Approved By: `pending`
-- Approved At: `pending`
+- Commit Plan Approval: `approved`
+- Approved By: `user`
+- Approved At: `2026-08-17`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
@@ -183,6 +183,6 @@ Draft Documentation Batch 由建立 Spec／Plan 的要求授權，不受下列 p
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `等待核准 2026-08-17 修訂與 R1 Commit Plan。`
+- Approved By: `user`
+- Approved At: `2026-08-17`
+- Approval Note: `使用者已核准 2026-08-17 修訂後的 Spec、Plan 與 R1 Commit Plan；等待明確開始 R1 實作。`
