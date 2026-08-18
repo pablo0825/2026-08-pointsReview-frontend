@@ -274,6 +274,43 @@ describe('shared application controls', () => {
     ])
   })
 
+  it('supports profile-only participants with empty points for new rows', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    const participant: ParticipantEditorValue = {
+      clientKey: 'one',
+      studentName: '甲',
+      studentNumber: 'A001',
+      grade: 1,
+      classNumber: 1,
+      requestedPoints: '',
+      isApplicant: true,
+    }
+
+    render(
+      <ParticipantsEditor
+        applicantEmail="student@example.com"
+        applicantPhone="0912345678"
+        initialRequestedPoints=""
+        maximumParticipants={15}
+        onApplicantEmailChange={vi.fn()}
+        onApplicantPhoneChange={vi.fn()}
+        onChange={onChange}
+        onDirty={vi.fn()}
+        participants={[participant]}
+        pointsEditable={false}
+        showPoints={false}
+      />,
+    )
+
+    expect(screen.queryByLabelText('申請點數')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '新增參與者' }))
+    expect(onChange).toHaveBeenLastCalledWith([
+      participant,
+      expect.objectContaining({ requestedPoints: '' }),
+    ])
+  })
+
   it('renders and clears indexed grade and class errors at their controls', async () => {
     const user = userEvent.setup()
     const onFieldChange = vi.fn()

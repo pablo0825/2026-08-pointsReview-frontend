@@ -16,6 +16,8 @@ export type ParticipantEditorValue = {
 type ParticipantsEditorProps = {
   participants: readonly ParticipantEditorValue[]
   pointsEditable: boolean
+  showPoints?: boolean
+  initialRequestedPoints?: string
   sharedRemainingPoints?: string | null
   maximumParticipants: number
   applicantEmail: string
@@ -32,6 +34,8 @@ type ParticipantsEditorProps = {
 export function ParticipantsEditor({
   participants,
   pointsEditable,
+  showPoints = true,
+  initialRequestedPoints = '0.00',
   sharedRemainingPoints,
   maximumParticipants,
   applicantEmail,
@@ -189,11 +193,12 @@ export function ParticipantsEditor({
               </select>
               <FieldErrorMessage id={`participants-${index}-classNumber-error`} message={errors[`participants.${index}.classNumber`]} />
             </label>
-            <div className="space-y-1 font-semibold">
-              <label htmlFor={`participant-${participant.clientKey}-requestedPoints`}>
-                申請點數
-              </label>
-              <div className="flex items-center gap-2">
+            {showPoints ? (
+              <div className="space-y-1 font-semibold">
+                <label htmlFor={`participant-${participant.clientKey}-requestedPoints`}>
+                  申請點數
+                </label>
+                <div className="flex items-center gap-2">
                 {pointsEditable ? (
                   <button
                     aria-label={`減少參與者 ${index + 1} 申請點數`}
@@ -236,9 +241,10 @@ export function ParticipantsEditor({
                     ＋
                   </button>
                 ) : null}
+                </div>
+                <FieldErrorMessage id={`participants-${index}-requestedPoints-error`} message={errors[`participants.${index}.requestedPoints`]} />
               </div>
-              <FieldErrorMessage id={`participants-${index}-requestedPoints-error`} message={errors[`participants.${index}.requestedPoints`]} />
-            </div>
+            ) : null}
           </div>
           {participant.isApplicant ? (
             <section
@@ -328,7 +334,7 @@ export function ParticipantsEditor({
               studentNumber: '',
               grade: 1,
               classNumber: 1,
-              requestedPoints: '0.00',
+              requestedPoints: initialRequestedPoints,
               isApplicant: false,
             },
           ]
