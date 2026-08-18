@@ -1,7 +1,7 @@
 # 點數審核系統－API 整合設計
 
 - 文件狀態：第一版基準
-- 最後更新：2026-08-16
+- 最後更新：2026-08-18
 - 相關文件：[前端架構](frontend-architecture.md)、[後端契約異動](backend-contract-changes.md)
 
 ## 1. 契約策略
@@ -283,6 +283,31 @@ GET /public/application-instructions?applicationType=competition
 - Response 已依系主任優先、姓名、`id` 排序；前端保留順序，`isDirector` 不顯示且不參與搜尋。
 - 查無可選老師時仍回傳 `HTTP 200 OK` 與 `{ "data": [] }`。
 
+### 5.6 展覽點數規則
+
+`GET /public/exhibition-point-options` 不接受任何 Query Parameter。成功固定回傳 `HTTP 200 OK`：
+
+```json
+{
+  "data": [
+    {
+      "exhibitionType": "fan_work",
+      "allowedPointsPerPerson": ["0.50", "1.00"]
+    },
+    {
+      "exhibitionType": "project_work",
+      "allowedPointsPerPerson": ["1.00", "2.00"]
+    }
+  ]
+}
+```
+
+- Response 使用後端收到 request 當日有效的展覽點數規則。
+- `exhibitionType` 只會是 `fan_work` 或 `project_work`；沒有有效規則的類型從陣列省略。
+- `allowedPointsPerPerson` 是最低與最高點數端點經去重、數值升冪排序後的兩位小數字串陣列；後端不自動展開端點之間的級距。
+- 前端不硬編碼點數，只顯示 Response 實際提供的類型與點數選項。
+- 沒有任何有效規則時仍回傳 `HTTP 200 OK` 與 `{ "data": [] }`。
+
 ## 6. 正式申請 multipart
 
 `payload` 為 JSON 字串，檔案欄位使用 `attachments[{clientFileKey}]`。每個 metadata 必須剛好對應一個檔案。
@@ -446,6 +471,62 @@ interface ProjectParticipationApplicationPayload {
 - 單檔超過 5,242,880 bytes 回傳 `400 file_too_large`；超過 10 個檔案回傳 `400 too_many_files`；副檔名、multipart MIME type 或實際內容不符 PDF、JPEG、PNG 時回傳 `400 file_type_not_allowed`。
 - 每 IP 每小時最多 20 次；超過時回傳 `429 rate_limited`，`Retry-After` 為至少 1 的整數秒。前端可讀時顯示等待時間並停用送件，讀不到時顯示通用稍後再試，不自動重試。
 - 未知 4xx 顯示可用的非空白後端 `message`，否則使用通用中文訊息；保留表單資料、廢棄原 Key，下一次送件產生新 Key。
+
+### 6.5 展覽申請 Payload
+
+展覽正式 `payload` 必須符合：
+
+```typescript
+interface ExhibitionApplicationPayload {
+  applicationType: "exhibition";
+  advisorId: number;
+  applicant: { name: string; email: string; phone: string };
+  participants: Array<{
+    academicYear: string;
+    grade: number;
+    classNumber: number;
+    studentNumber: string;
+    studentName: string;
+    requestedPoints: string;
+    isApplicant: boolean;
+  }>;
+  typeDetails: {
+    exhibitionType: "fan_work" | "project_work";
+    workName: string;
+    exhibitionName:
+      | "campus_exhibition"
+      | "young_designers_exhibition"
+      | "vision_get_wild"
+      | "young_designers_exhibition_taiwan"
+      | "a_plus_creative_festival"
+      | "moe_project_competition"
+      | "other";
+    exhibitionNameOther: string | null;
+    organizer: string;
+    venue: string;
+    startDate: string;
+    endDate: string;
+  };
+  attachments: Array<{
+    clientFileKey: string;
+    attachmentType:
+      | "exhibition_photo"
+      | "exhibition_poster"
+      | "official_document"
+      | "other";
+    attachmentTypeOther: string | null;
+    description: string | null;
+  }>;
+}
+```
+
+- `participants` 包含 1～15 筆，且恰好一筆 `isApplicant: true`；`applicant.name` 取該筆 trim 後的 `studentName`。
+- `participants[].academicYear` 由前端依 Asia/Taipei 當日與 8 月 1 日分界動態計算，畫面不顯示；`studentNumber` 正式值 trim 後轉大寫，並以正規化值檢查同一 request 的重複。
+- 每筆 `requestedPoints` 必須是該 `exhibitionType` 當前 `allowedPointsPerPerson` 中的兩位小數字串；前端只供選擇，後端正式送件時仍重新驗證當時規則。
+- `workName`、`organizer`、`venue` 必填、trim 後不可為空且最長 255；`exhibitionNameOther` 最長 255，只在 `exhibitionName = other` 時必填且 trim 後不可為空，其他名稱固定傳 `null`。
+- `startDate` 與 `endDate` 使用 `YYYY-MM-DD`；`endDate >= startDate` 且 `endDate` 不得晚於 Asia/Taipei 今天。
+- 至少一個附件必須為 `exhibition_photo`；檔案欄位名稱使用 `attachments[{clientFileKey}]`，其餘附件限制依 `application-rules.md` section 7。
+- 成功 Response 與 section 6.2 相同，固定為 `201`、`pending_advisor`、公開 `publicId` 與 UTC `submittedAt`。
 
 ## 7. 老師 API
 

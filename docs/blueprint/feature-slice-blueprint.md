@@ -5,8 +5,8 @@
 - Schema Version: `1`
 - Document Status: `active`
 - Requirements Root: `docs/project/`
-- Last Reconciled: `2026-08-16`
-- Active Feature Slice: `FS-005`
+- Last Reconciled: `2026-08-18`
+- Active Feature Slice: `FS-007`
 
 ## Purpose
 
@@ -44,7 +44,7 @@
 | FS-004 | `competition-application` | feature | FS-003 | none | none | accepted | 完整 AI Verification、真實後端 Human Integration 與使用者 Human Acceptance 均已通過；六項缺少安全測試條件的情境保留為非阻擋 `not-run`。 | 2026-08-15 |
 | FS-005 | `project-participation-application` | feature | FS-003 | none | none | accepted | 修訂後完整 AI Verification、真實後端核心 Human Integration 與使用者 Human Acceptance 均已通過；特殊錯誤與重送情境未人工重做，保留為非阻擋 `not-run`。 | 2026-08-17 |
 | FS-006 | `certificate-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約；證照正規化契約待確認。 | 2026-08-13 |
-| FS-007 | `exhibition-application` | feature | FS-003 | none | none | proposed | 已補充學號正規化、未登入送件及包含 5xx 的 Idempotency 契約，尚未開始 Spec。 | 2026-08-13 |
+| FS-007 | `exhibition-application` | feature | FS-003 | none | none | awaiting-approval | Shared Understanding 已確認且 Boundary Gate 已通過；Draft Spec／Plan 已建立，等待使用者核准。 | 2026-08-18 |
 | FS-008 | `application-revision` | feature | FS-004, FS-005, FS-006, FS-007 | none | none | proposed | 已補充學號正規化契約，尚未開始 Spec。 | 2026-08-13 |
 | FS-009 | `public-points-search` | feature | none | none | none | proposed | 已由第一版需求建立，尚未開始 Spec。 | 2026-08-10 |
 | FS-010 | `advisor-application-workspace` | feature | FS-001, FS-004, FS-005, FS-006, FS-007 | none | none | proposed | 已補充老師工作區共用架構責任，尚未開始 Spec。 | 2026-08-10 |
@@ -68,7 +68,7 @@
 | FS-004 | `docs/blueprint/slices/FS-004-competition-application.md` | `docs/specs/FS-004/FS-004-competition-application-spec.md` | `docs/plans/FS-004/FS-004-competition-application-plan.md` | `docs/verification/FS-004/FS-004-competition-application-verification.md` |
 | FS-005 | `docs/blueprint/slices/FS-005-project-participation-application.md` | `docs/specs/FS-005/FS-005-project-participation-application-spec.md` | `docs/plans/FS-005/FS-005-project-participation-application-plan.md` | `docs/verification/FS-005/FS-005-project-participation-application-verification.md` |
 | FS-006 | `docs/blueprint/slices/FS-006-certificate-application.md` | pending | pending | pending |
-| FS-007 | `docs/blueprint/slices/FS-007-exhibition-application.md` | pending | pending | pending |
+| FS-007 | `docs/blueprint/slices/FS-007-exhibition-application.md` | `docs/specs/FS-007/FS-007-exhibition-application-spec.md` | `docs/plans/FS-007/FS-007-exhibition-application-plan.md` | pending |
 | FS-008 | `docs/blueprint/slices/FS-008-application-revision.md` | pending | pending | pending |
 | FS-009 | `docs/blueprint/slices/FS-009-public-points-search.md` | pending | pending | pending |
 | FS-010 | `docs/blueprint/slices/FS-010-advisor-application-workspace.md` | pending | pending | pending |
