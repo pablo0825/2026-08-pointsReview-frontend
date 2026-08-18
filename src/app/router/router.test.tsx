@@ -80,4 +80,16 @@ describe('application router', () => {
       }),
     ).toBeInTheDocument()
   })
+
+  it('renders the exhibition application route', async () => {
+    const router = createMemoryRouter(appRoutes, {
+      initialEntries: ['/apply/exhibition'],
+    })
+
+    renderRouter(router)
+
+    expect(
+      await screen.findByRole('heading', { name: '參與者資料' }),
+    ).toBeInTheDocument()
+  })
 })

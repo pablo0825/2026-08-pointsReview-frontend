@@ -8,6 +8,7 @@ import { RouteErrorPage } from '../error-boundaries/route-error-page'
 import { PublicLayout } from '../layouts/public-layout'
 import { ApplicationEntryPage } from '../../features/applications/entry/application-entry-page'
 import { CompetitionApplicationPage } from '../../features/applications/competition/competition-application-page'
+import { ExhibitionApplicationPage } from '../../features/applications/exhibition/exhibition-application-page'
 import { ProjectParticipationApplicationPage } from '../../features/applications/project-participation/project-participation-application-page'
 import { PublishedInstructionsPage } from '../../features/rules/published-instructions-page'
 
@@ -49,7 +50,7 @@ export const appRoutes: RouteObject[] = [
       },
       {
         path: 'apply/exhibition',
-        element: createRoutePlaceholder('展覽申請表單準備中'),
+        element: <ExhibitionApplicationPage />,
       },
       {
         path: 'rules',
