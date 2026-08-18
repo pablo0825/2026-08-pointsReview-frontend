@@ -138,7 +138,6 @@ Draft Documentation Batch 由建立 Spec／Plan 的要求授權，不受下列 p
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
 |---|---|---|---|---|
-| Verification | 保存完整 AI Verification 與狀態 | Plan、Verification、blueprint | V-001～V-006 實際證據與所有 AI Acceptance closure | `docs(FS-007): record exhibition application verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint、必要 lineage | V-007～V-008 實際結果與文件一致性 | `docs(FS-007): record exhibition application acceptance` |
 
 ## Approval
