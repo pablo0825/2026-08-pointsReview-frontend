@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-007`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Based On Spec: `docs/specs/FS-007/FS-007-exhibition-application-spec.md`
 - Spec Last Updated: `2026-08-18`
 - Created: `2026-08-18`
@@ -131,14 +131,13 @@
 
 Draft Documentation Batch 由建立 Spec／Plan 的要求授權，不受下列 pending 狀態限制。
 
-- Commit Plan Approval: `pending`
-- Approved By: `pending`
-- Approved At: `pending`
+- Commit Plan Approval: `approved`
+- Approved By: `user`
+- Approved At: `2026-08-18`
 - Implementation Execution: `continuous`
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
 |---|---|---|---|---|
-| Approval | 保存核准文件與狀態 | FS-007 Slice Brief、Spec、Plan、blueprint | `git diff --check`、FS-007 狀態／連結／ID mapping 一致性 | `docs(FS-007): approve exhibition application specification` |
 | I1 | 讓共用參與者元件支援不顯示點數的資料編輯 | `src/features/applications/common/components/participants-editor.tsx`、`application-controls.test.tsx` | `npm run typecheck`、`npm run test -- src/features/applications/common/components/application-controls.test.tsx src/features/applications/competition/competition-application-page.test.tsx` | `refactor(applications): support profile-only participant editing` |
 | I2 | 建立展覽 Wire、Form、規則、Mapper 與送件 domain | `src/features/applications/exhibition/api/**`、`model/**` | `npm run typecheck`、`npm run test -- src/features/applications/exhibition/api/exhibition-application.test.ts src/features/applications/exhibition/model/exhibition-application.test.ts` | `feat(exhibition): add application domain contracts` |
 | I3 | 完成五步頁面、route、MSW 與元件整合 | `src/features/applications/exhibition/components/**`、`exhibition-application-page.tsx`、`exhibition-application-page.test.tsx`、`src/app/router/**`、`src/test/fixtures/exhibition-application.ts`、`src/test/handlers/public-exhibition-application.ts`、`src/test/server.ts` | `npm run typecheck`、`npm run lint`、`npm run test -- src/features/applications/exhibition/exhibition-application-page.test.tsx src/app/router/router.test.tsx src/features/applications/common/components/application-controls.test.tsx src/features/applications/competition/competition-application-page.test.tsx src/features/applications/project-participation/project-participation-application-page.test.tsx` | `feat(exhibition): implement application workflow` |
@@ -148,6 +147,6 @@ Draft Documentation Batch 由建立 Spec／Plan 的要求授權，不受下列 p
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `pending`
+- Approved By: `user`
+- Approved At: `2026-08-18`
+- Approval Note: `使用者已核准目前的 FS-007 Spec、Plan 與 Commit Plan。`

@@ -4,7 +4,7 @@
 
 - Feature Slice: `FS-007`
 - Change Type: `feature`
-- Document Status: `draft`
+- Document Status: `approved`
 - Feature Slice Status: See `docs/blueprint/feature-slice-blueprint.md`
 - Created: `2026-08-18`
 - Last Updated: `2026-08-18`
@@ -145,6 +145,6 @@
 
 ## Approval
 
-- Approved By: `pending`
-- Approved At: `pending`
-- Approval Note: `pending`
+- Approved By: `user`
+- Approved At: `2026-08-18`
+- Approval Note: `使用者已核准目前的 FS-007 Spec、Plan 與 Commit Plan。`
