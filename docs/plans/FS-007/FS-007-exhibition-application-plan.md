@@ -138,7 +138,6 @@ Draft Documentation Batch 由建立 Spec／Plan 的要求授權，不受下列 p
 
 | Batch | Purpose | Files | Required Verification | Proposed Message |
 |---|---|---|---|---|
-| I4 | 補齊瀏覽器旅程與跨 Slice 回歸 | `e2e/exhibition-application.spec.ts` | `npm run test:e2e -- --project=chromium e2e/exhibition-application.spec.ts e2e/competition-application.spec.ts e2e/project-participation-application.spec.ts`、`git diff --check` | `test(exhibition): cover application journeys` |
 | Verification | 保存完整 AI Verification 與狀態 | Plan、Verification、blueprint | V-001～V-006 實際證據與所有 AI Acceptance closure | `docs(FS-007): record exhibition application verification` |
 | Final | 記錄最終驗收與狀態 | Spec、Plan、Verification、blueprint、必要 lineage | V-007～V-008 實際結果與文件一致性 | `docs(FS-007): record exhibition application acceptance` |
 
